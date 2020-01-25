@@ -1,0 +1,11 @@
+{% import '_macros.text.jinja2' as macros %}
+
+{{- macros.revision_info(revision) }}
+
+{{ actor_name }} requested a review {{- event | comment_summary }}.
+{{- macros.reviewer_action(reviewer, revision) }}
+
+{{- macros.reviewers_status(event.reviewers) }}
+{{- macros.main_comment(event.main_comment) }}
+{{- macros.inline_comments(event.inline_comments) }}
+{{- macros.footer() }}

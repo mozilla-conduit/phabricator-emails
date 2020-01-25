@@ -1,0 +1,117 @@
+{% macro revision_info(revision) %}
+{{- revision.link }}
+{%- if revision.bug %}
+
+(Associated with bug {{ revision.bug.id }}: {{ revision.bug.name }})
+({{ revision.bug.link }})
+{%- endif %}
+{%- endmacro %}
+
+{% macro secure_revision_info(revision) %}
+{{- revision.link }}
+{%- if revision.bug %}
+
+(Associated with secure bug {{ revision.bug.id }})
+({{ revision.bug.link }})
+{%- endif %}
+{%- endmacro %}
+
+{% macro reviewer_action(reviewer, revision) %}
+{%- if reviewer is soft_needed_reviewer %}
+[!] A review is needed
+{%- elif reviewer is needed_reviewer %}
+[!] Your review is needed
+{%- endif %}
+{%- endmacro %}
+
+{% macro footer() %}
+{# This line is to visually separate the body of the email from the footer contents.
+   The length of this line was chosen arbitrarily based on visual appeal. #}
+-------------------------------
+
+Email preferences:
+https://phabricator.services.mozilla.com/preferences/this-link-is-fake
+Feedback/issues/comments for this email are very welcome, please report
+them on Bugzilla: https://bugzilla.mozilla.org/fake-link-again
+{%- endmacro %}
+
+{% macro main_comment(raw_comment) %}
+{%- if raw_comment %}
+
+{{ raw_comment | comment }}
+{%- endif %}
+{%- endmacro %}
+
+{% macro inline_comments(inline_comments) %}
+{%- if inline_comments %}
+
+Inline comments:
+{%- for inline_comment in inline_comments %}
+
+{{ inline_comment.link }}
+{{ inline_comment.text | comment }}
+{%- endfor %}
+{%- endif %}
+{%- endmacro %}
+
+{% macro reviewers_status(reviewers) %}
+{%- if reviewers %}
+
+Reviewers:
+{%- for reviewer in reviewers %}
+- {{ '[blocking] ' if reviewer is blocking_reviewer else '' -}} {{ reviewer.name }} {{ reviewer.status | reviewer_status }}
+{%- endfor %}
+{%- endif %}
+{%- endmacro %}
+
+{% macro reviewers_with_changes(reviewers) %}
+{%- if reviewers %}
+
+Reviewers:
+{%- for reviewer in reviewers %}
+- {{ '[blocking] ' if reviewer is blocking_reviewer else '' -}} {{ reviewer.name }} {{ reviewer.status | reviewer_status -}} {{ reviewer.metadata_change | existence_change }}
+{%- endfor %}
+{%- endif  %}
+{%- endmacro %}
+
+{% macro metadata_changes(is_title_changed, is_bug_changed, revision) %}
+{%- if is_title_changed or is_bug_changed %}
+
+Metadata changes:
+{%- endif %}
+{%- if is_title_changed %}
+- Title changed to D{{ revision.id }}: {{ revision.name }}
+{%- endif %}
+{%- if is_bug_changed %}
+{%- if revision.bug %}
+- Bug changed to: {{ revision.bug.id }} ({{ revision.bug.name }})
+{%- else %}
+- Bug changed to: None
+{%- endif %}
+{%- endif %}
+{%- endmacro %}
+
+{% macro secure_metadata_changes(is_title_changed, is_bug_changed, revision) %}
+{%- if is_title_changed or is_bug_changed %}
+
+Metadata changes:
+{%- endif %}
+{%- if is_title_changed %}
+- Title changed: (see the secure title on Phabricator)
+{%- endif %}
+{%- if is_bug_changed %}
+{%- if revision.bug %}
+- Bug changed to: {{ revision.bug.id }} (secure bug)
+{%- else %}
+- Bug changed to: None
+{%- endif %}
+{%- endif %}
+{%- endmacro %}
+
+{% macro affected_files(files) %}
+
+Affected files:
+{%- for file in files %}
+- {{ file.path }} {{ file.change | file_change }}
+{%- endfor %}
+{%- endmacro %}

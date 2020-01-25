@@ -1,0 +1,82 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+# These environment variables must be set in CircleCI UI
+#
+# DOCKERHUB_REPO - docker hub repo, format: <username>/<repo>
+# DOCKER_EMAIL   - login info for docker hub
+# DOCKER_USER
+# DOCKER_PASS
+
+version: 2
+jobs:
+  full:
+    docker:
+      # Use the python image, all we really care about is the preinstalled
+      # tools in a circleci image.
+      - image: circleci/python
+    steps:
+      - checkout
+      - run:
+          name: Run python tests
+          command: |
+            pip install -r requirements.txt
+            mkdir test-results
+            pytest --junitxml=test-results/junit.xml
+
+      - store_test_results:
+          path: test-results
+
+      - store_artifacts:
+          path: test-results
+
+      - run:
+          name: Create version.json
+          command: |
+            echo "
+              {
+                \"commit\": \"$CIRCLE_SHA1\",
+                \"version\": \"$CIRCLE_SHA1\",
+                \"source\": \"https://github.com/mozilla-conduit/phabricator-emails\",
+                \"build\": \"$CIRCLE_BUILD_URL\"
+              }
+            " > version.json
+            mkdir /tmp/artifacts && cp version.json /tmp/artifacts/version.js
+
+      - setup_remote_docker
+      - run:
+          name: Build the image
+          command: |
+            docker build --pull \
+              -f Dockerfile \
+              -t mozilla/phabricator-emails .
+      - run:
+          name: Get image id
+          command: |
+            docker inspect -f '{{.Id}}' mozilla/phabricator-emails \
+              | tee /tmp/artifacts/docker-image-shasum256.txt
+      - store_artifacts:
+          path: /tmp/artifacts
+
+      - deploy:
+          command: |
+            if [[ "x$DOCKERHUB_REPO" != x ]]; then
+              docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
+              docker tag "mozilla/phabricator-emails" "${DOCKERHUB_REPO}"
+              docker tag "mozilla/phabricator-emails" "${DOCKERHUB_REPO}:${CIRCLE_SHA1}"
+              docker push "${DOCKERHUB_REPO}:${CIRCLE_SHA1}"
+              if [[ ${CIRCLE_BRANCH} == master ]]; then
+                docker push "${DOCKERHUB_REPO}:latest"
+              fi
+            fi
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - full:
+          filters:
+            branches:
+              ignore:
+                - /\//

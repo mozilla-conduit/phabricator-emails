@@ -1,0 +1,7 @@
+{% import '_macros.text.jinja2' as macros %}
+
+{{- macros.secure_revision_info(revision) }}
+
+{{ actor_name }} landed this revision {{- event | secure_comment_summary }}.
+
+{{- macros.footer() }}

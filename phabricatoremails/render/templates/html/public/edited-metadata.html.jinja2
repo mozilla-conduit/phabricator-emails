@@ -1,0 +1,23 @@
+{% import '_macros.html.jinja2' as macros %}
+{{ macros.head() }}
+<div class="event-content">
+
+    {% call macros.preview(false, unique_number) %}
+        {{ emoji("memo") | safe }} {{ actor_name }} edited revision metadata.
+    {% endcall %}
+
+    {{ macros.title(revision) }}
+
+    <div class="summary">
+        <span class="emoji">{{ emoji("memo") | safe }}</span>
+        <span class="text"><span><span class="actor">{{ actor_name }}</span> edited revision metadata</span></span>
+    </div>
+
+    {{ macros.reviewers_with_changes(event.reviewers) }}
+
+    {% if event.is_title_changed or event.is_bug_changed %}
+        {{ macros.metadata_changes(event.is_title_changed, event.is_bug_changed, revision) }}
+    {% endif %}
+
+    {{ macros.footer(unique_number) }}
+</div>

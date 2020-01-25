@@ -1,0 +1,39 @@
+{% import '_macros.html.jinja2' as macros %}
+{{ macros.head() }}
+<div class="event-content">
+
+    {% call macros.preview(event.is_ready_to_land, unique_number) %}
+    {{ emoji("check_mark") | safe }} {{ actor_name }} accepted this revision {{- event | comment_summary }}.
+    {% endcall %}
+
+    {{ macros.title(revision) }}
+
+    <div class="summary">
+        <span class="emoji">{{ emoji("check_mark") | safe }}</span>
+        <span class="text"><span><span
+                class="actor">{{ actor_name }}</span> accepted this revision {{- event | comment_summary }}</span></span>
+        {% if event.is_ready_to_land %}
+            {% if event.lando_link %}
+                <a href="{{ event.lando_link }}" class="actionable">{{ emoji("airplane_arrival") | safe }} You can now land this
+                    revision</a>
+            {% else %}
+                <a href="{{ revision.link }}" class="actionable">{{ emoji("airplane_arrival") | safe }} You can now land this
+                    revision</a>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    {% if event is commented_on %}
+        {{ macros.comments_link(event.transaction_link) }}
+    {% endif %}
+
+    {% if event.main_comment %}
+        {{ macros.main_comment(event.main_comment) }}
+    {% endif %}
+
+    {% for comment in event.inline_comments %}
+        {{ macros.inline_comment(comment, recipient_timezone) }}
+    {% endfor %}
+
+    {{ macros.footer(unique_number) }}
+</div>

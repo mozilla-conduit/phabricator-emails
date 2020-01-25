@@ -1,0 +1,12 @@
+{% import '_macros.text.jinja2' as macros %}
+
+{{- macros.revision_info(revision) }}
+
+{{ actor_name }} accepted this revision {{- event | comment_summary }}.
+{%- if event.is_ready_to_land %}
+[!] You can now land this revision.
+{%- endif %}
+
+{{- macros.main_comment(event.main_comment) }}
+{{- macros.inline_comments(event.inline_comments) }}
+{{- macros.footer() }}
