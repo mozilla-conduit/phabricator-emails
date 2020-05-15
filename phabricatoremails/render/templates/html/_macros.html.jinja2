@@ -1,0 +1,245 @@
+{% macro head() %}
+    <head>
+        <meta charset="UTF-8">
+    </head>
+{% endmacro %}
+
+{% macro preview(is_actionable, unique_number) %}
+    <div class="preview" aria-hidden="true">
+        {% if is_actionable %}
+            {{ emoji("bell") | safe }}
+        {% endif %}
+        {{ caller() }}
+
+        {# We want the above preview text to be the only content visible in the "email preview" of Gmail/Mac Mail.
+           However, GMail folds content in an email thread that recipients have seen before. So, we need to make a
+           _unique_ chain of (unbreakable space + zero width non joiner) strings so that it doesn't get folded.
+
+           This unique chain of spaces has to be long enough to push content past the end of the "email preview" line,
+           and "100" spaces seems to be enough.
+
+           As seen on litmus.com:
+           https://litmus.com/blog/the-little-known-preview-text-hack-you-may-want-to-use-in-every-email
+        #}
+        {{ ("&nbsp;&zwnj;" * (100 + unique_number)) | safe }}
+    </div>
+    <div class="end-preview">
+
+    </div>
+{% endmacro %}
+
+{% macro title(revision) %}
+    <div class="title">
+        <a class="revision" href="{{ revision.link }}">D{{ revision.id }}: {{ revision.name }}</a>
+        {% if revision.bug %}
+            <div class="bug">
+                Associated with
+                <a href="{{ revision.bug.link }}">bug {{ revision.bug.id }}: {{ revision.bug.name }}</a>
+            </div>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% macro secure_title(revision) %}
+    <div class="title">
+        <a class="revision" href="{{ revision.link }}">D{{ revision.id }}: (secure revision)</a>
+        {% if revision.bug %}
+            <div class="bug">
+                Associated with
+                <a href="{{ revision.bug.link }}">bug {{ revision.bug.id }}: (secure bug)</a>
+            </div>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% macro reviewer_action(reviewer, revision) %}
+    {% if reviewer is soft_needed_reviewer %}
+        <a href="{{ revision.link }}" class="actionable">{{ emoji("microscope") | safe }} A review is needed</a>
+    {% elif reviewer is needed_reviewer %}
+        <a href="{{ revision.link }}" class="actionable">{{ emoji("microscope") | safe }} <b>Your</b> review is needed</a>
+    {% endif %}
+{% endmacro %}
+
+{% macro main_comment(main_comment) %}
+    <blockquote class="main-comment comment" aria-level="1">
+        {{ main_comment }}
+    </blockquote>
+{% endmacro %}
+
+{% macro new_changes_link(link) %}
+    <div class="event-link">
+        <a href="{{ link }}">View new code changes</a>
+    </div>
+{% endmacro %}
+
+{% macro comments_link(link) %}
+    <div class="event-link">
+        <a href="{{ link }}">View comments</a>
+    </div>
+{% endmacro %}
+
+{% macro inline_comment(comment, recipient_timezone) %}
+    <div class="inline-comment">
+        <a href="{{ comment.link }}">
+            {{ comment.file_context }}
+            <span class="view-inline">View inline</span>
+        </a>
+        {% if comment.context is reply %}
+            <div class="comment">
+                <div class="previous-comment">
+                    <div class="context">
+                        <span class="author">{{ comment.context.other_author }}</span>
+                        <span class="when">{{ comment.context.other_date_utc | date(recipient_timezone) }}:</span>
+                    </div>
+                    <blockquote class="raw-previous-comment" aria-level="2">
+                        {{ comment.context.other_comment }}
+                    </blockquote>
+                </div>
+                <blockquote class="reply-comment" aria-level="1">
+                    {{ comment.text }}
+                </blockquote>
+            </div>
+        {% elif comment.context is code %}
+            <div class="scroll-container">
+                <table role="table">
+                    {% for line in comment.context.diff %}
+                        <tr class="code {{ line.type | diff_class }}">
+                            <td class="line-number">{{ line.number }}</td>
+                            <td class="symbol">{{ line.type | diff_symbol }}</td>
+                            <td class="src">
+                                <pre>{{ line.raw_content }}</pre>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            <blockquote class="comment" aria-level="1">
+                {{ comment.text }}
+            </blockquote>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% macro reviewers_status(reviewers) %}
+    <div class="reviewers">
+        <div class="changes-title">Reviewers:</div>
+        <table role="table">
+            {% for reviewer in reviewers %}
+                <tr class="{{ reviewer | reviewer_actionable_class }}">
+                    <td class="status-checkbox">
+                        {{ reviewer.status | reviewer_status_icon | safe }}
+                    </td>
+                    <td class="user">{{ reviewer.name }}</td>
+                    {% if reviewer is blocking_reviewer %}
+                        <td class="blocking-text"><span>blocking</span></td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endmacro %}
+
+{% macro reviewers_with_changes(reviewers) %}
+    <div class="reviewers">
+        <div class="changes-title">Reviewers:</div>
+        <table role="table">
+            {% for reviewer in reviewers %}
+                <tr class="{{ reviewer | reviewer_actionable_class }} {{ reviewer.metadata_change | existence_change_class }}">
+                    <td class="status-checkbox">
+                        {{ reviewer.status | reviewer_status_icon | safe }}
+                    </td>
+                    <td class="user">{{ reviewer.name }}</td>
+                    {% if reviewer is blocking_reviewer %}
+                        <td class="blocking-text"><span>blocking</span></td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    <td class="diff"><span>{{ reviewer.metadata_change | existence_change_label }}</span></td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endmacro %}
+
+{% macro metadata_changes(is_title_changed, is_bug_changed, revision) %}
+    <div class="metadata-changes">
+        <div class="changes-title">Metadata changes:</div>
+        <table role="table">
+            {% if is_title_changed %}
+                <tr>
+                    <td class="field">Title changed to:</td>
+                    <td class="value">
+                        <a href="{{ revision.link }}">{{ revision.id }}: {{ revision.name }}</a>
+                    </td>
+                </tr>
+            {% endif %}
+            {% if is_bug_changed %}
+                <tr>
+                    <td class="field">Bug changed to:</td>
+                    <td class="value">
+                        {% if revision.bug %}
+                            <a href="{{ revision.bug.link }}">{{ revision.bug.id }} ({{ revision.bug.name }})</a>
+                        {% else %}
+                            <div class="none">None</div>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endif %}
+        </table>
+    </div>
+{% endmacro %}
+
+{% macro secure_metadata_changes(is_title_changed, is_bug_changed, revision) %}
+    <div class="metadata-changes">
+        <div class="changes-title">Metadata changes:</div>
+        <table role="table">
+            {% if is_title_changed %}
+                <tr>
+                    <td class="field">Title changed:</td>
+                    <td class="value">
+                        <a href="{{ revision.link }}">View secure title on Phabricator</a>
+                    </td>
+                </tr>
+            {% endif %}
+            {% if is_bug_changed %}
+                <tr>
+                    <td class="field">Bug changed to:</td>
+                    <td class="value">
+                        {% if revision.bug %}
+                            <a href="{{ revision.bug.link }}">{{ revision.bug.id }} (secure bug)</a>
+                        {% else %}
+                            <div class="none">None</div>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endif %}
+        </table>
+    </div>
+{% endmacro %}
+
+{% macro affected_files(files) %}
+    <div class="affected-files">
+        <div class="changes-title">Affected files:</div>
+        <table>
+            {% for file in files %}
+                <tr class="{{ file.change | file_change }}">
+                    <td>
+                        <pre>{{ file.path }}</pre>
+                    </td>
+                    <td class="diff"><span>{{ file.change | file_change }}</span></td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endmacro %}
+
+{% macro footer(unique_number) %}
+    <span class="prevent-fold">{{ unique_number }}</span>
+    <div class="footer">
+        <a href="unsub">Email preferences</a>. Feedback/issues/comments for this email are very welcome, please
+        <a href="https://bugzilla.mozilla.org/enter_bug.cgi?product=Conduit&component=Phabricator">report them on
+            Bugzilla</a>
+    </div>
+{% endmacro %}

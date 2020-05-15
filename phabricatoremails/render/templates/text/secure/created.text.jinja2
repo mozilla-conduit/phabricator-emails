@@ -1,0 +1,9 @@
+{% import '_macros.text.jinja2' as macros %}
+
+{{- macros.secure_revision_info(revision) }}
+
+{{ actor_name }} created this revision.
+{{- macros.reviewer_action(reviewer, revision) }}
+
+{{- macros.reviewers_status(event.reviewers) }}
+{{- macros.footer() }}

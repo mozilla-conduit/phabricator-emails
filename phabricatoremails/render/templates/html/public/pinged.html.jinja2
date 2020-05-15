@@ -1,0 +1,28 @@
+{% import '_macros.html.jinja2' as macros %}
+{{ macros.head() }}
+<div class="event-content">
+
+    {% call macros.preview(true, unique_number) %}
+        {{ emoji("speech_balloon") | safe }} {{ actor_name }} mentioned you.
+    {% endcall %}
+
+    {{ macros.title(revision) }}
+
+    <div class="summary">
+        <span class="emoji">{{ emoji("speech_balloon") | safe }}</span>
+        <span class="text"><span><span class="actor">{{ actor_name }}</span> mentioned you</span></span>
+        <a href="{{ event.transaction_link }}" class="actionable">{{ emoji("reply") | safe }} Respond on Phabricator</a>
+    </div>
+
+    {{ macros.comments_link(event.transaction_link) }}
+
+    {% if event.pinged_main_comment %}
+        {{ macros.main_comment(event.pinged_main_comment) }}
+    {% endif %}
+
+    {% for comment in event.pinged_inline_comments %}
+        {{ macros.inline_comment(comment, recipient_timezone) }}
+    {% endfor %}
+
+    {{ macros.footer(unique_number) }}
+</div>

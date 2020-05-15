@@ -1,0 +1,10 @@
+{% import '_macros.text.jinja2' as macros %}
+
+{{- macros.revision_info(revision) }}
+
+{{ actor_name }} requested changes {{- event | comment_summary }}.
+[!] You need to update your revision to land it
+
+{{- macros.main_comment(event.main_comment) }}
+{{- macros.inline_comments(event.inline_comments) }}
+{{- macros.footer() }}

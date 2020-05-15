@@ -1,0 +1,16 @@
+{% import '_macros.text.jinja2' as macros %}
+
+{{- macros.secure_revision_info(revision) }}
+
+{% if reviewer is accepted_reviewer %}
+{{- actor_name }} updated this revision that you've accepted.
+{%- else %}
+{{- actor_name }} updated this revision.
+{{- macros.reviewer_action(reviewer, revision) }}
+{%- endif %}
+
+Changes since last update:
+{{ event.new_changes_link }}
+
+{{- macros.reviewers_status(event.reviewers) }}
+{{- macros.footer() }}

@@ -1,0 +1,23 @@
+{% import '_macros.html.jinja2' as macros %}
+{{ macros.head() }}
+<div class="event-content">
+
+    {% call macros.preview(true, unique_number) %}
+        {{ emoji("wrench") | safe }} {{ actor_name }} requested changes {{- event | secure_comment_summary }}.
+    {% endcall %}
+
+    {{ macros.secure_title(revision) }}
+
+    <div class="summary">
+        <span class="emoji">{{ emoji("wrench") | safe }}</span>
+        <span class="text"><span><span
+                class="actor">{{ actor_name }}</span> requested changes {{- event | secure_comment_summary }}</span></span>
+        <a href="{{ event.transaction_link }}" class="actionable">{{ emoji("gear") | safe }} You need to resolve their comments</a>
+    </div>
+
+    {% if event is commented_on_secure %}
+        {{ macros.comments_link(event.transaction_link) }}
+    {% endif %}
+
+    {{ macros.footer(unique_number) }}
+</div>

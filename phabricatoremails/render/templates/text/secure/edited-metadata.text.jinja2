@@ -1,0 +1,9 @@
+{% import '_macros.text.jinja2' as macros %}
+
+{{- macros.secure_revision_info(revision) }}
+
+{{ actor_name }} edited revision metadata.
+
+{{- macros.reviewers_status(event.reviewers) }}
+{{- macros.secure_metadata_changes(event.is_title_changed, event.is_bug_changed, revision) }}
+{{- macros.footer() }}

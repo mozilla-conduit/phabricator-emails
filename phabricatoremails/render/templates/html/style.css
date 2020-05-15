@@ -1,0 +1,409 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
+.event-content {
+    font-family: sans-serif;
+}
+
+.event-content > div, .event-content blockquote {
+    margin-top: 10px;
+}
+
+a[href] {
+    color: #4a5f88;
+    text-decoration: underline;
+}
+
+div.preview, div.end-preview {
+    display: none;
+    max-height: 0;
+    overflow: hidden;
+}
+
+.title {
+    font-size: 16px;
+    line-height: 16px;
+    margin-bottom: 0.2em;
+}
+
+a[href].revision {
+    display: inline-block;
+    font-weight: bold;
+    margin-bottom: 0.2em;
+}
+
+.bug {
+    color: #000;
+    font-size: 13px;
+    font-style: italic;
+}
+
+.bug a[href] {
+    color: #5b75a5;
+}
+
+div.summary {
+    display: table;
+    border-collapse: separate;
+}
+
+.summary .preview-actionable {
+    display: none;
+}
+
+.summary .emoji, .summary .text, .summary .actionable {
+    color: #000;
+    text-decoration: none;
+    padding: 8px 12px;
+    background-color: #f3f5f7;
+    border-radius: 2px;
+    /*line-height: 18px;*/
+    font-size: 14px;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.summary .actor {
+    font-weight: bold;
+}
+
+.summary .emoji {
+    font-weight: lighter;
+    border-right: 3px solid #fff;
+    white-space: nowrap;
+}
+
+.summary .text {
+    border-right: 3px solid #fff;
+}
+
+.summary .actionable {
+    border-bottom: 3px solid #464c5c;
+    padding-bottom: 5px;
+}
+
+div.event-link {
+    margin-top: 4px;
+}
+
+.event-link a[href] {
+    padding: 6px 10px;
+    border-left: 3px solid #464c5c;
+    border-radius: 2px;
+    color: #464c5c;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #f3f5f7;
+    display: inline-block;
+}
+
+.changes-title {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 0.5em;
+}
+
+table {
+    font-size: inherit;
+    color: #000;
+}
+
+table td:first-child {
+    padding-left: 10px;
+}
+
+.reviewers, .metadata-changes, .affected-files {
+    font-size: 14px;
+    color: #464c5c;
+}
+
+.reviewers table, .metadata-changes table, .affected-files table {
+    border-radius: 2px;
+    border-spacing: 0;
+    overflow: hidden;
+    color: #464c5c;
+}
+
+.reviewers td, .metadata-changes td {
+    padding: 4px;
+}
+
+.reviewers td:first-child, .metadata-changes td:first-child {
+    padding: 4px 4px 4px 10px;
+}
+
+.reviewers .status-checkbox {
+    padding-right: 0;
+}
+
+@media screen and (min-resolution: 192dpi) {
+    /* Mobile emoji are larger than text of the same font size. This is mostly OK except for the "status-checkbox"
+     */
+    .reviewers .status-checkbox {
+        font-size: 0.7em;
+    }
+}
+
+.reviewers .actionable td:first-child {
+    border-left: 3px solid #c85a5a;
+}
+
+.reviewers .non-actionable td:first-child {
+    border-left: 3px solid #f7e6e6;
+}
+
+.reviewers .user {
+    font-weight: bold;
+}
+
+.reviewers .blocking-text {
+    padding: 0;
+    text-align: right;
+}
+
+.reviewers span, .affected-files span {
+    border-radius: 2px;
+    padding: 3px 6px 4px;
+    display: inline-block;
+}
+
+.reviewers .blocking-text span {
+    color: #c85a5a;
+    background-color: #f7e6e6;
+    margin-left: 6px;
+}
+
+.reviewers .diff {
+    padding: 0 0 0 1px;
+}
+
+.diff span {
+    box-sizing: border-box;
+    width: 100%;
+    text-align: center;
+}
+
+.added .diff span {
+    color: #367836;
+    background-color: #e6f5ea;
+}
+
+.changed .diff span {
+    color: #464c5c;
+    background-color: #f3f5f7;
+}
+
+.removed .diff span {
+    color: #c85a5a;
+    background-color: #f7e6e6;
+}
+
+.removed td, .removed td span {
+    text-decoration: line-through;
+}
+
+.removed td.diff span {
+    text-decoration: none;
+}
+
+.metadata-changes .field {
+    border-left: 3px solid #464c5c;
+}
+
+.metadata-changes .value {
+    padding: 0;
+}
+
+.metadata-changes .value a, .metadata-changes .value div {
+    font-weight: bold;
+    background-color: #f8f9fc;
+    padding: 5px;
+}
+
+.metadata-changes .value a {
+    color: inherit;
+    display: block;
+}
+
+.metadata-changes .value .none {
+    font-style: italic;
+}
+
+.affected-files table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.affected-files td {
+    text-align: left;
+}
+
+.affected-files td:first-child {
+    padding: 4px 5px 4px 10px;
+}
+
+.affected-files tr td:first-child {
+    border-left: 3px solid #464c5c;
+}
+
+.affected-files pre {
+    margin: 0;
+}
+
+blockquote {
+    /* Reset from default blockquote styling */
+    margin-left: 0 !important;
+    border-left: none !important;
+    margin-block-start: 0;
+    margin-block-end: 0;
+    margin-inline-start: 0;
+    margin-inline-end: 0;
+}
+
+.comment {
+    /* the !important here is to override Android's "padding-left: 0 !important" for blockquotes that we don't want */
+    padding: 8px 12px !important;
+    color: #464c5c;
+    font-size: 14px;
+    border-radius: 2px;
+}
+
+.main-comment {
+    margin-left: 1px;
+    padding: 16px 12px;
+    background-color: #f8f9fc;
+}
+
+.inline-comment blockquote {
+    margin: 0;
+}
+
+.inline-comment {
+    font-size: 14px;
+    overflow: hidden;
+    border: 1px solid #d8d8d8;
+    border-radius: 2px;
+}
+
+.inline-comment a[href] {
+    display: block;
+    border-bottom: 1px solid #d8d8d8;
+    color: #464c5c;
+    padding: 4px 8px;
+    text-decoration: none;
+}
+
+.inline-comment .view-inline {
+    float: right;
+    text-decoration: underline;
+}
+
+.inline-comment .scroll-container {
+    overflow-x: auto;
+    border-bottom: 1px solid #d8d8d8;
+}
+
+.inline-comment table {
+    font-size: inherit;
+    margin: 0;
+    border-spacing: 0;
+    width: 100%;
+}
+
+.previous-comment {
+    color: #464c5c;
+    border-left: 3px solid #a7b5bf;
+    padding: 0 8px;
+}
+
+.previous-comment .author {
+    font-weight: bold;
+}
+
+.previous-comment .when {
+    color: #74777d;
+}
+
+.previous-comment .raw-previous-comment {
+    margin: 0 0 8px;
+    padding-top: 4px;
+}
+
+.reply-comment {
+    /* Android tells blockquotes to have "padding-left: 0 !important", but we don't want the extra gap */
+    padding-left: 0 !important;
+}
+
+.code {
+    font-family: "Menlo", "Consolas", "Monaco", monospace;
+}
+
+.code td {
+    font: inherit;
+    font-size: 11px;
+    line-height: 15px;
+}
+
+.line-number {
+    text-align: center;
+    width: 1px;
+    padding: 0 11px;
+    user-select: none;
+}
+
+.symbol {
+    width: 1px;
+    padding: 0 5px;
+    user-select: none;
+}
+
+.src {
+    padding-left: 11px;
+    white-space: nowrap;
+}
+
+.src pre {
+    margin: 0;
+}
+
+.no-change-line .line-number {
+    border-right: 1px solid #d8d8d8;
+}
+
+.removed-line {
+    background-color: #ffeeee;
+}
+
+.removed-line .line-number {
+    background-color: #fdf5f5;
+    border-right: 1px solid #d9b5b5;
+}
+
+.added-line {
+    background-color: #eefff5;
+}
+
+.added-line .line-number {
+    background-color: #f5fdfa;
+    border-right: 1px solid #b6d9cb;
+}
+
+.prevent-fold {
+    display: none;
+}
+
+div.footer {
+    border-top: 1px solid #d8d8d8;
+    color: #464c5c;
+    font-size: 13px;
+    font-style: italic;
+    padding-top: 8px;
+    margin-top: 10px;
+}
+
+.footer a[href] {
+    color: #464c5c;
+}

@@ -1,0 +1,22 @@
+{% import '_macros.html.jinja2' as macros %}
+{{ macros.head() }}
+<div class="event-content">
+
+    {% call macros.preview(false, unique_number) %}
+        {{ emoji("check_mark") | safe }} {{ actor_name }} accepted this revision {{- event | secure_comment_summary }}.
+    {% endcall %}
+
+    {{ macros.secure_title(revision) }}
+
+    <div class="summary">
+        <span class="emoji">{{ emoji("check_mark") | safe }}</span>
+        <span class="text"><span><span
+                class="actor">{{ actor_name }}</span> accepted this revision {{- event | secure_comment_summary }}</span></span>
+    </div>
+
+    {% if event is commented_on_secure %}
+        {{ macros.comments_link(event.transaction_link) }}
+    {% endif %}
+
+    {{ macros.footer(unique_number) }}
+</div>

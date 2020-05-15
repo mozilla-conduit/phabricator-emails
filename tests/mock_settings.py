@@ -1,0 +1,38 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+import logging
+
+
+class MockSettings:
+    def __init__(
+        self,
+        *,
+        source=None,
+        worker=None,
+        bugzilla_host=None,
+        sentry_dsn="",
+        db_url="",
+        db=None,
+        mail=None
+    ):
+        self.logger = logging.getLogger()
+        self.source = source
+        self.worker = worker
+        self.bugzilla_host = bugzilla_host
+        self.sentry_dsn = sentry_dsn
+        self.db_url = db_url
+        self._db = db
+        self._mail = mail
+
+    def db(self):
+        return self._db
+
+    def mail(self):
+        return self._mail
+
+
+class MockStats:
+    def incr(self, *args, **kwargs):
+        pass

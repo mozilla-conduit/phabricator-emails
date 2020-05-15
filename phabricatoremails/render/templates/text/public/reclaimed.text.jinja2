@@ -1,0 +1,9 @@
+{% import '_macros.text.jinja2' as macros %}
+
+{{- macros.revision_info(revision) }}
+
+{{ actor_name }} reclaimed this revision {{- event | comment_summary }}.
+
+{{- macros.main_comment(event.main_comment) }}
+{{- macros.inline_comments(event.inline_comments) }}
+{{- macros.footer() }}

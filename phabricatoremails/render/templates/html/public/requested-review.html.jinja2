@@ -1,0 +1,33 @@
+{% import '_macros.html.jinja2' as macros %}
+{{ macros.head() }}
+<div class="event-content">
+
+    {% call macros.preview(reviewer.is_actionable, unique_number) %}
+        {{ emoji("circle_arrows") | safe }} {{ actor_name }} requested a review {{- event | comment_summary }}.
+    {% endcall %}
+
+    {{ macros.title(revision) }}
+
+    <div class="summary">
+        <span class="emoji">{{ emoji("circle_arrows") | safe }}</span>
+        <span class="text"><span><span
+                class="actor">{{ actor_name }}</span> requested a review {{- event | comment_summary }}</span></span>
+        {{ macros.reviewer_action(reviewer, revision) }}
+    </div>
+
+    {% if event is commented_on %}
+        {{ macros.comments_link(event.transaction_link) }}
+    {% endif %}
+
+    {{ macros.reviewers_status(event.reviewers) }}
+
+    {% if event.main_comment %}
+        {{ macros.main_comment(event.main_comment) }}
+    {% endif %}
+
+    {% for comment in event.inline_comments %}
+        {{ macros.inline_comment(comment, recipient_timezone) }}
+    {% endfor %}
+
+    {{ macros.footer(unique_number) }}
+</div>
