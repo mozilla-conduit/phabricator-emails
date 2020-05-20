@@ -92,7 +92,7 @@ class InlineComment:
                     )
                     for line in raw_context["diff"]
                 ]
-            )
+            )  # type: InlineCommentContext
         elif context_kind == "reply":
             context = ReplyContext(
                 raw_context["otherAuthor"],

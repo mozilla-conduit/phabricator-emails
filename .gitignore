@@ -9,6 +9,9 @@ output
 # When using "[dev].file=..." in settings.ini, the convention is "example.json"
 example.json
 
+# Mypy generated files
+.mypy_cache
+
 # Python generated files
 *.egg-info
 *.pyc
