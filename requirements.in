@@ -9,6 +9,7 @@ dockerflow ~= 2019.10
 flake8 ~= 3.7
 jinja2 ~= 2.11
 kgb ~= 5.0
+mypy ~= 0.770
 premailer ~= 3.6
 psycopg2 ~= 2.8
 pytest ~= 5.4
