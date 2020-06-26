@@ -1,14 +1,15 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+import os
 
 from alembic import context
 from phabricatoremails import models
-from phabricatoremails.settings import Settings
+from phabricatoremails.settings import Settings, SETTINGS_PATH_ENV_KEY
 from sqlalchemy import create_engine
 
 target_metadata = models.Base.metadata
-settings = Settings.load()
+settings = Settings.load(os.environ.get(SETTINGS_PATH_ENV_KEY))
 db_url = settings.db_url
 
 
