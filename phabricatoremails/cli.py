@@ -3,13 +3,12 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import argparse
-import os
 
 import sentry_sdk
 from phabricatoremails.prepare import prepare
 from phabricatoremails.migrate import migrate
 from phabricatoremails.service import service
-from phabricatoremails.settings import Settings, SETTINGS_PATH_ENV_KEY
+from phabricatoremails.settings import Settings
 from statsd import StatsClient
 
 
@@ -33,7 +32,7 @@ def parse_command():
 
 def cli():
     args = parse_command()
-    settings = Settings.load(os.environ.get(SETTINGS_PATH_ENV_KEY))
+    settings = Settings.load()
     if settings.sentry_dsn:
         sentry_sdk.init(settings.sentry_dsn)
 

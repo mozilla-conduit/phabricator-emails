@@ -17,7 +17,6 @@ dockerflow-compatible already.
 Place a `settings.ini` file in the `/app` directory of the container.
 There's an example production `settings.ini` file in the repository called `settings.production-example.ini`. You can
 copy that one, then consult the [configuration documentation below](#configuration-reference) for additional details.
-Finally, set an environment variable called `PHABRICATOR_EMAILS_SETTINGS_PATH` to `/app/settings.ini`.
 
 ### Amazon credentials
 
