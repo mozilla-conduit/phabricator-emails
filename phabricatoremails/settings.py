@@ -19,9 +19,6 @@ from phabricatoremails.source import FileSource, PhabricatorSource
 from sqlalchemy import create_engine
 
 
-SETTINGS_PATH_ENV_KEY = "PHABRICATOR_EMAILS_SETTINGS_PATH"
-
-
 def _parse_logger(config: ConfigParser):
     """Provides a logger set up according to our configuration.
 
@@ -123,18 +120,15 @@ class Settings:
         return _parse_mail(self._config, self.logger)
 
     @classmethod
-    def load(cls, settings_path=None):
-        """Load and parse settings from a settings.ini.
-
-        Looks in the package directory by default, but will use a custom path if
-        provided.
-        """
+    def load(cls):
+        """Load and parse settings from a settings.ini file in the package directory."""
 
         config = configparser.ConfigParser()
-        if settings_path:
-            path = settings_path
-        else:
-            path = pathlib.Path(PACKAGE_DIRECTORY / "settings.ini").resolve()
+        # The location of "settings.ini" cannot be parameterized because alembic
+        # needs access to the db connection string, but can't have access to
+        # CLI parameters. So, our most usable option is to require that "settings.ini"
+        # is in the package directory.
+        path = pathlib.Path(PACKAGE_DIRECTORY / "settings.ini").resolve()
         if not config.read(str(path)):
             raise Exception(f'No config file found at "{path}"')
 
