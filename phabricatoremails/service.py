@@ -87,9 +87,7 @@ def service(settings: Settings, stats: StatsClient):
             "`phabricator-emails prepare` first."
         )
 
-    raw_css_path = (
-        PACKAGE_DIRECTORY / "phabricatoremails/render/templates/html/style.css"
-    )
+    raw_css_path = PACKAGE_DIRECTORY / "render/templates/html/style.css"
     css_text = raw_css_path.read_text()
     template_store = TemplateStore(
         css_text,

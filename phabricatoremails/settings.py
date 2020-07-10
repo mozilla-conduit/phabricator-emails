@@ -134,7 +134,7 @@ class Settings:
         if settings_path:
             path = settings_path
         else:
-            path = pathlib.Path(PACKAGE_DIRECTORY / "settings.ini").resolve()
+            path = pathlib.Path(PACKAGE_DIRECTORY.parent / "settings.ini").resolve()
         if not config.read(str(path)):
             raise Exception(f'No config file found at "{path}"')
 

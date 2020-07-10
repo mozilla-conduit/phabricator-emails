@@ -1,0 +1,3 @@
+include phabricatoremails/alembic.ini
+recursive-include phabricatoremails/alembic *.py *.mako
+recursive-include phabricatoremails/render/templates *.css *.jinja2

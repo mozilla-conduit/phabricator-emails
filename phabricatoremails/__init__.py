@@ -4,4 +4,4 @@
 
 import pathlib
 
-PACKAGE_DIRECTORY = pathlib.Path(__file__).parent.parent
+PACKAGE_DIRECTORY = pathlib.Path(__file__).parent

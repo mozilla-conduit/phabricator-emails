@@ -8,8 +8,8 @@ from phabricatoremails import PACKAGE_DIRECTORY
 
 PY_FILES = sorted(
     str(f)
-    for f in list((PACKAGE_DIRECTORY / "phabricatoremails").glob("**/*.py"))
-    + list((PACKAGE_DIRECTORY / "tests").glob("**/*.py"))
+    for f in list(PACKAGE_DIRECTORY.glob("**/*.py"))
+    + list((PACKAGE_DIRECTORY.parent / "tests").glob("**/*.py"))
 )
 
 
