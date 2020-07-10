@@ -5,7 +5,7 @@
 """Initializes query_position and thread tables.
 
 Revision ID: 3fc2902fe464
-Revises: 
+Revises:
 Create Date: 2020-04-09 09:57:09.401710
 
 """

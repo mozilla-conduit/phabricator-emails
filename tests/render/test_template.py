@@ -28,7 +28,7 @@ def test_templates_end_with_newline():
     # The templates need to end with a newline so that the MIME sections are properly
     # distanced. If they don't have sufficient newlines, then email clients won't
     # realize that the HTML and text sections are separate.
-    template_dir = PACKAGE_DIRECTORY / "phabricatoremails" / "render" / "templates"
+    template_dir = PACKAGE_DIRECTORY / "render" / "templates"
     template_files = [f for f in template_dir.glob("*/*/*.jinja2")]
 
     if not len(template_files):

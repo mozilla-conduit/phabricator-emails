@@ -21,6 +21,7 @@ COPY requirements.txt .
 RUN pip install --user -r requirements.txt
 
 COPY setup.py ./
+COPY MANIFEST.in ./
 COPY phabricatoremails/ phabricatoremails/
 RUN pip install --user .
 
