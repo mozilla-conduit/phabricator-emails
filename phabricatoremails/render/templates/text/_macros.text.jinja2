@@ -24,15 +24,16 @@
 {%- endif %}
 {%- endmacro %}
 
-{% macro footer() %}
+{% macro footer(actor_name) %}
 {# This line is to visually separate the body of the email from the footer contents.
    The length of this line was chosen arbitrarily based on visual appeal. #}
 -------------------------------
 
 Email preferences:
-https://phabricator.services.mozilla.com/preferences/this-link-is-fake
+{{ phabricator_host }}/settings/user/{{ actor_name }}/page/emaildelivery/
 Feedback/issues/comments for this email are very welcome, please report
-them on Bugzilla: https://bugzilla.mozilla.org/fake-link-again
+them on Bugzilla:
+https://bugzilla.mozilla.org/enter_bug.cgi?product=Conduit&component=Phabricator
 {%- endmacro %}
 
 {% macro main_comment(raw_comment) %}

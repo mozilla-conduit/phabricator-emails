@@ -142,6 +142,9 @@ def test_parse_fs_mail(tmp_path):
 def test_settings():
     config = _config_parser(
         """
+    [phabricator]
+    host=phabricator.host
+
     [dev]
     file=example.json
 
@@ -153,6 +156,7 @@ def test_settings():
     """
     )
     settings = Settings(config)
+    assert settings.phabricator_host == "phabricator.host"
     assert settings.bugzilla_host == "bugzilla.host"
 
 

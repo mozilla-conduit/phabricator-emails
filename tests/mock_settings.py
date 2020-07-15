@@ -12,6 +12,7 @@ class MockSettings:
         source=None,
         worker=None,
         bugzilla_host=None,
+        phabricator_host=None,
         sentry_dsn="",
         db_url="",
         db=None,
@@ -21,6 +22,7 @@ class MockSettings:
         self.source = source
         self.worker = worker
         self.bugzilla_host = bugzilla_host
+        self.phabricator_host = phabricator_host
         self.sentry_dsn = sentry_dsn
         self.db_url = db_url
         self._db = db

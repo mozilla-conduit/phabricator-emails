@@ -203,7 +203,12 @@ class TemplateStore:
     """
 
     def __init__(
-        self, css_text: str, keep_css_classes: bool, html_loader=None, text_loader=None
+        self,
+        phabricator_host: str,
+        css_text: str,
+        keep_css_classes: bool,
+        html_loader=None,
+        text_loader=None,
     ):
         self._css_inline = Premailer(
             css_text=css_text,
@@ -218,12 +223,14 @@ class TemplateStore:
         self.html_jinja_env = _jinja_html(
             html_loader
             if html_loader
-            else jinja2.PackageLoader("phabricatoremails", "render/templates/html")
+            else jinja2.PackageLoader("phabricatoremails", "render/templates/html"),
+            phabricator_host,
         )
         self.text_jinja_env = _jinja_text(
             text_loader
             if text_loader
-            else jinja2.PackageLoader("phabricatoremails", "render/templates/text")
+            else jinja2.PackageLoader("phabricatoremails", "render/templates/text"),
+            phabricator_host,
         )
 
     def get(self, template_path: str) -> Template:
@@ -237,7 +244,7 @@ class TemplateStore:
         )
 
 
-def _jinja_html(loader):
+def _jinja_html(loader, phabricator_host: str):
     jinja_env = jinja2.Environment(
         loader=loader,
         autoescape=True,
@@ -267,10 +274,11 @@ def _jinja_html(loader):
     jinja_env.filters["comment_summary"] = _comment_summary
     jinja_env.filters["secure_comment_summary"] = _secure_comment_summary
     jinja_env.globals["emoji"] = _emoji_html
+    jinja_env.globals["phabricator_host"] = phabricator_host
     return jinja_env
 
 
-def _jinja_text(loader):
+def _jinja_text(loader, phabricator_host: str):
     jinja_env = jinja2.Environment(
         loader=loader,
         autoescape=False,  # These are text emails, we want raw characters
@@ -291,4 +299,5 @@ def _jinja_text(loader):
     jinja_env.filters["file_change"] = _file_change
     jinja_env.filters["comment_summary"] = _comment_summary
     jinja_env.filters["secure_comment_summary"] = _secure_comment_summary
+    jinja_env.globals["phabricator_host"] = phabricator_host
     return jinja_env

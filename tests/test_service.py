@@ -106,7 +106,7 @@ def test_integration_pipeline():
         }
     )
     mail = MockMail()
-    render = Render(TemplateStore("", False))
+    render = Render(TemplateStore("", "", False))
     logger = logging.create_dev_logger()
     pipeline = Pipeline(source, render, mail, logger, MockStats())
     with spy_on(mail.send), spy_on(source.fetch_next):
@@ -178,7 +178,7 @@ def test_pipeline_skips_events_that_fail_to_render():
         }
     )
     mail = MockMail()
-    render = Render(TemplateStore("", False))
+    render = Render(TemplateStore("", "", False))
     logger = logging.create_dev_logger()
     pipeline = Pipeline(source, render, mail, logger, MockStats())
     with spy_on(mail.send):
@@ -215,7 +215,7 @@ def test_service_reads_css(mock_template_store):
     db = MockDB(is_initialized=True)
     settings = MockSettings(worker=MockWorker(), db=db)
     service(settings, MockStats())
-    assert ".event-content" in mock_template_store.call_args.args[0]
+    assert ".event-content" in mock_template_store.call_args.args[1]
 
 
 @patch("phabricatoremails.service.TemplateStore")
