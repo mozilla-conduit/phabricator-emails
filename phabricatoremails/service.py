@@ -90,6 +90,7 @@ def service(settings: Settings, stats: StatsClient):
     raw_css_path = PACKAGE_DIRECTORY / "render/templates/html/style.css"
     css_text = raw_css_path.read_text()
     template_store = TemplateStore(
+        settings.phabricator_host,
         css_text,
         # Keep CSS classes when outputting to local files, since that indicates local
         # development/testing

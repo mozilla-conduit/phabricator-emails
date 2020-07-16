@@ -35,6 +35,12 @@ def _parse_logger(config: ConfigParser):
         return create_logger()
 
 
+def _parse_host(raw_host: str):
+    if raw_host.endswith("/"):
+        return raw_host[:-1]
+    return raw_host
+
+
 def _parse_pipeline(config: ConfigParser, logger: Logger):
     """Provides data-fetching implementations according to our configuration.
 
@@ -49,11 +55,9 @@ def _parse_pipeline(config: ConfigParser, logger: Logger):
         # matter when reading from a file.
         return FileSource(pathlib.Path(dev_source_file).resolve()), RunOnceWorker(0)
 
-    host = config.get("phabricator", "host")
+    host = _parse_host(config.get("phabricator", "host"))
     token = config.get("phabricator", "token")
     story_limit = int(config.get("dev", "story_limit", fallback="100"))
-    if host.endswith("/"):
-        host = host[:-1]
     source = PhabricatorSource(host, token, story_limit)
 
     override_since_key = config.get("dev", "since_key", fallback=None)
@@ -100,6 +104,7 @@ class Settings:
     source: Any
     worker: Any
     bugzilla_host: str
+    phabricator_host: str
     logger: Logger
     sentry_dsn: str
     db_url: str
@@ -110,7 +115,8 @@ class Settings:
         source, worker = _parse_pipeline(config, logger)
         self.source = source
         self.worker = worker
-        self.bugzilla_host = config.get("bugzilla", "host")
+        self.bugzilla_host = _parse_host(config.get("bugzilla", "host"))
+        self.phabricator_host = _parse_host(config.get("phabricator", "host"))
         self.logger = logger
         self.sentry_dsn = config.get("sentry", "dsn", fallback="")
         self.db_url = config.get("db", "url")
