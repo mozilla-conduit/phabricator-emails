@@ -50,9 +50,10 @@ def test_integration_templates():
         {
             "revision": Revision(1, "revision", "link", None),
             "actor_name": "actor",
+            "recipient_username": "1",
             "unique_number": 0,
             "event": RevisionCommentPinged(
-                Recipient("1@mail", timezone.utc, False),
+                Recipient("1@mail", "1", timezone.utc, False),
                 "you've been pinged",
                 [],
                 "link",

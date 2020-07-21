@@ -14,15 +14,15 @@ from phabricatoremails.render.mailbatch import (
 )
 from tests.render.mock_template import MockTemplateStore
 
-NON_ACTOR_RECIPIENT = Recipient("1@mail", timezone.utc, False)
+NON_ACTOR_RECIPIENT = Recipient("1@mail", "1", timezone.utc, False)
 PUBLIC_REVISION = Revision(1, "revision", "link", None)
 EVENT = RevisionCreated([], [])
 
 
 def test_target():
     batch = MailBatch(MockTemplateStore())
-    batch.target(Recipient("1@mail", timezone.utc, False), "template-author")
-    batch.target(Recipient("2@mail", timezone.utc, False), "template-reviewer")
+    batch.target(Recipient("1@mail", "1", timezone.utc, False), "template-author")
+    batch.target(Recipient("2@mail", "2", timezone.utc, False), "template-reviewer")
     emails = batch.process(PUBLIC_REVISION, "actor", 0, 0, EVENT)
     assert len(emails) == 2
     assert emails[0].to == "1@mail"
@@ -33,15 +33,15 @@ def test_target_many():
     batch = MailBatch(MockTemplateStore())
     batch.target_many(
         [
-            Recipient("1@mail", timezone.utc, False),
-            Recipient("2@mail", timezone.utc, False),
+            Recipient("1@mail", "1", timezone.utc, False),
+            Recipient("2@mail", "2", timezone.utc, False),
         ],
         "template-reviewer",
     )
     batch.target_many(
         [
-            Recipient("3@mail", timezone.utc, False),
-            Recipient("4@mail", timezone.utc, False),
+            Recipient("3@mail", "3", timezone.utc, False),
+            Recipient("4@mail", "4", timezone.utc, False),
         ],
         "template-reviewer",
     )
@@ -55,11 +55,11 @@ def test_target_many():
 
 def test_adds_targets():
     batch = MailBatch(MockTemplateStore())
-    batch.target(Recipient("1@mail", timezone.utc, False), "template-author")
+    batch.target(Recipient("1@mail", "1", timezone.utc, False), "template-author")
     batch.target_many(
         [
-            Recipient("2@mail", timezone.utc, False),
-            Recipient("3@mail", timezone.utc, False),
+            Recipient("2@mail", "2", timezone.utc, False),
+            Recipient("3@mail", "3", timezone.utc, False),
         ],
         "template-reviewer",
     )
@@ -72,11 +72,11 @@ def test_adds_targets():
 
 def test_only_sends_to_each_recipient_once():
     batch = MailBatch(MockTemplateStore())
-    batch.target(Recipient("1@mail", timezone.utc, False), "template-author")
+    batch.target(Recipient("1@mail", "1", timezone.utc, False), "template-author")
     batch.target_many(
         [
-            Recipient("1@mail", timezone.utc, False),
-            Recipient("2@mail", timezone.utc, False),
+            Recipient("1@mail", "1", timezone.utc, False),
+            Recipient("2@mail", "2", timezone.utc, False),
         ],
         "template-reviewer",
     )
@@ -95,7 +95,7 @@ def test_filter_target_no_recipient():
 
 def test_filter_target_is_actor():
     batch = MailBatch(MockTemplateStore())
-    batch.target(Recipient("1@mail", timezone.utc, True), "template-author")
+    batch.target(Recipient("1@mail", "1", timezone.utc, True), "template-author")
     emails = batch.process(PUBLIC_REVISION, "actor", 0, 0, EVENT)
     assert len(emails) == 0
 

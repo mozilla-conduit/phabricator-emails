@@ -46,11 +46,13 @@ def test_integration_pipeline():
                         "body": {
                             "reviewers": [
                                 {
+                                    "username": "2",
                                     "email": "2@mail",
                                     "timezoneOffset": 0,
                                     "isActor": False,
                                 },
                                 {
+                                    "username": "3",
                                     "email": "3@mail",
                                     "timezoneOffset": 0,
                                     "isActor": False,
@@ -73,6 +75,7 @@ def test_integration_pipeline():
                         "body": {
                             "reviewers": [
                                 {
+                                    "username": "5",
                                     "email": "5@mail",
                                     "timezoneOffset": 0,
                                     "isActor": False,
