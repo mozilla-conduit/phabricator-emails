@@ -17,6 +17,7 @@ Additional information about this module can be found in __init__.py
 @dataclass
 class Recipient:
     email: str
+    username: str
     timezone: timezone
     is_actor: bool
 
@@ -31,6 +32,7 @@ class Recipient:
             minutes = ceil((offset_seconds - hours * 3600) / 60)
         return cls(
             recipient["email"],
+            recipient["username"],
             timezone(timedelta(hours=hours, minutes=minutes)),
             recipient["isActor"],
         )

@@ -22,6 +22,7 @@ class Target:
 
     template_path: str
     recipient_email: str
+    recipient_username: str
     kwargs: Dict
 
 
@@ -53,7 +54,9 @@ class MailBatch:
             return
 
         kwargs["recipient_timezone"] = recipient.timezone
-        self._targets[recipient.email] = Target(template_path, recipient.email, kwargs)
+        self._targets[recipient.email] = Target(
+            template_path, recipient.email, recipient.username, kwargs
+        )
 
     def target_many(self, recipients: List[Recipient], template_path: str, **kwargs):
         """Appends many emails to be sent for the current event.
@@ -104,6 +107,7 @@ class MailBatch:
                 template_params={
                     "revision": revision,
                     "actor_name": actor_name,
+                    "recipient_username": target.recipient_username,
                     "unique_number": unique_number,
                     "event": event,
                     **target.kwargs,
@@ -133,6 +137,7 @@ class MailBatch:
                 template_params={
                     "revision": revision,
                     "actor_name": actor_name,
+                    "recipient_username": target.recipient_username,
                     "unique_number": unique_number,
                     "event": event,
                     **target.kwargs,

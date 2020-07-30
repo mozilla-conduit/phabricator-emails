@@ -17,7 +17,12 @@ BODY = {
             "isActionable": True,
             "status": "requested-changes",
             "recipients": [
-                {"timezoneOffset": -25200, "email": "reviewer@mail", "isActor": False}
+                {
+                    "timezoneOffset": -25200,
+                    "username": "reviewer",
+                    "email": "reviewer@mail",
+                    "isActor": False,
+                }
             ],
         }
     ],

@@ -24,13 +24,13 @@
 {%- endif %}
 {%- endmacro %}
 
-{% macro footer(actor_name) %}
+{% macro footer(recipient_username) %}
 {# This line is to visually separate the body of the email from the footer contents.
    The length of this line was chosen arbitrarily based on visual appeal. #}
 -------------------------------
 
 Email preferences:
-{{ phabricator_host }}/settings/user/{{ actor_name }}/page/emaildelivery/
+{{ phabricator_host }}/settings/user/{{ recipient_username }}/page/emaildelivery/
 Feedback/issues/comments for this email are very welcome, please report
 them on Bugzilla:
 https://bugzilla.mozilla.org/enter_bug.cgi?product=Conduit&component=Phabricator
