@@ -20,6 +20,8 @@ ENV PATH "/app/.local/bin:${PATH}"
 COPY requirements.txt .
 RUN pip install --user -r requirements.txt
 
+# Using a wildcard so that the COPY still succeeds, even if version.json doesn't exist.
+COPY version.json* ./
 COPY setup.py ./
 COPY MANIFEST.in ./
 COPY phabricatoremails/ phabricatoremails/
