@@ -9,11 +9,9 @@
 
 {% macro secure_revision_info(revision) %}
 {{- revision.link }}
-{%- if revision.bug %}
 
 (Associated with secure bug {{ revision.bug.id }})
 ({{ revision.bug.link }})
-{%- endif %}
 {%- endmacro %}
 
 {% macro reviewer_action(reviewer, revision) %}
@@ -101,11 +99,7 @@ Metadata changes:
 - Title changed: (see the secure title on Phabricator)
 {%- endif %}
 {%- if is_bug_changed %}
-{%- if revision.bug %}
 - Bug changed to: {{ revision.bug.id }} (secure bug)
-{%- else %}
-- Bug changed to: None
-{%- endif %}
 {%- endif %}
 {%- endmacro %}
 

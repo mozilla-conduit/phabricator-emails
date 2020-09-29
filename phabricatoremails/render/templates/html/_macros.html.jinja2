@@ -43,12 +43,10 @@
 {% macro secure_title(revision) %}
     <div class="title">
         <a class="revision" href="{{ revision.link }}">D{{ revision.id }}: (secure revision)</a>
-        {% if revision.bug %}
-            <div class="bug">
-                Associated with
-                <a href="{{ revision.bug.link }}">bug {{ revision.bug.id }}: (secure bug)</a>
-            </div>
-        {% endif %}
+        <div class="bug">
+            Associated with
+            <a href="{{ revision.bug.link }}">bug {{ revision.bug.id }}: (secure bug)</a>
+        </div>
     </div>
 {% endmacro %}
 
@@ -207,11 +205,7 @@
                 <tr>
                     <td class="field">Bug changed to:</td>
                     <td class="value">
-                        {% if revision.bug %}
-                            <a href="{{ revision.bug.link }}">{{ revision.bug.id }} (secure bug)</a>
-                        {% else %}
-                            <div class="none">None</div>
-                        {% endif %}
+                        <a href="{{ revision.bug.link }}">{{ revision.bug.id }} (secure bug)</a>
                     </td>
                 </tr>
             {% endif %}
