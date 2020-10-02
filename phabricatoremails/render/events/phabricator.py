@@ -12,6 +12,7 @@ from phabricatoremails.render.events.common import (
     Reviewer,
     ParseError,
     ReviewerStatus,
+    CommentMessage,
 )
 
 """Describes data structures that are used by public revision events.
@@ -47,7 +48,7 @@ class Revision:
 class ReplyContext:
     other_author: str
     other_date_utc: datetime
-    other_comment: str
+    other_comment_message: CommentMessage
 
 
 class DiffLineType(Enum):
@@ -75,7 +76,7 @@ InlineCommentContext = Union[ReplyContext, CodeContext]
 class InlineComment:
     file_context: str
     link: str
-    text: str
+    message: CommentMessage
     context: InlineCommentContext
 
     @classmethod
@@ -97,7 +98,7 @@ class InlineComment:
             context = ReplyContext(
                 raw_context["otherAuthor"],
                 datetime.fromisoformat(raw_context["otherDateUtc"]),
-                raw_context["otherComment"],
+                CommentMessage.parse(raw_context["otherCommentMessage"]),
             )
         else:
             raise ParseError("Comment context was not code or a reply")
@@ -105,7 +106,7 @@ class InlineComment:
         return cls(
             inline["fileContext"],
             inline["link"],
-            inline["text"],
+            CommentMessage.parse(inline["message"]),
             context,
         )
 
@@ -166,7 +167,7 @@ class MetadataEditedReviewer:
 @dataclass
 class RevisionAbandoned:
     KIND = "revision-abandoned"
-    main_comment: Optional[str]
+    main_comment_message: Optional[CommentMessage]
     inline_comments: List[InlineComment]
     transaction_link: str
     reviewers: List[Recipient]
@@ -174,7 +175,7 @@ class RevisionAbandoned:
     @classmethod
     def parse(cls, body: Dict):
         return cls(
-            body.get("mainComment"),
+            CommentMessage.parse_optional(body.get("mainCommentMessage")),
             InlineComment.parse_many(body["inlineComments"]),
             body["transactionLink"],
             [Recipient.parse(reviewer) for reviewer in body["reviewers"]],
@@ -198,7 +199,7 @@ class RevisionCreated:
 @dataclass
 class RevisionReclaimed:
     KIND = "revision-reclaimed"
-    main_comment: Optional[str]
+    main_comment_message: Optional[CommentMessage]
     inline_comments: List[InlineComment]
     transaction_link: str
     reviewers: List[Recipient]
@@ -206,7 +207,7 @@ class RevisionReclaimed:
     @classmethod
     def parse(cls, body: Dict):
         return cls(
-            body.get("mainComment"),
+            CommentMessage.parse_optional(body.get("mainCommentMessage")),
             InlineComment.parse_many(body["inlineComments"]),
             body["transactionLink"],
             [Recipient.parse(reviewer) for reviewer in body["reviewers"]],
@@ -216,7 +217,7 @@ class RevisionReclaimed:
 @dataclass
 class RevisionAccepted:
     KIND = "revision-accepted"
-    main_comment: Optional[str]
+    main_comment_message: Optional[CommentMessage]
     inline_comments: List[InlineComment]
     transaction_link: str
     lando_link: Optional[str]
@@ -227,7 +228,7 @@ class RevisionAccepted:
     @classmethod
     def parse(cls, body: Dict):
         return cls(
-            body.get("mainComment"),
+            CommentMessage.parse_optional(body.get("mainCommentMessage")),
             InlineComment.parse_many(body["inlineComments"]),
             body["transactionLink"],
             body.get("landoLink"),
@@ -240,7 +241,7 @@ class RevisionAccepted:
 @dataclass
 class RevisionCommented:
     KIND = "revision-commented"
-    main_comment: Optional[str]
+    main_comment_message: Optional[CommentMessage]
     inline_comments: List[InlineComment]
     transaction_link: str
     author: Optional[Recipient]
@@ -249,7 +250,7 @@ class RevisionCommented:
     @classmethod
     def parse(cls, body: Dict):
         return cls(
-            body.get("mainComment"),
+            CommentMessage.parse_optional(body.get("mainCommentMessage")),
             InlineComment.parse_many(body["inlineComments"]),
             body["transactionLink"],
             Recipient.parse_optional(body.get("author")),
@@ -260,7 +261,7 @@ class RevisionCommented:
 @dataclass
 class RevisionLanded:
     KIND = "revision-landed"
-    main_comment: Optional[str]
+    main_comment_message: Optional[CommentMessage]
     inline_comments: List[InlineComment]
     transaction_link: str
     author: Optional[Recipient]
@@ -269,7 +270,7 @@ class RevisionLanded:
     @classmethod
     def parse(cls, body: Dict):
         return cls(
-            body.get("mainComment"),
+            CommentMessage.parse_optional(body.get("mainCommentMessage")),
             InlineComment.parse_many(body["inlineComments"]),
             body["transactionLink"],
             Recipient.parse_optional(body.get("author")),
@@ -281,7 +282,7 @@ class RevisionLanded:
 class RevisionCommentPinged:
     KIND = "revision-comment-pinged"
     recipient: Recipient
-    pinged_main_comment: Optional[str]
+    pinged_main_comment_message: Optional[CommentMessage]
     pinged_inline_comments: List[InlineComment]
     transaction_link: str
 
@@ -289,7 +290,7 @@ class RevisionCommentPinged:
     def parse(cls, body: Dict):
         return cls(
             Recipient.parse(body["recipient"]),
-            body.get("pingedMainComment"),
+            CommentMessage.parse_optional(body.get("pingedMainCommentMessage")),
             InlineComment.parse_many(body["pingedInlineComments"]),
             body["transactionLink"],
         )
@@ -298,7 +299,7 @@ class RevisionCommentPinged:
 @dataclass
 class RevisionRequestedChanges:
     KIND = "revision-requested-changes"
-    main_comment: Optional[str]
+    main_comment_message: Optional[CommentMessage]
     inline_comments: List[InlineComment]
     transaction_link: str
     author: Optional[Recipient]
@@ -307,7 +308,7 @@ class RevisionRequestedChanges:
     @classmethod
     def parse(cls, body: Dict):
         return cls(
-            body.get("mainComment"),
+            CommentMessage.parse_optional(body.get("mainCommentMessage")),
             InlineComment.parse_many(body["inlineComments"]),
             body["transactionLink"],
             Recipient.parse_optional(body.get("author")),
@@ -318,7 +319,7 @@ class RevisionRequestedChanges:
 @dataclass
 class RevisionRequestedReview:
     KIND = "revision-requested-review"
-    main_comment: Optional[str]
+    main_comment_message: Optional[CommentMessage]
     inline_comments: List[InlineComment]
     transaction_link: str
     reviewers: List[Reviewer]
@@ -326,7 +327,7 @@ class RevisionRequestedReview:
     @classmethod
     def parse(cls, body: Dict):
         return cls(
-            body.get("mainComment"),
+            CommentMessage.parse_optional(body.get("mainCommentMessage")),
             InlineComment.parse_many(body["inlineComments"]),
             body["transactionLink"],
             Reviewer.parse_many(body["reviewers"]),

@@ -82,7 +82,10 @@ def test_integration_pipeline():
                                     "isActor": False,
                                 }
                             ],
-                            "mainComment": "Main comment",
+                            "mainCommentMessage": {
+                                "asText": "Main comment",
+                                "asHtml": "<p>Main comment</p>",
+                            },
                             "inlineComments": [
                                 {
                                     "contextKind": "code",
@@ -97,7 +100,10 @@ def test_integration_pipeline():
                                     },
                                     "fileContext": "/README:20",
                                     "link": "link",
-                                    "text": "great content here.",
+                                    "message": {
+                                        "asText": "great content here.",
+                                        "asHtml": "<em>great content here.</em>",
+                                    },
                                 }
                             ],
                             "transactionLink": "link",

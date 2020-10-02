@@ -58,9 +58,9 @@
     {% endif %}
 {% endmacro %}
 
-{% macro main_comment(main_comment) %}
-    <blockquote class="main-comment comment" aria-level="1">
-        {{ main_comment }}
+{% macro main_comment(message) %}
+    <blockquote class="main-comment comment message" aria-level="1">
+        {{ message.as_html | safe }}
     </blockquote>
 {% endmacro %}
 
@@ -89,12 +89,12 @@
                         <span class="author">{{ comment.context.other_author }}</span>
                         <span class="when">{{ comment.context.other_date_utc | date(recipient_timezone) }}:</span>
                     </div>
-                    <blockquote class="raw-previous-comment" aria-level="2">
-                        {{ comment.context.other_comment }}
+                    <blockquote class="raw-previous-comment message" aria-level="2">
+                        {{ comment.context.other_comment_message.as_html | safe }}
                     </blockquote>
                 </div>
-                <blockquote class="reply-comment" aria-level="1">
-                    {{ comment.text }}
+                <blockquote class="reply-comment message" aria-level="1">
+                    {{ comment.message.as_html | safe }}
                 </blockquote>
             </div>
         {% elif comment.context is code %}
@@ -111,8 +111,8 @@
                     {% endfor %}
                 </table>
             </div>
-            <blockquote class="comment" aria-level="1">
-                {{ comment.text }}
+            <blockquote class="comment message" aria-level="1">
+                {{ comment.message.as_html | safe }}
             </blockquote>
         {% endif %}
     </div>

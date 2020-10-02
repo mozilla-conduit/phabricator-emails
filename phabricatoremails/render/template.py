@@ -50,7 +50,7 @@ def _is_code(context):
 
 
 def _is_commented_on(event):
-    return event.main_comment or event.inline_comments
+    return event.main_comment_message or event.inline_comments
 
 
 def _is_commented_on_secure(event):
@@ -88,10 +88,10 @@ def _date(utc_value: datetime, receiver_timezone: timezone):
 
 
 def _comment_summary(body):
-    if not body.main_comment and not body.inline_comments:
+    if not body.main_comment_message and not body.inline_comments:
         return ""
-    elif (body.main_comment and not body.inline_comments) or (
-        not body.main_comment and len(body.inline_comments) == 1
+    elif (body.main_comment_message and not body.inline_comments) or (
+        not body.main_comment_message and len(body.inline_comments) == 1
     ):
         return " and submitted a comment"
     else:
@@ -153,8 +153,16 @@ def _diff_symbol(diff_type: DiffLineType):
 
 
 def _text_comment(comment: str):
-    # Email width is 80, use two characters for "> ". So, each line gets 78 characters
-    return "\n".join(["> " + line for line in textwrap.wrap(comment, 78)])
+    return "\n".join(
+        [
+            "> " + line
+            for raw_line in comment.strip().split("\n")
+            # Email width is 80, use two characters for "> ". So, each line gets 78
+            # characters. If line is empty, manually return [""] to preserve the empty
+            # line.
+            for line in (textwrap.wrap(raw_line, 78) if raw_line else [""])
+        ]
+    )
 
 
 def _text_reviewer_status(status: ReviewerStatus):
@@ -215,7 +223,6 @@ class TemplateStore:
             exclude_pseudoclasses=False,
             align_floating_images=False,
             disable_leftover_css=False,
-            disable_validation=True,
             remove_classes=not keep_css_classes,
             allow_network=False,
             strip_important=False,
