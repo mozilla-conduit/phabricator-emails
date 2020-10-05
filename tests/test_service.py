@@ -37,6 +37,7 @@ def test_integration_pipeline():
     source = MockSource(
         next_result={
             "data": {
+                "storyErrors": 0,
                 "events": [
                     {
                         "isSecure": True,
@@ -111,7 +112,7 @@ def test_integration_pipeline():
     mail = MockMail()
     render = Render(TemplateStore("", "", False))
     logger = logging.create_dev_logger()
-    pipeline = Pipeline(source, render, mail, logger, MockStats())
+    pipeline = Pipeline(source, render, mail, logger, MockStats(), False)
     with spy_on(mail.send), spy_on(source.fetch_next):
         new_position = pipeline.run(MockThreadStore(), 10)
         assert new_position == 20
@@ -143,7 +144,9 @@ def test_integration_pipeline():
 
 def test_pipeline_returns_same_position_if_fetch_fails():
     source = MockSource(fail_on_fetch_next=True)
-    pipeline = Pipeline(source, None, None, logging.create_dev_logger(), MockStats())
+    pipeline = Pipeline(
+        source, None, None, logging.create_dev_logger(), MockStats(), False
+    )
     assert pipeline.run(MockThreadStore(), 10) == 10
 
 
@@ -151,6 +154,7 @@ def test_pipeline_skips_events_that_fail_to_render():
     source = MockSource(
         next_result={
             "data": {
+                "storyErrors": 0,
                 "events": [
                     {
                         "isSecure": True,
@@ -183,7 +187,7 @@ def test_pipeline_skips_events_that_fail_to_render():
     mail = MockMail()
     render = Render(TemplateStore("", "", False))
     logger = logging.create_dev_logger()
-    pipeline = Pipeline(source, render, mail, logger, MockStats())
+    pipeline = Pipeline(source, render, mail, logger, MockStats(), False)
     with spy_on(mail.send):
         pipeline.run(MockThreadStore(), 10)
         assert len(mail.send.calls) == 1
@@ -192,9 +196,11 @@ def test_pipeline_skips_events_that_fail_to_render():
 def test_pipeline_updates_position_even_if_no_new_events():
     # Sometimes, a feed event may happen that isn't relevant to emails. Phabricator
     # will report a newer feed position while returning an empty event list.
-    source = MockSource(next_result={"data": {"events": []}, "cursor": {"after": 20}})
+    source = MockSource(
+        next_result={"data": {"events": [], "storyErrors": 0}, "cursor": {"after": 20}}
+    )
     logger = logging.create_dev_logger()
-    pipeline = Pipeline(source, None, MockMail(), logger, MockStats())
+    pipeline = Pipeline(source, None, MockMail(), logger, MockStats(), False)
     new_position = pipeline.run(MockThreadStore(), 10)
     assert new_position == 20
 

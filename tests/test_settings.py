@@ -28,22 +28,12 @@ def _config_parser(ini_contents: str):
 
 
 def test_parse_logger():
-    dev_config = _config_parser(
-        """
-    [dev]
-    """
-    )
     with mock.patch("phabricatoremails.settings.create_dev_logger") as create_fn:
-        _parse_logger(dev_config)
+        _parse_logger(True)
         create_fn.assert_called_once()
 
-    prod_config = _config_parser(
-        """
-    [phabricator]
-    """
-    )
     with mock.patch("phabricatoremails.settings.create_logger") as create_fn:
-        _parse_logger(prod_config)
+        _parse_logger(False)
         create_fn.assert_called_once()
 
 
