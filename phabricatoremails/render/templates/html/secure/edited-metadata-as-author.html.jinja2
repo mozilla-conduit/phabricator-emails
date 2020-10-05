@@ -1,0 +1,7 @@
+{% extends "secure/edited-metadata.base.html.jinja2" %}
+
+{% block preview %}
+    {% call macros.preview(false, unique_number) %}
+        {{ emoji("memo") | safe }} {{ actor_name }} edited revision metadata.
+    {% endcall %}
+{% endblock %}

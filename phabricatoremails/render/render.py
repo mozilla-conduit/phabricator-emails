@@ -53,7 +53,7 @@ def parse_body(kind: str, is_secure: bool, raw_body: Dict, batch: MailBatch):
         # There's no "insecure" variant for when metadata is edited
         body = RevisionMetadataEdited.parse(raw_body)
 
-        batch.target(body.author, "edited-metadata")
+        batch.target(body.author, "edited-metadata-as-author")
         for reviewer in body.reviewers:
             if reviewer.metadata_change == ExistenceChange.ADDED:
                 batch.target_many(
@@ -62,7 +62,11 @@ def parse_body(kind: str, is_secure: bool, raw_body: Dict, batch: MailBatch):
             elif reviewer.metadata_change == ExistenceChange.REMOVED:
                 batch.target_many(reviewer.recipients, "removed-as-reviewer")
             else:
-                batch.target_many(reviewer.recipients, "edited-metadata")
+                batch.target_many(
+                    reviewer.recipients,
+                    "edited-metadata-as-reviewer",
+                    reviewer=reviewer,
+                )
     elif kind == RevisionCommented.KIND:
         if is_secure:
             body = SecureRevisionCommented.parse(raw_body)
