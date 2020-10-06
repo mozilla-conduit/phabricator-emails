@@ -2,6 +2,12 @@
 
 {{- macros.secure_revision_info(revision) }}
 
-{{ actor_name }} reclaimed this revision {{- event | secure_comment_summary }}.
+{% if reviewer is accepted_reviewer %}
+{{- actor_name }} reclaimed this revision that you've accepted {{- event | secure_comment_summary }}.
+{%- else %}
+{{- actor_name }} reclaimed this revision {{- event | secure_comment_summary }}.
+{{- macros.reviewer_action(reviewer, revision) }}
+{%- endif %}
 
+{{- macros.reviewers_status(event.reviewers) }}
 {{- macros.footer(recipient_username) }}

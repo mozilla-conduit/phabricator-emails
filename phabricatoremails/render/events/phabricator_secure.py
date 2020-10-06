@@ -63,14 +63,14 @@ class SecureRevisionCreated:
 
 @dataclass
 class SecureRevisionReclaimed:
-    reviewers: List[Recipient]
+    reviewers: List[Reviewer]
     comment_count: int
     transaction_link: str
 
     @classmethod
     def parse(cls, body: Dict):
         return cls(
-            [Recipient.parse(reviewer) for reviewer in body["reviewers"]],
+            [Reviewer.parse(reviewer) for reviewer in body["reviewers"]],
             body["commentCount"],
             body["transactionLink"],
         )
