@@ -158,12 +158,20 @@ class Render:
             thread = thread_store.get_or_create(revision.id)
             thread.email_count += 1
             return batch.process_secure(
-                revision, actor_name, thread.email_count, timestamp, body,
+                revision,
+                actor_name,
+                thread.email_count,
+                timestamp,
+                body,
             )
         else:
             revision = Revision.parse(event["revision"])
             thread = thread_store.get_or_create(revision.id)
             thread.email_count += 1
             return batch.process(
-                revision, actor_name, thread.email_count, timestamp, body,
+                revision,
+                actor_name,
+                thread.email_count,
+                timestamp,
+                body,
             )

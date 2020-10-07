@@ -136,7 +136,10 @@ class SecureRevisionCommentPinged:
 
     @classmethod
     def parse(cls, body: Dict):
-        return cls(Recipient.parse(body["recipient"]), body["transactionLink"],)
+        return cls(
+            Recipient.parse(body["recipient"]),
+            body["transactionLink"],
+        )
 
 
 @dataclass
