@@ -16,6 +16,9 @@ jobs:
       # Use the python image, all we really care about is the preinstalled
       # tools in a circleci image.
       - image: circleci/python
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASS
     steps:
       - checkout
       - run:
@@ -45,6 +48,16 @@ jobs:
             mkdir /tmp/artifacts && cp version.json /tmp/artifacts/version.js
 
       - setup_remote_docker
+
+      - run:
+          run: Login to Dockerhub
+          command: |
+            if [ "${DOCKER_USER}" == "" ] || [ "${DOCKER_PASS}" == "" ]; then
+              echo "Skipping login to Dockerhub, credentials not available."
+            else
+              echo "${DOCKER_PASS}" | docker login -u="${DOCKER_USER}" --password-stdin
+            fi
+
       - run:
           name: Build the image
           command: |
@@ -62,7 +75,6 @@ jobs:
       - deploy:
           command: |
             if [[ "x$DOCKERHUB_REPO" != x ]]; then
-              docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
               docker tag "mozilla/phabricator-emails" "${DOCKERHUB_REPO}"
               docker tag "mozilla/phabricator-emails" "${DOCKERHUB_REPO}:${CIRCLE_SHA1}"
               docker push "${DOCKERHUB_REPO}:${CIRCLE_SHA1}"
