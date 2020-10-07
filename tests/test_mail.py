@@ -24,7 +24,9 @@ def test_smtp():
     mail = SmtpMail(smtp_server, "from@mail", logging.create_dev_logger(), None)
     mail.send([MOCK_EMAIL])
     smtp_server.sendmail.assert_called_with(
-        "from@mail", "to@mail", mock.ANY,
+        "from@mail",
+        "to@mail",
+        mock.ANY,
     )
     mime_message = smtp_server.sendmail.call_args.args[2]
     assert "phabricator subject" in mime_message

@@ -3,16 +3,16 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 alembic ~= 1.4
-black ~= 19.10b0
+black ~= 20.8b1
 boto3 ~= 1.12
-dockerflow ~= 2019.10
+dockerflow ~= 2020.10
 flake8 ~= 3.7
 jinja2 ~= 2.11
-kgb ~= 5.0
-mypy ~= 0.770
+kgb ~= 6.0
+mypy ~= 0.782
 premailer ~= 3.6
 psycopg2 ~= 2.8
-pytest ~= 5.4
+pytest ~= 6.1
 requests ~= 2.23
 sentry-sdk ~= 0.14
 sqlalchemy ~= 1.3

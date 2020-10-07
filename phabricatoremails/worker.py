@@ -75,7 +75,9 @@ class PhabricatorWorker:
         while not self._is_shutdown_requested:
             with db.session() as db_session:
                 is_caught_up = self._poll(
-                    QueryPositionStore(db_session), ThreadStore(db_session), pipeline,
+                    QueryPositionStore(db_session),
+                    ThreadStore(db_session),
+                    pipeline,
                 )
 
                 if is_caught_up and not self._is_shutdown_requested:

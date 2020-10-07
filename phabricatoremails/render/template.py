@@ -234,8 +234,7 @@ class TemplateStore:
         )
 
     def get(self, template_path: str) -> Template:
-        """Return html and text templates from the "templates" directory.
-        """
+        """Return html and text templates from the "templates" directory."""
 
         return Template(
             self._css_inline,
