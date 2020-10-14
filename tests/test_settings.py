@@ -44,7 +44,7 @@ def test_parse_file_pipeline():
     file=example.json
     """
     )
-    source, worker = _parse_pipeline(config, Any)
+    source, worker = _parse_pipeline(config, Any, True)
     assert isinstance(source, FileSource)
     assert isinstance(worker, RunOnceWorker)
 
@@ -60,7 +60,7 @@ def test_parse_run_once_pipeline():
     since_key=10
     """
     )
-    source, worker = _parse_pipeline(config, Any)
+    source, worker = _parse_pipeline(config, Any, True)
     assert isinstance(source, PhabricatorSource)
     assert isinstance(worker, RunOnceWorker)
 
@@ -77,7 +77,7 @@ def test_parse_production_pipeline():
     story_limit=10
     """
     )
-    source, worker = _parse_pipeline(config, Any)
+    source, worker = _parse_pipeline(config, Any, True)
     assert isinstance(source, PhabricatorSource)
     assert isinstance(worker, PhabricatorWorker)
 

@@ -41,7 +41,7 @@ def _parse_host(raw_host: str):
     return raw_host
 
 
-def _parse_pipeline(config: ConfigParser, logger: Logger):
+def _parse_pipeline(config: ConfigParser, logger: Logger, is_dev: bool):
     """Provides data-fetching implementations according to our configuration.
 
     To facilitate easier local development, we have a few different combinations of
@@ -65,7 +65,7 @@ def _parse_pipeline(config: ConfigParser, logger: Logger):
         return source, RunOnceWorker(int(override_since_key))
 
     poll_gap_seconds = int(config.get("phabricator", "poll_gap_seconds", fallback="60"))
-    return source, PhabricatorWorker(logger, poll_gap_seconds)
+    return source, PhabricatorWorker(logger, poll_gap_seconds, is_dev)
 
 
 def _parse_mail(config: ConfigParser, logger: Logger):
@@ -114,7 +114,7 @@ class Settings:
     def __init__(self, config: ConfigParser):
         is_dev = config.has_section("dev")
         logger = _parse_logger(is_dev)
-        source, worker = _parse_pipeline(config, logger)
+        source, worker = _parse_pipeline(config, logger, is_dev)
         self.source = source
         self.worker = worker
         self.bugzilla_host = _parse_host(config.get("bugzilla", "host"))
