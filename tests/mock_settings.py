@@ -15,8 +15,9 @@ class MockSettings:
         phabricator_host=None,
         sentry_dsn="",
         db_url="",
+        is_dev=False,
         db=None,
-        mail=None
+        mail=None,
     ):
         self.logger = logging.getLogger()
         self.source = source
@@ -25,6 +26,7 @@ class MockSettings:
         self.phabricator_host = phabricator_host
         self.sentry_dsn = sentry_dsn
         self.db_url = db_url
+        self.is_dev = is_dev
         self._db = db
         self._mail = mail
 

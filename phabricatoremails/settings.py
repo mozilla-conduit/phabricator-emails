@@ -22,14 +22,14 @@ from sqlalchemy import create_engine
 SETTINGS_PATH_ENV_KEY = "PHABRICATOR_EMAILS_SETTINGS_PATH"
 
 
-def _parse_logger(config: ConfigParser):
+def _parse_logger(is_dev: bool):
     """Provides a logger set up according to our configuration.
 
     The regular logger is noisy and implements the MozLog JSON format, so we also
     have a "dev" logger that simply prints out each log without any annotations.
     The correct logger is chosen based on the provided configuration file.
     """
-    if config.has_section("dev"):
+    if is_dev:
         return create_dev_logger()
     else:
         return create_logger()
@@ -108,10 +108,12 @@ class Settings:
     logger: Logger
     sentry_dsn: str
     db_url: str
+    is_dev: bool
     _config: ConfigParser
 
     def __init__(self, config: ConfigParser):
-        logger = _parse_logger(config)
+        is_dev = config.has_section("dev")
+        logger = _parse_logger(is_dev)
         source, worker = _parse_pipeline(config, logger)
         self.source = source
         self.worker = worker
@@ -120,6 +122,7 @@ class Settings:
         self.logger = logger
         self.sentry_dsn = config.get("sentry", "dsn", fallback="")
         self.db_url = config.get("db", "url")
+        self.is_dev = is_dev
         self._config = config
 
     def db(self):

@@ -32,6 +32,7 @@ class Pipeline:
     _mail: Any
     _logger: Any
     _stats: StatsClient
+    _is_dev: bool
 
     def run(self, thread_store: ThreadStore, from_key: int):
         """Query Phabricator feed and send email, returning new feed position."""
@@ -46,6 +47,14 @@ class Pipeline:
             )
             self._stats.incr(STAT_FAILED_TO_REQUEST_FROM_PHABRICATOR)
             return from_key
+
+        story_error_count = result["data"]["storyErrors"]
+        if self._is_dev and story_error_count:
+            self._logger.error(
+                "Server encountered {} errors while creating email events".format(
+                    story_error_count
+                )
+            )
 
         emails = []
         for event in result["data"]["events"]:
@@ -98,5 +107,5 @@ def service(settings: Settings, stats: StatsClient):
     )
 
     render = Render(template_store)
-    pipeline = Pipeline(source, render, mail, logger, stats)
+    pipeline = Pipeline(source, render, mail, logger, stats, settings.is_dev)
     worker.process(db, pipeline.run)
