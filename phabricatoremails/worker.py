@@ -29,12 +29,14 @@ class PhabricatorWorker:
 
     _logger: Logger
     _poll_gap_seconds: int
+    _is_dev: bool
     _is_shutdown_requested: bool
     _is_sleeping: bool
 
-    def __init__(self, logger: Logger, poll_gap_seconds: int):
+    def __init__(self, logger: Logger, poll_gap_seconds: int, is_dev: bool):
         self._logger = logger
         self._poll_gap_seconds = poll_gap_seconds
+        self._is_dev = is_dev
         self._is_shutdown_requested = False
         self._is_sleeping = False
 
@@ -81,10 +83,11 @@ class PhabricatorWorker:
                 )
 
                 if is_caught_up and not self._is_shutdown_requested:
-                    self._logger.debug(
-                        f"Caught up with feed, sleeping for "
-                        f"{self._poll_gap_seconds} seconds..."
-                    )
+                    if self._is_dev:
+                        self._logger.debug(
+                            f"Caught up with feed, sleeping for "
+                            f"{self._poll_gap_seconds} seconds..."
+                        )
 
                     self._is_sleeping = True
                     try:

@@ -16,7 +16,7 @@ def test_poll_caught_up():
     def pipeline(*unused):
         return 10
 
-    worker = PhabricatorWorker(create_dev_logger(), 60)
+    worker = PhabricatorWorker(create_dev_logger(), 60, False)
     caught_up = worker._poll(
         MockQueryPositionStore(position=position), MockThreadStore(), pipeline
     )
@@ -30,7 +30,7 @@ def test_poll_fresh_events():
     def pipeline(*unused):
         return 20
 
-    worker = PhabricatorWorker(create_dev_logger(), 60)
+    worker = PhabricatorWorker(create_dev_logger(), 60, False)
     caught_up = worker._poll(
         MockQueryPositionStore(position=position), MockThreadStore(), pipeline
     )
