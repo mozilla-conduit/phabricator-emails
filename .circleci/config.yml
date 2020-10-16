@@ -15,7 +15,7 @@ jobs:
     docker:
       # Use the python image, all we really care about is the preinstalled
       # tools in a circleci image.
-      - image: circleci/python
+      - image: circleci/python:3.8
     steps:
       - checkout
       - run:

@@ -102,7 +102,12 @@ class InlineComment:
         else:
             raise ParseError("Comment context was not code or a reply")
 
-        return cls(inline["fileContext"], inline["link"], inline["text"], context,)
+        return cls(
+            inline["fileContext"],
+            inline["link"],
+            inline["text"],
+            context,
+        )
 
     @classmethod
     def parse_many(cls, inlines: List[Dict]):
