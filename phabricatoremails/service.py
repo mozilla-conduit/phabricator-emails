@@ -2,7 +2,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-from dataclasses import dataclass
 from typing import Any
 
 from phabricatoremails import PACKAGE_DIRECTORY
@@ -21,7 +20,6 @@ from phabricatoremails.thread_store import ThreadStore
 from statsd import StatsClient
 
 
-@dataclass
 class Pipeline:
     """Fetch events from Phabricator and emails accordingly."""
 
@@ -32,6 +30,17 @@ class Pipeline:
     _stats: StatsClient
     _error_notify: Any
     _is_dev: bool
+
+    def __init__(
+        self, source: Any, render: Any, stats: StatsClient, settings: Settings
+    ):
+        self._source = source
+        self._render = render
+        self._mail = settings.mail()
+        self._logger = settings.logger
+        self._stats = stats
+        self._error_notify = settings.error_notify
+        self._is_dev = settings.is_dev
 
     def run(self, thread_store: ThreadStore, from_key: int):
         """Query Phabricator feed and send email, returning new feed position."""
@@ -84,7 +93,6 @@ def service(settings: Settings, stats: StatsClient):
 
     source = settings.source
     worker = settings.worker
-    logger = settings.logger
     db = settings.db()
     mail = settings.mail()
 
@@ -105,7 +113,5 @@ def service(settings: Settings, stats: StatsClient):
     )
 
     render = Render(template_store)
-    pipeline = Pipeline(
-        source, render, mail, logger, stats, settings.error_notify, settings.is_dev
-    )
+    pipeline = Pipeline(source, render, stats, settings)
     worker.process(db, pipeline.run)

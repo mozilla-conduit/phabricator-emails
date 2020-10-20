@@ -15,6 +15,11 @@ class ErrorNotify:
     _stats: StatsClient
 
     def notify(self, exception: Exception, warning: str, failure_stat: str):
+        """Report the exception to local logging and remote error tracking.
+
+        Logs the exception, logs the custom message, sends the exception to Sentry and
+        increments the specified error statistic.
+        """
         formatted_exception = traceback.format_exception(
             type(exception), exception, exception.__traceback__
         )

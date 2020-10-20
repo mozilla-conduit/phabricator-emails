@@ -1,8 +1,7 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-import logging
+from phabricatoremails import logging
 
 
 class MockSettings:
@@ -20,7 +19,7 @@ class MockSettings:
         db=None,
         mail=None,
     ):
-        self.logger = logging.getLogger()
+        self.logger = logging.create_dev_logger()
         self.source = source
         self.worker = worker
         self.bugzilla_host = bugzilla_host

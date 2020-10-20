@@ -110,11 +110,13 @@ def test_integration_pipeline():
             "cursor": {"after": 20},
         }
     )
-    mail = MockMail()
     render = Render(TemplateStore("", "", False))
-    logger = logging.create_dev_logger()
+    mail = MockMail()
     pipeline = Pipeline(
-        source, render, mail, logger, MockStats(), MockErrorNotify(), False
+        source,
+        render,
+        MockStats(),
+        MockSettings(mail=mail),
     )
     with spy_on(mail.send), spy_on(source.fetch_next):
         new_position = pipeline.run(MockThreadStore(), 10)
@@ -151,10 +153,7 @@ def test_pipeline_returns_same_position_if_fetch_fails():
         source,
         None,
         None,
-        logging.create_dev_logger(),
-        MockStats(),
-        MockErrorNotify(),
-        False,
+        MockSettings(error_notify=MockErrorNotify()),
     )
     assert pipeline.run(MockThreadStore(), 10) == 10
 
@@ -195,9 +194,11 @@ def test_pipeline_skips_events_that_fail_to_render():
     )
     mail = MockMail()
     render = Render(TemplateStore("", "", False))
-    logger = logging.create_dev_logger()
     pipeline = Pipeline(
-        source, render, mail, logger, MockStats(), MockErrorNotify(), False
+        source,
+        render,
+        MockStats(),
+        MockSettings(mail=mail, error_notify=MockErrorNotify()),
     )
     with spy_on(mail.send):
         pipeline.run(MockThreadStore(), 10)
@@ -210,9 +211,11 @@ def test_pipeline_updates_position_even_if_no_new_events():
     source = MockSource(
         next_result={"data": {"events": [], "storyErrors": 0}, "cursor": {"after": 20}}
     )
-    logger = logging.create_dev_logger()
     pipeline = Pipeline(
-        source, None, MockMail(), logger, MockStats(), MockErrorNotify(), False
+        source,
+        None,
+        MockStats(),
+        MockSettings(mail=MockMail()),
     )
     new_position = pipeline.run(MockThreadStore(), 10)
     assert new_position == 20
