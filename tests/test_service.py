@@ -13,6 +13,7 @@ from phabricatoremails.render.render import Render
 from phabricatoremails.render.template import TemplateStore
 from phabricatoremails.service import Pipeline, service
 from tests.mock_db import MockDB
+from tests.mock_error_notify import MockErrorNotify
 from tests.mock_mail import MockMail
 from tests.mock_settings import MockStats, MockSettings
 from tests.mock_source import MockSource
@@ -112,7 +113,9 @@ def test_integration_pipeline():
     mail = MockMail()
     render = Render(TemplateStore("", "", False))
     logger = logging.create_dev_logger()
-    pipeline = Pipeline(source, render, mail, logger, MockStats(), False)
+    pipeline = Pipeline(
+        source, render, mail, logger, MockStats(), MockErrorNotify(), False
+    )
     with spy_on(mail.send), spy_on(source.fetch_next):
         new_position = pipeline.run(MockThreadStore(), 10)
         assert new_position == 20
@@ -145,7 +148,13 @@ def test_integration_pipeline():
 def test_pipeline_returns_same_position_if_fetch_fails():
     source = MockSource(fail_on_fetch_next=True)
     pipeline = Pipeline(
-        source, None, None, logging.create_dev_logger(), MockStats(), False
+        source,
+        None,
+        None,
+        logging.create_dev_logger(),
+        MockStats(),
+        MockErrorNotify(),
+        False,
     )
     assert pipeline.run(MockThreadStore(), 10) == 10
 
@@ -187,7 +196,9 @@ def test_pipeline_skips_events_that_fail_to_render():
     mail = MockMail()
     render = Render(TemplateStore("", "", False))
     logger = logging.create_dev_logger()
-    pipeline = Pipeline(source, render, mail, logger, MockStats(), False)
+    pipeline = Pipeline(
+        source, render, mail, logger, MockStats(), MockErrorNotify(), False
+    )
     with spy_on(mail.send):
         pipeline.run(MockThreadStore(), 10)
         assert len(mail.send.calls) == 1
@@ -200,7 +211,9 @@ def test_pipeline_updates_position_even_if_no_new_events():
         next_result={"data": {"events": [], "storyErrors": 0}, "cursor": {"after": 20}}
     )
     logger = logging.create_dev_logger()
-    pipeline = Pipeline(source, None, MockMail(), logger, MockStats(), False)
+    pipeline = Pipeline(
+        source, None, MockMail(), logger, MockStats(), MockErrorNotify(), False
+    )
     new_position = pipeline.run(MockThreadStore(), 10)
     assert new_position == 20
 

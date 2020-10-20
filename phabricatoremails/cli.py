@@ -33,12 +33,13 @@ def parse_command():
 
 def cli():
     args = parse_command()
-    settings = Settings.load(os.environ.get(SETTINGS_PATH_ENV_KEY))
+    stats = StatsClient()
+    settings = Settings.load(stats, os.environ.get(SETTINGS_PATH_ENV_KEY))
     if settings.sentry_dsn:
         sentry_sdk.init(settings.sentry_dsn)
 
     parameters = [settings]
     if args.func == service:
-        parameters.append(StatsClient())
+        parameters.append(stats)
 
     args.func(*parameters)

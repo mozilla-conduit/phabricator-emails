@@ -2,14 +2,12 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import traceback
 from dataclasses import dataclass
 from typing import Any
 
-import sentry_sdk
 from phabricatoremails import PACKAGE_DIRECTORY
 from phabricatoremails.constants import (
-    STAT_FAILED_TO_SEND_MAIL,
+    STAT_PROCESSED_MAIL,
     STAT_FAILED_TO_RENDER_EVENT,
     STAT_FAILED_TO_REQUEST_FROM_PHABRICATOR,
 )
@@ -32,6 +30,7 @@ class Pipeline:
     _mail: Any
     _logger: Any
     _stats: StatsClient
+    _error_notify: Any
     _is_dev: bool
 
     def run(self, thread_store: ThreadStore, from_key: int):
@@ -40,12 +39,12 @@ class Pipeline:
         try:
             result = self._source.fetch_next(from_key)
         except PhabricatorException as e:
-            self._logger.warning(e)
-            self._logger.warning(
+            self._error_notify.notify(
+                e,
                 "Failed to fetch data from Phabricator. Ignoring the error,"
-                "will retry after the polling delay."
+                "will retry after the polling delay.",
+                STAT_FAILED_TO_REQUEST_FROM_PHABRICATOR,
             )
-            self._stats.incr(STAT_FAILED_TO_REQUEST_FROM_PHABRICATOR)
             return from_key
 
         story_error_count = result["data"]["storyErrors"]
@@ -61,16 +60,15 @@ class Pipeline:
             try:
                 emails += self._render.process_event_to_emails(event, thread_store)
             except Exception as e:
-                self._logger.warning(traceback.format_exc())
-                self._logger.warning(
-                    "Failed to send emails for a Phabricator event, "
-                    "skipping the event and continuing."
+                self._error_notify.notify(
+                    e,
+                    "Failed to render emails for a Phabricator event, "
+                    "skipping the event and continuing.",
+                    STAT_FAILED_TO_RENDER_EVENT,
                 )
-                sentry_sdk.capture_exception(e)
-                self._stats.incr(STAT_FAILED_TO_RENDER_EVENT)
 
         self._mail.send(emails)
-        self._stats.incr(STAT_FAILED_TO_SEND_MAIL, count=len(emails))
+        self._stats.incr(STAT_PROCESSED_MAIL, count=len(emails))
         return int(result["cursor"]["after"])
 
 
@@ -107,5 +105,7 @@ def service(settings: Settings, stats: StatsClient):
     )
 
     render = Render(template_store)
-    pipeline = Pipeline(source, render, mail, logger, stats, settings.is_dev)
+    pipeline = Pipeline(
+        source, render, mail, logger, stats, settings.error_notify, settings.is_dev
+    )
     worker.process(db, pipeline.run)

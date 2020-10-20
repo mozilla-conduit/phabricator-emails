@@ -18,6 +18,8 @@ from phabricatoremails.settings import (
 )
 from phabricatoremails.source import FileSource, PhabricatorSource
 from phabricatoremails.worker import RunOnceWorker, PhabricatorWorker
+from tests.mock_error_notify import MockErrorNotify
+from tests.mock_settings import MockStats
 
 
 def _config_parser(ini_contents: str):
@@ -94,7 +96,7 @@ def test_parse_ses_mail(mock_boto3_client):
     [email-ses]
     """
     )
-    mail = _parse_mail(config, Any)
+    mail = _parse_mail(config, Any, MockErrorNotify())
     assert isinstance(mail, SesMail)
 
 
@@ -111,7 +113,7 @@ def test_parse_smtp_mail(mock_smtp):
     host=smtp-host
     """
     )
-    mail = _parse_mail(config, Any)
+    mail = _parse_mail(config, Any, MockErrorNotify())
     assert isinstance(mail, SmtpMail)
 
 
@@ -125,7 +127,7 @@ def test_parse_fs_mail(tmp_path):
     "output_path={tmp_path}
     """
     )
-    mail = _parse_mail(config, Any)
+    mail = _parse_mail(config, Any, MockErrorNotify())
     assert isinstance(mail, FsMail)
 
 
@@ -145,7 +147,7 @@ def test_settings():
     url=postgres://db
     """
     )
-    settings = Settings(config)
+    settings = Settings(config, MockStats())
     assert settings.phabricator_host == "phabricator.host"
     assert settings.bugzilla_host == "bugzilla.host"
 
@@ -158,4 +160,4 @@ def test_settings_missing_property_throws_error():
         """
     )
     with pytest.raises(configparser.Error):
-        Settings(config)
+        Settings(config, MockStats())

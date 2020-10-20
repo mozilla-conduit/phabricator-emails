@@ -12,12 +12,13 @@ from typing import Any
 
 from phabricatoremails import PACKAGE_DIRECTORY
 from phabricatoremails.db import DB
+from phabricatoremails.error_notify import ErrorNotify
 from phabricatoremails.logging import create_dev_logger, create_logger
 from phabricatoremails.mail import SesMail, SmtpMail, FsMail
 from phabricatoremails.worker import RunOnceWorker, PhabricatorWorker
 from phabricatoremails.source import FileSource, PhabricatorSource
 from sqlalchemy import create_engine
-
+from statsd import StatsClient
 
 SETTINGS_PATH_ENV_KEY = "PHABRICATOR_EMAILS_SETTINGS_PATH"
 
@@ -68,7 +69,7 @@ def _parse_pipeline(config: ConfigParser, logger: Logger, is_dev: bool):
     return source, PhabricatorWorker(logger, poll_gap_seconds, is_dev)
 
 
-def _parse_mail(config: ConfigParser, logger: Logger):
+def _parse_mail(config: ConfigParser, logger: Logger, error_notify: Any):
     from_address = config.get("email", "from_address")
     implementation = config.get("email", "implementation")
 
@@ -79,14 +80,19 @@ def _parse_mail(config: ConfigParser, logger: Logger):
             "email-ses", "aws_secret_access_key", fallback=None
         )
         return SesMail.from_aws_credentials(
-            from_address, logger, send_to, aws_access_key_id, aws_secret_access_key
+            from_address,
+            logger,
+            error_notify,
+            send_to,
+            aws_access_key_id,
+            aws_secret_access_key,
         )
 
     if implementation == "smtp":
         host = config.get("email-smtp", "host")
         send_to = config.get("email-smtp", "send_to", fallback=None)
         mail_server = smtplib.SMTP(host, timeout=1)
-        return SmtpMail(mail_server, from_address, logger, send_to)
+        return SmtpMail(mail_server, from_address, logger, error_notify, send_to)
 
     if implementation == "fs":
         output = config.get("email-fs", "output_path", fallback="output")
@@ -106,12 +112,13 @@ class Settings:
     bugzilla_host: str
     phabricator_host: str
     logger: Logger
+    error_notify: Any
     sentry_dsn: str
     db_url: str
     is_dev: bool
     _config: ConfigParser
 
-    def __init__(self, config: ConfigParser):
+    def __init__(self, config: ConfigParser, stats: StatsClient):
         is_dev = config.has_section("dev")
         logger = _parse_logger(is_dev)
         source, worker = _parse_pipeline(config, logger, is_dev)
@@ -120,6 +127,7 @@ class Settings:
         self.bugzilla_host = _parse_host(config.get("bugzilla", "host"))
         self.phabricator_host = _parse_host(config.get("phabricator", "host"))
         self.logger = logger
+        self.error_notify = ErrorNotify(self.logger, stats)
         self.sentry_dsn = config.get("sentry", "dsn", fallback="")
         self.db_url = config.get("db", "url")
         self.is_dev = is_dev
@@ -129,10 +137,10 @@ class Settings:
         return DB(create_engine(self.db_url))
 
     def mail(self):
-        return _parse_mail(self._config, self.logger)
+        return _parse_mail(self._config, self.logger, self.error_notify)
 
     @classmethod
-    def load(cls, settings_path=None):
+    def load(cls, stats: StatsClient, settings_path=None):
         """Load and parse settings from a settings.ini.
 
         Looks in the package directory by default, but will use a custom path if
@@ -147,4 +155,4 @@ class Settings:
         if not config.read(str(path)):
             raise Exception(f'No config file found at "{path}"')
 
-        return cls(config)
+        return cls(config, stats)

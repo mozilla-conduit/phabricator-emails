@@ -13,6 +13,7 @@ from logging import Logger
 from typing import List, Optional, Any
 
 import boto3
+from phabricatoremails.constants import STAT_FAILED_TO_SEND_MAIL
 
 
 @dataclass
@@ -102,6 +103,7 @@ class SmtpMail:
     _server: smtplib.SMTP
     _from_address: str
     _logger: Logger
+    _error_notify: Any
     _send_to: Optional[str]
 
     def send(self, emails: List[OutgoingEmail]):
@@ -111,14 +113,22 @@ class SmtpMail:
                 f'[{email.to}] Sending "{email.template_path}" for "{email.subject}"'
             )
 
-            mime_message = email.to_mime_message(
-                self._from_address, include_target_in_subject=self._send_to is not None
-            )
-            self._server.sendmail(
-                self._from_address,
-                self._send_to if self._send_to else email.to,
-                mime_message.as_string(),
-            )
+            try:
+                mime_message = email.to_mime_message(
+                    self._from_address,
+                    include_target_in_subject=self._send_to is not None,
+                )
+                self._server.sendmail(
+                    self._from_address,
+                    self._send_to if self._send_to else email.to,
+                    mime_message.as_string(),
+                )
+            except Exception as e:
+                self._error_notify.notify(
+                    e,
+                    "Failed to send email, skipping and continuing.",
+                    STAT_FAILED_TO_SEND_MAIL,
+                )
 
 
 @dataclass
@@ -128,6 +138,7 @@ class SesMail:
     _client: Any
     _from_address: str
     _logger: Logger
+    _error_notify: Any
     _send_to: Optional[str]
 
     @classmethod
@@ -135,6 +146,7 @@ class SesMail:
         cls,
         from_address: str,
         logger: Logger,
+        error_notify: Any,
         send_to: Optional[str],
         aws_access_key_id: Optional[str] = None,
         aws_secret_access_key: Optional[str] = None,
@@ -153,7 +165,7 @@ class SesMail:
             aws_access_key_id=aws_access_key_id,
             aws_secret_access_key=aws_secret_access_key,
         )
-        return cls(client, from_address, logger, send_to)
+        return cls(client, from_address, logger, error_notify, send_to)
 
     def send(self, emails: List[OutgoingEmail]):
         """Send emails via SES with the send_raw_email API."""
@@ -163,16 +175,24 @@ class SesMail:
                 f'[{email.to}] Sending "{email.template_path}" for "{email.subject}"'
             )
 
-            destination = self._send_to if self._send_to else email.to
-            mime_message = email.to_mime_message(
-                self._from_address, include_target_in_subject=self._send_to is not None
-            )
+            try:
+                destination = self._send_to if self._send_to else email.to
+                mime_message = email.to_mime_message(
+                    self._from_address,
+                    include_target_in_subject=self._send_to is not None,
+                )
 
-            # send_raw_email() is used instead of send_email() because it provides
-            # greater flexibility, such as specifying the `Date` header (which isn't
-            # possible with `send_email()`).
-            self._client.send_raw_email(
-                RawMessage={"Data": mime_message.as_string()},
-                Source=self._from_address,
-                Destinations=[destination],
-            )
+                # send_raw_email() is used instead of send_email() because it provides
+                # greater flexibility, such as specifying the `Date` header (which isn't
+                # possible with `send_email()`).
+                self._client.send_raw_email(
+                    RawMessage={"Data": mime_message.as_string()},
+                    Source=self._from_address,
+                    Destinations=[destination],
+                )
+            except Exception as e:
+                self._error_notify.notify(
+                    e,
+                    "Failed to send email, skipping and continuing.",
+                    STAT_FAILED_TO_SEND_MAIL,
+                )
