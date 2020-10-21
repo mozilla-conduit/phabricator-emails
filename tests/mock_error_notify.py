@@ -4,5 +4,5 @@
 
 
 class MockErrorNotify:
-    def notify(self, exception: Exception, warning: str, failure_stat: str):
+    def notify(self, exception: Exception, failure_stat: str):
         pass

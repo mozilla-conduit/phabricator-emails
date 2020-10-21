@@ -127,7 +127,7 @@ class Settings:
         self.bugzilla_host = _parse_host(config.get("bugzilla", "host"))
         self.phabricator_host = _parse_host(config.get("phabricator", "host"))
         self.logger = logger
-        self.error_notify = ErrorNotify(self.logger, stats)
+        self.error_notify = ErrorNotify(stats)
         self.sentry_dsn = config.get("sentry", "dsn", fallback="")
         self.db_url = config.get("db", "url")
         self.is_dev = is_dev

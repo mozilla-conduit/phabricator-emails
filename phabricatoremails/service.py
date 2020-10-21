@@ -1,7 +1,6 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
 from typing import Any
 
 from phabricatoremails import PACKAGE_DIRECTORY
@@ -48,12 +47,12 @@ class Pipeline:
         try:
             result = self._source.fetch_next(from_key)
         except PhabricatorException as e:
-            self._error_notify.notify(
-                e,
-                "Failed to fetch data from Phabricator. Ignoring the error,"
-                "will retry after the polling delay.",
-                STAT_FAILED_TO_REQUEST_FROM_PHABRICATOR,
+            self._logger.warning(
+                "Failed to fetch data from Phabricator. Ignoring the error, "
+                "will retry after the polling delay:",
+                exc_info=e,
             )
+            self._error_notify.notify(e, STAT_FAILED_TO_REQUEST_FROM_PHABRICATOR)
             return from_key
 
         story_error_count = result["data"]["storyErrors"]
@@ -69,12 +68,12 @@ class Pipeline:
             try:
                 emails += self._render.process_event_to_emails(event, thread_store)
             except Exception as e:
-                self._error_notify.notify(
-                    e,
+                self._logger.warning(
                     "Failed to render emails for a Phabricator event, "
-                    "skipping the event and continuing.",
-                    STAT_FAILED_TO_RENDER_EVENT,
+                    "skipping the event and continuing:",
+                    exc_info=e,
                 )
+                self._error_notify.notify(e, STAT_FAILED_TO_RENDER_EVENT)
 
         self._mail.send(emails)
         self._stats.incr(STAT_PROCESSED_MAIL, count=len(emails))

@@ -6,6 +6,7 @@ import pathlib
 import smtplib
 from builtins import classmethod
 from dataclasses import dataclass
+from email.errors import MessageError
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formatdate
@@ -123,12 +124,18 @@ class SmtpMail:
                     self._send_to if self._send_to else email.to,
                     mime_message.as_string(),
                 )
-            except Exception as e:
-                self._error_notify.notify(
-                    e,
-                    "Failed to send email, skipping and continuing.",
-                    STAT_FAILED_TO_SEND_MAIL,
+            except MessageError as e:
+                self._logger.warning(
+                    "Failed to send email, skipping and continuing.", exc_info=e
                 )
+                self._error_notify.notify(e, STAT_FAILED_TO_SEND_MAIL)
+            except Exception as e:
+                self._logger.warning(
+                    "Failed to send email due to a general error, skipping and "
+                    "continuing.",
+                    exc_info=e,
+                )
+                self._error_notify.notify(e, STAT_FAILED_TO_SEND_MAIL)
 
 
 @dataclass
@@ -174,14 +181,27 @@ class SesMail:
             self._logger.debug(
                 f'[{email.to}] Sending "{email.template_path}" for "{email.subject}"'
             )
+            destination = self._send_to if self._send_to else email.to
 
             try:
-                destination = self._send_to if self._send_to else email.to
                 mime_message = email.to_mime_message(
                     self._from_address,
                     include_target_in_subject=self._send_to is not None,
                 )
+            except MessageError as e:
+                self._logger.warning(
+                    "Email could not be converted into a MIME message, skipping:", exc_info=e
+                )
+                self._error_notify.notify(e, STAT_FAILED_TO_SEND_MAIL)
+                continue
+            except Exception as e:
+                self._logger.warning(
+                    "Unexpected error when converting email into MIME message, skipping:", exc_info=e
+                )
+                self._error_notify.notify(e, STAT_FAILED_TO_SEND_MAIL)
+                continue
 
+            try:
                 # send_raw_email() is used instead of send_email() because it provides
                 # greater flexibility, such as specifying the `Date` header (which isn't
                 # possible with `send_email()`).
@@ -191,8 +211,9 @@ class SesMail:
                     Destinations=[destination],
                 )
             except Exception as e:
-                self._error_notify.notify(
-                    e,
-                    "Failed to send email, skipping and continuing.",
-                    STAT_FAILED_TO_SEND_MAIL,
+                self._logger.warning(
+                    "Failed to send email due to a general error, skipping and "
+                    "continuing.",
+                    exc_info=e,
                 )
+                self._error_notify.notify(e, STAT_FAILED_TO_SEND_MAIL)
