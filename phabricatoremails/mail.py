@@ -6,6 +6,7 @@ import pathlib
 import smtplib
 from builtins import classmethod
 from dataclasses import dataclass
+from email.errors import MessageError
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formatdate
@@ -111,9 +112,17 @@ class SmtpMail:
                 f'[{email.to}] Sending "{email.template_path}" for "{email.subject}"'
             )
 
-            mime_message = email.to_mime_message(
-                self._from_address, include_target_in_subject=self._send_to is not None
-            )
+            try:
+                mime_message = email.to_mime_message(
+                    self._from_address,
+                    include_target_in_subject=self._send_to is not None,
+                )
+            except MessageError as e:
+                self._logger.warning(
+                    "Email could not be written as MIME message, skipping:", exc_info=e
+                )
+                continue
+
             self._server.sendmail(
                 self._from_address,
                 self._send_to if self._send_to else email.to,
@@ -164,9 +173,16 @@ class SesMail:
             )
 
             destination = self._send_to if self._send_to else email.to
-            mime_message = email.to_mime_message(
-                self._from_address, include_target_in_subject=self._send_to is not None
-            )
+            try:
+                mime_message = email.to_mime_message(
+                    self._from_address,
+                    include_target_in_subject=self._send_to is not None,
+                )
+            except MessageError as e:
+                self._logger.warning(
+                    "Email could not be written as MIME message, skipping:", exc_info=e
+                )
+                continue
 
             # send_raw_email() is used instead of send_email() because it provides
             # greater flexibility, such as specifying the `Date` header (which isn't
