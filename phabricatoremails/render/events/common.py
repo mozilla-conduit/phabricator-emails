@@ -15,6 +15,23 @@ Additional information about this module can be found in __init__.py
 
 
 @dataclass
+class CommentMessage:
+    as_text: str
+    as_html: str
+
+    @classmethod
+    def parse(cls, message: Dict):
+        return cls(
+            message["asText"],
+            message["asHtml"],
+        )
+
+    @classmethod
+    def parse_optional(cls, message: Optional[Dict]):
+        return cls.parse(message) if message else None
+
+
+@dataclass
 class Recipient:
     email: str
     username: str

@@ -4,6 +4,6 @@
 
 {{ actor_name }} reclaimed this revision {{- event | comment_summary }}.
 
-{{- macros.main_comment(event.main_comment) }}
+{{- macros.main_comment(event.main_comment_message) }}
 {{- macros.inline_comments(event.inline_comments) }}
 {{- macros.footer(recipient_username) }}

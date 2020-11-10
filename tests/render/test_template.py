@@ -9,7 +9,12 @@ import jinja2
 import pytest
 from jinja2 import TemplateNotFound, DictLoader
 from phabricatoremails import PACKAGE_DIRECTORY
-from phabricatoremails.render.events.common import Recipient, Reviewer, ReviewerStatus
+from phabricatoremails.render.events.common import (
+    Recipient,
+    Reviewer,
+    ReviewerStatus,
+    CommentMessage,
+)
 from phabricatoremails.render.events.phabricator import (
     RevisionCommentPinged,
     Revision,
@@ -54,7 +59,7 @@ def test_integration_templates():
             "unique_number": 0,
             "event": RevisionCommentPinged(
                 Recipient("1@mail", "1", timezone.utc, False),
-                "you've been pinged",
+                CommentMessage("you've been pinged", "you've been pinged"),
                 [],
                 "link",
             ),

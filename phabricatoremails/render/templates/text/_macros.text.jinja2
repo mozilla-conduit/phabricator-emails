@@ -34,10 +34,10 @@ them on Bugzilla:
 https://bugzilla.mozilla.org/enter_bug.cgi?product=Conduit&component=Phabricator
 {%- endmacro %}
 
-{% macro main_comment(raw_comment) %}
-{%- if raw_comment %}
+{% macro main_comment(message) %}
+{%- if message %}
 
-{{ raw_comment | comment }}
+{{ message.as_text | comment }}
 {%- endif %}
 {%- endmacro %}
 
@@ -48,7 +48,7 @@ Inline comments:
 {%- for inline_comment in inline_comments %}
 
 {{ inline_comment.link }}
-{{ inline_comment.text | comment }}
+{{ inline_comment.message.as_text | comment }}
 {%- endfor %}
 {%- endif %}
 {%- endmacro %}

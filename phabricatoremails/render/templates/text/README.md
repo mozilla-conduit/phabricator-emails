@@ -55,7 +55,7 @@ For example, if writing a macro to handle outputting an optional comment, that b
 ```jinja2
 {% macro output_optional_comment(comment) %}
 
-{{ event.main_comment | comment }}
+{{ event.main_comment_message | comment }}
 {%- endmacro %}
 ```
 

@@ -8,7 +8,7 @@
     font-family: sans-serif;
 }
 
-.event-content > div, .event-content blockquote {
+.event-content > div, .event-content > blockquote {
     margin-top: 10px;
 }
 
@@ -288,7 +288,7 @@ blockquote {
     border-radius: 2px;
 }
 
-.inline-comment a[href] {
+.inline-comment > a[href] {
     display: block;
     border-bottom: 1px solid #d8d8d8;
     color: #464c5c;
@@ -315,8 +315,12 @@ blockquote {
 
 .previous-comment {
     color: #464c5c;
+}
+
+.previous-comment .context {
     border-left: 3px solid #a7b5bf;
     padding: 0 8px;
+    margin-bottom: 3px;
 }
 
 .previous-comment .author {
@@ -328,8 +332,84 @@ blockquote {
 }
 
 .previous-comment .raw-previous-comment {
-    margin: 0 0 8px;
-    padding-top: 4px;
+    overflow: auto;
+    padding: 4px 0 0 8px;
+    border-left: 3px solid #a7b5bf !important;
+    margin-bottom: 8px;
+}
+
+/*
+.message contains the generated HTML response from Phabricator.
+The elements within have Phabricator-defined classes.
+Most of the styles in here are copied from how Phabricator would style it's own emails,
+except with some adjustments to make them "fit better" with our custom style.
+ */
+
+.message p {
+    margin: 0;
+}
+
+.message blockquote {
+    border-left: 3px solid #a7b5bf !important;
+    padding: 8px 12px;
+    color: #545b6d;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    background-color: rgba(175, 175, 175, 0.1);
+}
+
+.message .remarkup-reply-head {
+    padding-bottom: 4px;
+}
+
+.message a.phui-tag-view.phui-tag-type-object {
+    color: black;
+    text-decoration: none;
+    background-color: #e7e7e7;
+    border-color: #e7e7e7;
+    border-radius: 3px;
+    font-weight: bold;
+    padding: 0 4px;
+}
+
+.message a.phui-tag-view.phui-tag-type-person {
+    color: #19558d;
+    background-color: #f1f7ff;
+    border: 1px solid #f1f7ff;
+    border-radius: 3px;
+    font-weight: bold;
+    padding: 0 4px;
+}
+
+.message .remarkup-monospaced, .message .remarkup-code {
+    background-color: rgba(71, 87, 120, 0.08);
+}
+
+.message .remarkup-code {
+    font-size: 11px;
+    line-height: 15px;
+    padding: 12px;
+}
+
+.message table {
+    border-collapse: separate;
+    border-spacing: 1px;
+    background: #bfcfda;
+    margin: 12px 0;
+    word-break: normal;
+    line-height: 1.7em;
+    color: inherit;
+}
+
+.message th {
+    font-weight: bold;
+    padding: 4px 6px;
+    background: #f8f9fc;
+}
+
+.message td {
+    background: #fff;
+    padding: 3px 6px;
 }
 
 .reply-comment {

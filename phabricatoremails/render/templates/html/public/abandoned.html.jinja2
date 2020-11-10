@@ -18,8 +18,8 @@
         {{ macros.comments_link(event.transaction_link) }}
     {% endif %}
 
-    {% if event.main_comment %}
-        {{ macros.main_comment(event.main_comment) }}
+    {% if event.main_comment_message %}
+        {{ macros.main_comment(event.main_comment_message) }}
     {% endif %}
 
     {% for comment in event.inline_comments %}
