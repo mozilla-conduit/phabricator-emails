@@ -2,20 +2,22 @@
 {{ macros.head() }}
 <div class="event-content">
 
-    {% call macros.preview(false, unique_number) %}
-        {{ emoji("memo") | safe }} {{ actor_name }} edited revision metadata.
-    {% endcall %}
+    {% block preview %}
+    {% endblock %}
 
-    {{ macros.secure_title(revision) }}
+    {{ macros.title(revision) }}
 
     <div class="summary">
         <span class="emoji">{{ emoji("memo") | safe }}</span>
         <span class="text"><span><span class="actor">{{ actor_name }}</span> edited revision metadata</span></span>
+        {% block reviewer_action %}
+        {% endblock %}
     </div>
+
     {{ macros.reviewers_with_changes(event.reviewers) }}
 
     {% if event.is_title_changed or event.is_bug_changed %}
-        {{ macros.secure_metadata_changes(event.is_title_changed, event.is_bug_changed, revision) }}
+        {{ macros.metadata_changes(event.is_title_changed, event.is_bug_changed, revision) }}
     {% endif %}
 
     {{ macros.footer(recipient_username, unique_number) }}
