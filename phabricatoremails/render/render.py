@@ -124,7 +124,9 @@ def parse_body(kind: str, is_secure: bool, raw_body: Dict, batch: MailBatch):
             body = SecureRevisionReclaimed.parse(raw_body)
         else:
             body = RevisionReclaimed.parse(raw_body)
-        batch.target_many(body.reviewers, "reclaimed")
+
+        for reviewer in body.reviewers:
+            batch.target_many(reviewer.recipients, "reclaimed", reviewer=reviewer)
     elif kind == RevisionCreated.KIND:
         if is_secure:
             body = SecureRevisionCreated.parse(raw_body)

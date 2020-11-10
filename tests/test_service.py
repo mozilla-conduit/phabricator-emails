@@ -47,16 +47,30 @@ def test_integration_pipeline():
                         "body": {
                             "reviewers": [
                                 {
-                                    "username": "2",
-                                    "email": "2@mail",
-                                    "timezoneOffset": 0,
-                                    "isActor": False,
+                                    "name": "2",
+                                    "isActionable": False,
+                                    "status": "accepted",
+                                    "recipients": [
+                                        {
+                                            "timezoneOffset": 0,
+                                            "username": "2",
+                                            "email": "2@mail",
+                                            "isActor": False,
+                                        }
+                                    ],
                                 },
                                 {
-                                    "username": "3",
-                                    "email": "3@mail",
-                                    "timezoneOffset": 0,
-                                    "isActor": False,
+                                    "name": "3",
+                                    "isActionable": True,
+                                    "status": "requested-changes",
+                                    "recipients": [
+                                        {
+                                            "timezoneOffset": 0,
+                                            "username": "3",
+                                            "email": "3@mail",
+                                            "isActor": False,
+                                        }
+                                    ],
                                 },
                             ],
                             "commentCount": 1,
@@ -132,7 +146,7 @@ def test_integration_pipeline():
         emails[0],
         "D1: (secure bug 1)",
         "2@mail",
-        "1 reclaimed this revision and submitted a comment.",
+        "1 reclaimed this revision that you've accepted and submitted a comment.",
     )
     _assert_mail(
         emails[1],

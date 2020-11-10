@@ -202,7 +202,7 @@ class RevisionReclaimed:
     main_comment_message: Optional[CommentMessage]
     inline_comments: List[InlineComment]
     transaction_link: str
-    reviewers: List[Recipient]
+    reviewers: List[Reviewer]
 
     @classmethod
     def parse(cls, body: Dict):
@@ -210,7 +210,7 @@ class RevisionReclaimed:
             CommentMessage.parse_optional(body.get("mainCommentMessage")),
             InlineComment.parse_many(body["inlineComments"]),
             body["transactionLink"],
-            [Recipient.parse(reviewer) for reviewer in body["reviewers"]],
+            [Reviewer.parse(reviewer) for reviewer in body["reviewers"]],
         )
 
 
