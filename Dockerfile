@@ -9,7 +9,7 @@ LABEL bug-component="https://bugzilla.mozilla.org/enter_bug.cgi?product=Conduit&
 
 RUN apt-get update && apt-get install -y \
     postgresql-client=11+200+deb10u4 \
-    libpq-dev=11.9-0+deb10u1 \
+    libpq-dev=11.11-0+deb10u1 \
     gcc=4:8.3.0-1
 
 RUN addgroup --gid 10001 app && adduser -q --gecos "" --disabled-password --uid 10001 --gid 10001 --home /app --shell /bin/sh app
