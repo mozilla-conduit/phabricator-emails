@@ -29,22 +29,18 @@ BODY = {
 }
 
 
-def _create_public_event(revision_id: int = 1):
+def _create_public_context(revision_id: int = 1):
     return {
-        "isSecure": False,
         "eventKind": RevisionUpdated.KIND,
-        "timestamp": 123,
         "actorName": "actor",
         "revision": {"revisionId": revision_id, "name": "revision", "link": "link"},
         "body": BODY,
     }
 
 
-def _create_secure_event(revision_id: int, bug_id: int):
+def _create_secure_context(revision_id: int, bug_id: int):
     return {
-        "isSecure": True,
         "eventKind": RevisionUpdated.KIND,
-        "timestamp": 123,
         "actorName": "actor",
         "revision": {
             "revisionId": revision_id,
@@ -56,10 +52,29 @@ def _create_secure_event(revision_id: int, bug_id: int):
     }
 
 
+def _create_minimal_context(revision_id: int):
+    return {
+        "revision": {
+            "revisionId": revision_id,
+            "link": "link",
+        },
+        "recipients": [
+            {
+                "email": "reviewer@mail",
+                "username": "reviewer",
+                "timezoneOffset": -25200,
+                "isActor": False,
+            }
+        ],
+    }
+
+
 def test_processes_events():
     render = Render(MockTemplateStore())
     thread_store = MockThreadStore()
-    emails = render.process_event_to_emails(_create_public_event(), thread_store)
+    emails = render.process_event_to_emails_with_full_context(
+        False, 123, _create_public_context(), thread_store
+    )
     assert len(emails) == 1
     email = emails[0]
     assert email.subject == "D1: revision"
@@ -70,10 +85,24 @@ def test_processes_events():
 def test_processes_secure_events():
     render = Render(MockTemplateStore())
     thread_store = MockThreadStore()
-    emails = render.process_event_to_emails(_create_secure_event(1, 2), thread_store)
+    emails = render.process_event_to_emails_with_full_context(
+        True, 123, _create_secure_context(1, 2), thread_store
+    )
     assert len(emails) == 1
     email = emails[0]
     assert email.subject == "D1: (secure bug 2)"
+    assert email.to == "reviewer@mail"
+
+
+def test_processes_minimal_events():
+    render = Render(MockTemplateStore())
+    thread_store = MockThreadStore()
+    emails = render.process_event_to_emails_with_minimal_context(
+        123, _create_minimal_context(1), thread_store
+    )
+    assert len(emails) == 1
+    email = emails[0]
+    assert email.subject == "D1"
     assert email.to == "reviewer@mail"
 
 
@@ -81,11 +110,17 @@ def test_unique_number_is_different_for_each_thread_email():
     template_store = MockTemplateStore()
     render = Render(template_store)
     thread_store = MockThreadStore()
-    render.process_event_to_emails(_create_public_event(1), thread_store)
+    render.process_event_to_emails_with_full_context(
+        False, 123, _create_public_context(1), thread_store
+    )
     assert template_store.last_template_params["unique_number"] == 1
 
-    render.process_event_to_emails(_create_public_event(1), thread_store)
+    render.process_event_to_emails_with_full_context(
+        False, 123, _create_public_context(1), thread_store
+    )
     assert template_store.last_template_params["unique_number"] == 2
 
-    render.process_event_to_emails(_create_public_event(2), thread_store)
+    render.process_event_to_emails_with_full_context(
+        False, 123, _create_public_context(2), thread_store
+    )
     assert template_store.last_template_params["unique_number"] == 1

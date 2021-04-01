@@ -45,6 +45,16 @@ class Revision:
 
 
 @dataclass
+class MinimalRevision:
+    id: int
+    link: str
+
+    @classmethod
+    def parse(cls, revision: dict):
+        return cls(revision["revisionId"], revision["link"])
+
+
+@dataclass
 class ReplyContext:
     other_author: str
     other_date_utc: datetime

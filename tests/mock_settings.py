@@ -16,6 +16,7 @@ class MockSettings:
         sentry_dsn="",
         db_url="",
         is_dev=False,
+        temporary_mail_error_retry_seconds=0,
         db=None,
         mail=None,
     ):
@@ -27,6 +28,7 @@ class MockSettings:
         self.sentry_dsn = sentry_dsn
         self.db_url = db_url
         self.is_dev = is_dev
+        self.temporary_mail_error_retry_seconds = temporary_mail_error_retry_seconds
         self._db = db
         self._mail = mail
 

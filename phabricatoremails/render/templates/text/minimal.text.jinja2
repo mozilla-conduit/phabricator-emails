@@ -1,0 +1,12 @@
+{% import '_macros.text.jinja2' as macros %}
+
+{{- revision.link }}
+
+An (unknown) action occurred.
+
+Due to an internal issue (it's been automatically reported!), we weren't
+able to fetch the details on the action that happened to this revision.
+You should view the revision on Phabricator to ensure that you're not
+missing anything important.
+
+{{- macros.footer(recipient_username) }}

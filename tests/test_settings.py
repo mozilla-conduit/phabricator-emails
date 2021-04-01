@@ -9,6 +9,8 @@ from typing import Any
 from unittest import mock
 
 import pytest
+
+from phabricatoremails import logging
 from phabricatoremails.mail import SesMail, SmtpMail, FsMail
 from phabricatoremails.settings import (
     _parse_logger,
@@ -125,7 +127,7 @@ def test_parse_fs_mail(tmp_path):
     "output_path={tmp_path}
     """
     )
-    mail = _parse_mail(config, Any)
+    mail = _parse_mail(config, logging.create_dev_logger())
     assert isinstance(mail, FsMail)
 
 

@@ -2,9 +2,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-from phabricatoremails.mail import OutgoingEmail
+from phabricatoremails.mail import SendEmailState, SendEmailResult
 
 
 class MockMail:
-    def send(self, emails: list[OutgoingEmail]):
-        pass
+    def send(self, _):
+        return SendEmailResult(SendEmailState.SUCCESS)

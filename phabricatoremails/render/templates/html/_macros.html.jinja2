@@ -50,6 +50,12 @@
     </div>
 {% endmacro %}
 
+{% macro minimal_title(revision) %}
+    <div class="title">
+        <a class="revision" href="{{ revision.link }}">D{{ revision.id }}</a>
+    </div>
+{% endmacro %}
+
 {% macro reviewer_action(reviewer, revision) %}
     {% if reviewer is soft_needed_reviewer %}
         <a href="{{ revision.link }}" class="actionable">{{ emoji("microscope") | safe }} A review is needed</a>
