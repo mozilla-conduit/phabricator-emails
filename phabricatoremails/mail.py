@@ -1,7 +1,7 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
+import enum
 import pathlib
 import smtplib
 from builtins import classmethod
@@ -9,10 +9,26 @@ from dataclasses import dataclass
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formatdate
+from enum import Enum
 from logging import Logger
 from typing import Optional, Any
 
 import boto3
+
+
+class SendEmailState(Enum):
+    SUCCESS = enum.auto()
+    TEMPORARY_FAILURE = enum.auto()
+    PERMANENT_FAILURE = enum.auto()
+
+
+@dataclass
+class SendEmailResult:
+    """Result from sending email."""
+
+    status: SendEmailState
+    reason_text: Optional[str] = None
+    exception: Optional[Exception] = None
 
 
 @dataclass
@@ -49,7 +65,7 @@ class FsMail:
 
     _logger: Logger
     _from_address: str
-    _index: int
+    _email_count: int
     _output_path: pathlib.Path
     _eml_path: pathlib.Path
     _html_path: pathlib.Path
@@ -58,7 +74,7 @@ class FsMail:
     def __init__(self, from_address: str, logger: Logger, output_path: pathlib.Path):
         self._logger = logger
         self._from_address = from_address
-        self._index = 0
+        self._email_count = 0
 
         self._output_path = output_path
         self._eml_path = output_path / "eml"
@@ -68,22 +84,21 @@ class FsMail:
         self._html_path.mkdir(parents=True, exist_ok=True)
         self._text_path.mkdir(parents=True, exist_ok=True)
 
-    def send(self, emails: list[OutgoingEmail]):
+        self._logger.debug(f'Recording emails to the "{self._output_path}" directory.')
+
+    def send(self, email: OutgoingEmail) -> SendEmailResult:
         """Write the provided emails to files."""
 
-        for email in emails:
-            basefilename = f"{self._index}-to-{email.to}"
-            with (self._eml_path / (basefilename + ".eml")).open("w") as file:
-                file.write(email.to_mime_message(self._from_address).as_string())
-            with (self._html_path / (basefilename + ".html")).open("w") as file:
-                file.write(email.html_contents)
-            with (self._text_path / (basefilename + ".text")).open("w") as file:
-                file.write(email.text_contents)
+        basefilename = f"{self._email_count}-to-{email.to}"
+        with (self._eml_path / (basefilename + ".eml")).open("w") as file:
+            file.write(email.to_mime_message(self._from_address).as_string())
+        with (self._html_path / (basefilename + ".html")).open("w") as file:
+            file.write(email.html_contents)
+        with (self._text_path / (basefilename + ".text")).open("w") as file:
+            file.write(email.text_contents)
 
-            self._index += 1
-        self._logger.debug(
-            f'Recorded {len(emails)} emails to the "{self._output_path}" directory'
-        )
+        self._email_count += 1
+        return SendEmailResult(SendEmailState.SUCCESS)
 
 
 @dataclass
@@ -104,21 +119,21 @@ class SmtpMail:
     _logger: Logger
     _send_to: Optional[str]
 
-    def send(self, emails: list[OutgoingEmail]):
+    def send(self, email: OutgoingEmail) -> SendEmailResult:
         """Send emails via SMTP."""
-        for email in emails:
-            self._logger.debug(
-                f'[{email.to}] Sending "{email.template_path}" for "{email.subject}"'
-            )
+        self._logger.debug(
+            f'[{email.to}] Sending "{email.template_path}" for "{email.subject}"'
+        )
 
-            mime_message = email.to_mime_message(
-                self._from_address, include_target_in_subject=self._send_to is not None
-            )
-            self._server.sendmail(
-                self._from_address,
-                self._send_to if self._send_to else email.to,
-                mime_message.as_string(),
-            )
+        mime_message = email.to_mime_message(
+            self._from_address, include_target_in_subject=self._send_to is not None
+        )
+        self._server.sendmail(
+            self._from_address,
+            self._send_to if self._send_to else email.to,
+            mime_message.as_string(),
+        )
+        return SendEmailResult(SendEmailState.SUCCESS)
 
 
 @dataclass
@@ -155,19 +170,21 @@ class SesMail:
         )
         return cls(client, from_address, logger, send_to)
 
-    def send(self, emails: list[OutgoingEmail]):
+    def send(self, email: OutgoingEmail) -> SendEmailResult:
         """Send emails via SES with the send_raw_email API."""
 
-        for email in emails:
-            self._logger.debug(
-                f'[{email.to}] Sending "{email.template_path}" for "{email.subject}"'
-            )
+        self._logger.debug(
+            f'[{email.to}] Sending "{email.template_path}" for "{email.subject}"'
+        )
 
-            destination = self._send_to if self._send_to else email.to
-            mime_message = email.to_mime_message(
-                self._from_address, include_target_in_subject=self._send_to is not None
-            )
+        destination = self._send_to if self._send_to else email.to
+        mime_message = email.to_mime_message(
+            self._from_address, include_target_in_subject=self._send_to is not None
+        )
 
+        import botocore.exceptions
+
+        try:
             # send_raw_email() is used instead of send_email() because it provides
             # greater flexibility, such as specifying the `Date` header (which isn't
             # possible with `send_email()`).
@@ -176,3 +193,30 @@ class SesMail:
                 Source=self._from_address,
                 Destinations=[destination],
             )
+        except (
+            botocore.exceptions.HTTPClientError,
+            botocore.exceptions.ConnectionError,
+        ) as error:
+            return SendEmailResult(
+                SendEmailState.TEMPORARY_FAILURE, type(error).__name__, error
+            )
+        except botocore.exceptions.ClientError as error:
+            # Potential error list fetched from
+            # https://docs.aws.amazon.com/ses/latest/APIReference/API_SendRawEmail.html#API_SendRawEmail_Errors  # noqa
+            error_code = error.response["Error"]["Code"]
+            if error_code in (
+                "AccountSendingPaused",
+                "ConfigurationSetDoesNotExist",
+                "ConfigurationSetSendingPaused",
+                "MailFromDomainNotVerified",
+            ):
+                return SendEmailResult(
+                    SendEmailState.TEMPORARY_FAILURE, error_code, error
+                )
+            else:
+                # If this is "MessageRejected" or some other unexpected Amazon error,
+                # then pass it upwards as a permanent error.
+                return SendEmailResult(
+                    SendEmailState.PERMANENT_FAILURE, error_code, error
+                )
+        return SendEmailResult(SendEmailState.SUCCESS)

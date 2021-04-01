@@ -6,8 +6,13 @@ from unittest import mock
 from unittest.mock import Mock
 
 from phabricatoremails import logging
-from phabricatoremails.mail import SmtpMail, OutgoingEmail, SesMail
-
+from phabricatoremails.mail import (
+    SmtpMail,
+    OutgoingEmail,
+    SesMail,
+    SendEmailResult,
+    SendEmailState,
+)
 
 MOCK_EMAIL = OutgoingEmail(
     "template",
@@ -22,7 +27,8 @@ MOCK_EMAIL = OutgoingEmail(
 def test_smtp():
     smtp_server = Mock()
     mail = SmtpMail(smtp_server, "from@mail", logging.create_dev_logger(), None)
-    mail.send([MOCK_EMAIL])
+    result = mail.send(MOCK_EMAIL)
+    assert result == SendEmailResult(SendEmailState.SUCCESS)
     smtp_server.sendmail.assert_called_with(
         "from@mail",
         "to@mail",
@@ -37,7 +43,8 @@ def test_smtp():
 def test_ses():
     client = Mock()
     mail = SesMail(client, "from@mail", logging.create_dev_logger(), None)
-    mail.send([MOCK_EMAIL])
+    result = mail.send(MOCK_EMAIL)
+    assert result == SendEmailResult(SendEmailState.SUCCESS)
     ses_kwargs = client.send_raw_email.call_args.kwargs
     assert ses_kwargs["Destinations"] == ["to@mail"]
     assert ses_kwargs["Source"] == "from@mail"

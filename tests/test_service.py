@@ -8,10 +8,15 @@ import pytest
 from kgb import spy_on
 from phabricatoremails import logging
 from phabricatoremails.db import DBNotInitializedError
-from phabricatoremails.mail import OutgoingEmail, FsMail
+from phabricatoremails.mail import (
+    OutgoingEmail,
+    FsMail,
+    SendEmailResult,
+    SendEmailState,
+)
 from phabricatoremails.render.render import Render
 from phabricatoremails.render.template import TemplateStore
-from phabricatoremails.service import Pipeline, service
+from phabricatoremails.service import Pipeline, service, process_event, _send_emails
 from tests.mock_db import MockDB
 from tests.mock_mail import MockMail
 from tests.mock_settings import MockStats, MockSettings
@@ -140,7 +145,7 @@ def test_integration_pipeline():
 
         emails = []
         for call in mail.send.calls:
-            emails.extend(call.args[0])
+            emails.append(call.args[0])
 
     _assert_mail(
         emails[0],
@@ -170,7 +175,9 @@ def test_pipeline_returns_same_position_if_fetch_fails():
     assert pipeline.run(MockThreadStore(), 10) == 10
 
 
-def test_pipeline_skips_events_that_fail_to_render():
+def test_pipeline_skips_events_that_fail_to_render_and_have_no_minimal_context():
+    # Note: this behaviour is only needed until Bug 1672239 lands server-side,
+    # at which point "minimalContext" is expected to exist.
     source = MockSource(
         next_result={
             "data": {
@@ -184,9 +191,17 @@ def test_pipeline_skips_events_that_fail_to_render():
                         "body": {
                             "reviewers": [
                                 {
-                                    "email": "2@mail",
-                                    "timezoneOffset": 0,
-                                    "isActor": False,
+                                    "name": "2",
+                                    "isActionable": False,
+                                    "status": "unreviewed",
+                                    "recipients": [
+                                        {
+                                            "username": "2",
+                                            "email": "2@mail",
+                                            "timezoneOffset": 0,
+                                            "isActor": False,
+                                        }
+                                    ],
                                 }
                             ],
                             "commentCount": 1,
@@ -198,7 +213,10 @@ def test_pipeline_skips_events_that_fail_to_render():
                             "bug": {"bugId": 1, "link": "link"},
                         },
                     },
-                    {"thisEventIsMissingProperties": True},
+                    {
+                        "timestamp": 123,
+                        "thisEventIsMissingProperties": True,
+                    },
                 ],
             },
             "cursor": {"after": 20},
@@ -223,6 +241,171 @@ def test_pipeline_updates_position_even_if_no_new_events():
     pipeline = Pipeline(source, None, MockMail(), logger, MockStats(), False)
     new_position = pipeline.run(MockThreadStore(), 10)
     assert new_position == 20
+
+
+def test_processes_with_minimal_context_if_no_full_context():
+    event = {
+        "isSecure": True,
+        "timestamp": 0,
+        "context": None,
+        "minimalContext": {
+            "revision": {
+                "revisionId": 1,
+                "link": "link",
+            },
+            "recipients": [
+                {
+                    "username": "2",
+                    "email": "2@mail",
+                    "timezoneOffset": 0,
+                    "isActor": False,
+                }
+            ],
+        },
+    }
+    mail = MockMail()
+    render = Render(TemplateStore("", "", False))
+    logger = logging.create_dev_logger()
+    with spy_on(mail.send):
+        process_event(event, render, MockThreadStore(), logger, MockStats(), mail)
+        assert len(mail.send.calls) == 1
+        assert mail.send.calls[0].args[0].template_path == "minimal"
+
+
+def test_processes_with_minimal_context_if_full_context_error():
+    event = {
+        "isSecure": True,
+        "timestamp": 0,
+        "context": {
+            "thisContextIsMissingProperties": True,
+        },
+        "minimalContext": {
+            "revision": {
+                "revisionId": 1,
+                "link": "link",
+            },
+            "recipients": [
+                {
+                    "username": "2",
+                    "email": "2@mail",
+                    "timezoneOffset": 0,
+                    "isActor": False,
+                }
+            ],
+        },
+    }
+    mail = MockMail()
+    render = Render(TemplateStore("", "", False))
+    logger = logging.create_dev_logger()
+    with spy_on(mail.send):
+        process_event(event, render, MockThreadStore(), logger, MockStats(), mail)
+        assert len(mail.send.calls) == 1
+        assert mail.send.calls[0].args[0].template_path == "minimal"
+
+
+@patch("phabricatoremails.service._send_emails")
+def test_retries_failed_full_sends_with_minimal_emails(send_emails_fn):
+    event = {
+        "timestamp": 0,
+        "isSecure": True,
+        "context": {
+            "eventKind": "revision-reclaimed",
+            "actorName": "1",
+            "body": {
+                "reviewers": [
+                    {
+                        "name": "2",
+                        "isActionable": False,
+                        "status": "unreviewed",
+                        "recipients": [
+                            {
+                                "username": "2",
+                                "email": "2@mail",
+                                "timezoneOffset": 0,
+                                "isActor": False,
+                            },
+                            {
+                                "username": "3",
+                                "email": "3@mail",
+                                "timezoneOffset": 0,
+                                "isActor": False,
+                            },
+                        ],
+                    }
+                ],
+                "commentCount": 1,
+                "transactionLink": "link",
+            },
+            "revision": {
+                "revisionId": 1,
+                "link": "link",
+                "bug": {"bugId": 1, "link": "link"},
+            },
+        },
+        "minimalContext": {
+            "revision": {
+                "revisionId": 1,
+                "link": "link",
+            },
+            "recipients": [
+                {
+                    "username": "2",
+                    "email": "2@mail",
+                    "timezoneOffset": 0,
+                    "isActor": False,
+                },
+                {
+                    "username": "3",
+                    "email": "3@mail",
+                    "timezoneOffset": 0,
+                    "isActor": False,
+                },
+            ],
+        },
+    }
+
+    send_emails_fn.side_effect = [["2@mail"], []]
+    render = Render(TemplateStore("", "", False))
+    logger = logging.create_dev_logger()
+    process_event(event, render, MockThreadStore(), logger, MockStats(), None)
+    assert len(send_emails_fn.call_args_list) == 2
+    assert len(send_emails_fn.call_args_list[1][0][3]) == 1
+    _assert_mail(
+        send_emails_fn.call_args_list[1][0][3][0],
+        "D1",
+        "2@mail",
+        "An (unknown) action occurred",
+    )
+
+
+@patch("time.sleep")
+def test_retries_temporary_email_failures(_):
+    class FailOnceMail:
+        def __init__(self):
+            self.call_count = 0
+
+        def send(self, _):
+            self.call_count += 1
+            if self.call_count == 1:
+                return SendEmailResult(SendEmailState.TEMPORARY_FAILURE, "oops")
+            return SendEmailResult(SendEmailState.SUCCESS)
+
+    mail = FailOnceMail()
+    _send_emails(
+        mail,
+        MockStats(),
+        logging.create_dev_logger(),
+        [OutgoingEmail("", "", "", 0, "", "")],
+        "",
+    )
+    _send_emails(
+        mail,
+        MockStats(),
+        logging.create_dev_logger(),
+        [OutgoingEmail("", "", "", 1, "", "")],
+        "",
+    )
+    assert mail.call_count == 3
 
 
 def test_service_runs_worker():

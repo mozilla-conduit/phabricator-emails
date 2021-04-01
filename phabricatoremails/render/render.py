@@ -5,7 +5,7 @@
 from dataclasses import dataclass
 
 from phabricatoremails.mail import OutgoingEmail
-from phabricatoremails.render.events.common import ParseError
+from phabricatoremails.render.events.common import ParseError, Recipient
 from phabricatoremails.render.events.phabricator import (
     Revision,
     RevisionAccepted,
@@ -20,6 +20,7 @@ from phabricatoremails.render.events.phabricator import (
     RevisionCreated,
     RevisionMetadataEdited,
     ExistenceChange,
+    MinimalRevision,
 )
 from phabricatoremails.render.events.phabricator_secure import (
     SecureRevision,
@@ -145,21 +146,15 @@ class Render:
 
     _template_store: TemplateStore
 
-    def process_event_to_emails(
-        self, event: dict, thread_store: ThreadStore
+    def process_event_to_emails_with_full_context(
+        self, is_secure: bool, timestamp: int, context: dict, thread_store: ThreadStore
     ) -> list[OutgoingEmail]:
-        """Turn the raw Phabricator event into an outgoing email."""
-
-        is_secure = event["isSecure"]
-        kind = event["eventKind"]
-        timestamp = event["timestamp"]
-        actor_name = event["actorName"]
-        body = event["body"]
+        """Turn the raw Phabricator context into outgoing emails."""
         batch = MailBatch(self._template_store)
-        body = parse_body(kind, is_secure, body, batch)
-
+        actor_name = context["actorName"]
+        body = parse_body(context["eventKind"], is_secure, context["body"], batch)
         if is_secure:
-            revision = SecureRevision.parse(event["revision"])
+            revision = SecureRevision.parse(context["revision"])
             thread = thread_store.get_or_create(revision.id)
             thread.email_count += 1
             return batch.process_secure(
@@ -170,7 +165,7 @@ class Render:
                 body,
             )
         else:
-            revision = Revision.parse(event["revision"])
+            revision = Revision.parse(context["revision"])
             thread = thread_store.get_or_create(revision.id)
             thread.email_count += 1
             return batch.process(
@@ -180,3 +175,37 @@ class Render:
                 timestamp,
                 body,
             )
+
+    def process_event_to_emails_with_minimal_context(
+        self, timestamp: int, context: dict, thread_store: ThreadStore
+    ):
+        """Turn the minimal Phabricator context into outgoing emails."""
+        revision = MinimalRevision.parse(context["revision"])
+        recipients = Recipient.parse_many(context["recipients"])
+        thread = thread_store.get_or_create(revision.id)
+        thread.email_count += 1
+        emails = []
+        for recipient in recipients:
+            if recipient.is_actor:
+                continue
+
+            template = self._template_store.get("minimal")
+            html_email, text_email = template.render(
+                {
+                    "revision": revision,
+                    "recipient_username": recipient.username,
+                    "unique_number": thread.email_count,
+                    "event": context,
+                }
+            )
+            emails.append(
+                OutgoingEmail(
+                    "minimal",
+                    f"D{revision.id}",
+                    recipient.email,
+                    timestamp,
+                    html_email,
+                    text_email,
+                )
+            )
+        return emails

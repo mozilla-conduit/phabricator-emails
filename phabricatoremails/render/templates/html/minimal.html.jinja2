@@ -1,0 +1,25 @@
+{% import '_macros.html.jinja2' as macros %}
+{{ macros.head() }}
+<div class="event-content">
+
+    {% call macros.preview(true, unique_number) %}
+        {{ emoji("building_construction") | safe }} An action occurred.
+    {% endcall %}
+
+    {{ macros.minimal_title(revision) }}
+
+    <div class="summary">
+        <span class="emoji">{{ emoji("building_construction") | safe }}</span>
+        <span class="text"><span>An (unknown) action occurred</span></span>
+        <a href="{{ revision.link }}" class="actionable">View the revision</a>
+    </div>
+
+    <div class="minimal-email-error-summary">
+        Due to an internal issue (it's been automatically reported!), we weren't
+        able to fetch the details on the action that happened to this revision.
+        You should <a href="{{ revision.link }}">view the revision on Phabricator</a>
+        to ensure that you're not missing anything important.
+    </div>
+
+    {{ macros.footer(recipient_username, unique_number) }}
+</div>
