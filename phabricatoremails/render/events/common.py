@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from datetime import timezone, timedelta
 from enum import Enum
 from math import floor, ceil
-from typing import Optional, Dict, List
+from typing import Optional
 
 """Describes data structures that are used by both secure and public revision events.
 
@@ -20,14 +20,14 @@ class CommentMessage:
     as_html: str
 
     @classmethod
-    def parse(cls, message: Dict):
+    def parse(cls, message: dict):
         return cls(
             message["asText"],
             message["asHtml"],
         )
 
     @classmethod
-    def parse_optional(cls, message: Optional[Dict]):
+    def parse_optional(cls, message: Optional[dict]):
         return cls.parse(message) if message else None
 
 
@@ -39,7 +39,7 @@ class Recipient:
     is_actor: bool
 
     @classmethod
-    def parse(cls, recipient: Dict):
+    def parse(cls, recipient: dict):
         offset_seconds = recipient["timezoneOffset"]  # e.g.: -25200
         if offset_seconds > 0:
             hours = floor(offset_seconds / 3600)
@@ -55,11 +55,11 @@ class Recipient:
         )
 
     @classmethod
-    def parse_many(cls, recipients: List[Dict]):
+    def parse_many(cls, recipients: list[dict]):
         return list(map(cls.parse, recipients))
 
     @classmethod
-    def parse_optional(cls, recipient: Optional[Dict]):
+    def parse_optional(cls, recipient: Optional[dict]):
         return cls.parse(recipient) if recipient else None
 
 
@@ -75,10 +75,10 @@ class Reviewer:
     name: str
     is_actionable: bool
     status: ReviewerStatus
-    recipients: List[Recipient]
+    recipients: list[Recipient]
 
     @classmethod
-    def parse(cls, reviewer: Dict):
+    def parse(cls, reviewer: dict):
         return cls(
             reviewer["name"],
             reviewer["isActionable"],
@@ -87,7 +87,7 @@ class Reviewer:
         )
 
     @classmethod
-    def parse_many(cls, reviewers: List[Dict]):
+    def parse_many(cls, reviewers: list[dict]):
         return list(map(cls.parse, reviewers))
 
 

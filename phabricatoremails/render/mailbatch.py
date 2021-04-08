@@ -3,7 +3,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 from dataclasses import dataclass
-from typing import Optional, List, Dict
+from typing import Optional
 
 from phabricatoremails.mail import OutgoingEmail
 from phabricatoremails.render.events.common import Recipient
@@ -23,7 +23,7 @@ class Target:
     template_path: str
     recipient_email: str
     recipient_username: str
-    kwargs: Dict
+    kwargs: dict
 
 
 class MailBatch:
@@ -37,7 +37,7 @@ class MailBatch:
     they're all parameterized by the same event.
     """
 
-    _targets: Dict[str, Target]
+    _targets: dict[str, Target]
 
     def __init__(self, template_store: TemplateStore):
         self._targets = {}
@@ -58,7 +58,7 @@ class MailBatch:
             template_path, recipient.email, recipient.username, kwargs
         )
 
-    def target_many(self, recipients: List[Recipient], template_path: str, **kwargs):
+    def target_many(self, recipients: list[Recipient], template_path: str, **kwargs):
         """Appends many emails to be sent for the current event.
 
         Each email will use the provided template (rendered with the extra kwargs
@@ -73,7 +73,7 @@ class MailBatch:
         template_path: str,
         recipient_address: str,
         timestamp: int,
-        template_params: Dict,
+        template_params: dict,
     ):
         """Render the provided template and parameters into an OutgoingEmail."""
         template = self._template_store.get(template_path)

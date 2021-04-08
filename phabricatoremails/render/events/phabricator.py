@@ -5,7 +5,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Optional, List, Union, Dict
+from typing import Optional, Union
 
 from phabricatoremails.render.events.common import (
     Recipient,
@@ -36,7 +36,7 @@ class Revision:
     bug: Optional[Bug]
 
     @classmethod
-    def parse(cls, revision: Dict):
+    def parse(cls, revision: dict):
         raw_bug = revision.get("bug")
         bug = (
             Bug(raw_bug["bugId"], raw_bug["name"], raw_bug["link"]) if raw_bug else None
@@ -66,7 +66,7 @@ class DiffLine:
 
 @dataclass
 class CodeContext:
-    diff: List[DiffLine]
+    diff: list[DiffLine]
 
 
 InlineCommentContext = Union[ReplyContext, CodeContext]
@@ -80,7 +80,7 @@ class InlineComment:
     context: InlineCommentContext
 
     @classmethod
-    def parse(cls, inline: Dict):
+    def parse(cls, inline: dict):
         context_kind = inline["contextKind"]
         raw_context = inline["context"]
         if context_kind == "code":
@@ -111,7 +111,7 @@ class InlineComment:
         )
 
     @classmethod
-    def parse_many(cls, inlines: List[Dict]):
+    def parse_many(cls, inlines: list[dict]):
         return list(map(cls.parse, inlines))
 
 
@@ -127,11 +127,11 @@ class AffectedFile:
     change: AffectedFileChange
 
     @classmethod
-    def parse(cls, file: Dict):
+    def parse(cls, file: dict):
         return cls(file["path"], AffectedFileChange(file["change"]))
 
     @classmethod
-    def parse_many(cls, files: List[Dict]):
+    def parse_many(cls, files: list[dict]):
         return list(map(cls.parse, files))
 
 
@@ -147,10 +147,10 @@ class MetadataEditedReviewer:
     is_actionable: bool
     status: ReviewerStatus
     metadata_change: ExistenceChange
-    recipients: List[Recipient]
+    recipients: list[Recipient]
 
     @classmethod
-    def parse(cls, reviewer: Dict):
+    def parse(cls, reviewer: dict):
         return cls(
             reviewer["name"],
             reviewer["isActionable"],
@@ -160,7 +160,7 @@ class MetadataEditedReviewer:
         )
 
     @classmethod
-    def parse_many(cls, reviewers: List[Dict]):
+    def parse_many(cls, reviewers: list[dict]):
         return list(map(cls.parse, reviewers))
 
 
@@ -168,12 +168,12 @@ class MetadataEditedReviewer:
 class RevisionAbandoned:
     KIND = "revision-abandoned"
     main_comment_message: Optional[CommentMessage]
-    inline_comments: List[InlineComment]
+    inline_comments: list[InlineComment]
     transaction_link: str
-    reviewers: List[Recipient]
+    reviewers: list[Recipient]
 
     @classmethod
-    def parse(cls, body: Dict):
+    def parse(cls, body: dict):
         return cls(
             CommentMessage.parse_optional(body.get("mainCommentMessage")),
             InlineComment.parse_many(body["inlineComments"]),
@@ -185,11 +185,11 @@ class RevisionAbandoned:
 @dataclass
 class RevisionCreated:
     KIND = "revision-created"
-    affected_files: List[AffectedFile]
-    reviewers: List[Reviewer]
+    affected_files: list[AffectedFile]
+    reviewers: list[Reviewer]
 
     @classmethod
-    def parse(cls, body: Dict):
+    def parse(cls, body: dict):
         return cls(
             AffectedFile.parse_many(body["affectedFiles"]),
             Reviewer.parse_many(body["reviewers"]),
@@ -200,12 +200,12 @@ class RevisionCreated:
 class RevisionReclaimed:
     KIND = "revision-reclaimed"
     main_comment_message: Optional[CommentMessage]
-    inline_comments: List[InlineComment]
+    inline_comments: list[InlineComment]
     transaction_link: str
-    reviewers: List[Reviewer]
+    reviewers: list[Reviewer]
 
     @classmethod
-    def parse(cls, body: Dict):
+    def parse(cls, body: dict):
         return cls(
             CommentMessage.parse_optional(body.get("mainCommentMessage")),
             InlineComment.parse_many(body["inlineComments"]),
@@ -218,15 +218,15 @@ class RevisionReclaimed:
 class RevisionAccepted:
     KIND = "revision-accepted"
     main_comment_message: Optional[CommentMessage]
-    inline_comments: List[InlineComment]
+    inline_comments: list[InlineComment]
     transaction_link: str
     lando_link: Optional[str]
     is_ready_to_land: bool
     author: Optional[Recipient]
-    reviewers: List[Recipient]
+    reviewers: list[Recipient]
 
     @classmethod
-    def parse(cls, body: Dict):
+    def parse(cls, body: dict):
         return cls(
             CommentMessage.parse_optional(body.get("mainCommentMessage")),
             InlineComment.parse_many(body["inlineComments"]),
@@ -242,13 +242,13 @@ class RevisionAccepted:
 class RevisionCommented:
     KIND = "revision-commented"
     main_comment_message: Optional[CommentMessage]
-    inline_comments: List[InlineComment]
+    inline_comments: list[InlineComment]
     transaction_link: str
     author: Optional[Recipient]
-    reviewers: List[Recipient]
+    reviewers: list[Recipient]
 
     @classmethod
-    def parse(cls, body: Dict):
+    def parse(cls, body: dict):
         return cls(
             CommentMessage.parse_optional(body.get("mainCommentMessage")),
             InlineComment.parse_many(body["inlineComments"]),
@@ -262,13 +262,13 @@ class RevisionCommented:
 class RevisionLanded:
     KIND = "revision-landed"
     main_comment_message: Optional[CommentMessage]
-    inline_comments: List[InlineComment]
+    inline_comments: list[InlineComment]
     transaction_link: str
     author: Optional[Recipient]
-    reviewers: List[Recipient]
+    reviewers: list[Recipient]
 
     @classmethod
-    def parse(cls, body: Dict):
+    def parse(cls, body: dict):
         return cls(
             CommentMessage.parse_optional(body.get("mainCommentMessage")),
             InlineComment.parse_many(body["inlineComments"]),
@@ -283,11 +283,11 @@ class RevisionCommentPinged:
     KIND = "revision-comment-pinged"
     recipient: Recipient
     pinged_main_comment_message: Optional[CommentMessage]
-    pinged_inline_comments: List[InlineComment]
+    pinged_inline_comments: list[InlineComment]
     transaction_link: str
 
     @classmethod
-    def parse(cls, body: Dict):
+    def parse(cls, body: dict):
         return cls(
             Recipient.parse(body["recipient"]),
             CommentMessage.parse_optional(body.get("pingedMainCommentMessage")),
@@ -300,13 +300,13 @@ class RevisionCommentPinged:
 class RevisionRequestedChanges:
     KIND = "revision-requested-changes"
     main_comment_message: Optional[CommentMessage]
-    inline_comments: List[InlineComment]
+    inline_comments: list[InlineComment]
     transaction_link: str
     author: Optional[Recipient]
-    reviewers: List[Recipient]
+    reviewers: list[Recipient]
 
     @classmethod
-    def parse(cls, body: Dict):
+    def parse(cls, body: dict):
         return cls(
             CommentMessage.parse_optional(body.get("mainCommentMessage")),
             InlineComment.parse_many(body["inlineComments"]),
@@ -320,12 +320,12 @@ class RevisionRequestedChanges:
 class RevisionRequestedReview:
     KIND = "revision-requested-review"
     main_comment_message: Optional[CommentMessage]
-    inline_comments: List[InlineComment]
+    inline_comments: list[InlineComment]
     transaction_link: str
-    reviewers: List[Reviewer]
+    reviewers: list[Reviewer]
 
     @classmethod
-    def parse(cls, body: Dict):
+    def parse(cls, body: dict):
         return cls(
             CommentMessage.parse_optional(body.get("mainCommentMessage")),
             InlineComment.parse_many(body["inlineComments"]),
@@ -341,10 +341,10 @@ class RevisionMetadataEdited:
     is_title_changed: bool
     is_bug_changed: bool
     author: Optional[Recipient]
-    reviewers: List[MetadataEditedReviewer]
+    reviewers: list[MetadataEditedReviewer]
 
     @classmethod
-    def parse(cls, body: Dict):
+    def parse(cls, body: dict):
         return cls(
             body["isReadyToLand"],
             body["isTitleChanged"],
@@ -359,11 +359,11 @@ class RevisionUpdated:
     KIND = "revision-updated"
     is_ready_to_land: bool
     new_changes_link: str
-    affected_files: List[AffectedFile]
-    reviewers: List[Reviewer]
+    affected_files: list[AffectedFile]
+    reviewers: list[Reviewer]
 
     @classmethod
-    def parse(cls, body: Dict):
+    def parse(cls, body: dict):
         return cls(
             body["isReadyToLand"],
             body["newChangesLink"],

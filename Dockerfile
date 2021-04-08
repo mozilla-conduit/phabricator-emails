@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-FROM python:3.8.2-slim
+FROM python:3.9.4-slim
 LABEL maintainer="Mitchell Hentges <mhentges@mozilla.com>"
 LABEL community="https://chat.mozilla.org/#/room/#conduit:mozilla.org"
 LABEL bug-component="https://bugzilla.mozilla.org/enter_bug.cgi?product=Conduit&component=Phabricator"

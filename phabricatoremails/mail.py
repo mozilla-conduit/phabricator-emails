@@ -10,7 +10,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formatdate
 from logging import Logger
-from typing import List, Optional, Any
+from typing import Optional, Any
 
 import boto3
 
@@ -68,7 +68,7 @@ class FsMail:
         self._html_path.mkdir(parents=True, exist_ok=True)
         self._text_path.mkdir(parents=True, exist_ok=True)
 
-    def send(self, emails: List[OutgoingEmail]):
+    def send(self, emails: list[OutgoingEmail]):
         """Write the provided emails to files."""
 
         for email in emails:
@@ -104,7 +104,7 @@ class SmtpMail:
     _logger: Logger
     _send_to: Optional[str]
 
-    def send(self, emails: List[OutgoingEmail]):
+    def send(self, emails: list[OutgoingEmail]):
         """Send emails via SMTP."""
         for email in emails:
             self._logger.debug(
@@ -155,7 +155,7 @@ class SesMail:
         )
         return cls(client, from_address, logger, send_to)
 
-    def send(self, emails: List[OutgoingEmail]):
+    def send(self, emails: list[OutgoingEmail]):
         """Send emails via SES with the send_raw_email API."""
 
         for email in emails:

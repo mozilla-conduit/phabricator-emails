@@ -3,7 +3,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 from dataclasses import dataclass
-from typing import Optional, List, Dict
+from typing import Optional
 
 from phabricatoremails.render.events.common import Recipient, Reviewer
 
@@ -31,7 +31,7 @@ class SecureRevision:
     bug: SecureBug
 
     @classmethod
-    def parse(cls, revision: Dict):
+    def parse(cls, revision: dict):
         raw_bug = revision["bug"]
         bug = SecureBug(raw_bug["bugId"], raw_bug["link"])
         return cls(revision["revisionId"], revision["link"], bug)
@@ -39,12 +39,12 @@ class SecureRevision:
 
 @dataclass
 class SecureRevisionAbandoned:
-    reviewers: List[Recipient]
+    reviewers: list[Recipient]
     comment_count: int
     transaction_link: str
 
     @classmethod
-    def parse(cls, body: Dict):
+    def parse(cls, body: dict):
         return cls(
             [Recipient.parse(reviewer) for reviewer in body["reviewers"]],
             body["commentCount"],
@@ -54,21 +54,21 @@ class SecureRevisionAbandoned:
 
 @dataclass
 class SecureRevisionCreated:
-    reviewers: List[Reviewer]
+    reviewers: list[Reviewer]
 
     @classmethod
-    def parse(cls, body: Dict):
+    def parse(cls, body: dict):
         return cls(Reviewer.parse_many(body["reviewers"]))
 
 
 @dataclass
 class SecureRevisionReclaimed:
-    reviewers: List[Reviewer]
+    reviewers: list[Reviewer]
     comment_count: int
     transaction_link: str
 
     @classmethod
-    def parse(cls, body: Dict):
+    def parse(cls, body: dict):
         return cls(
             [Reviewer.parse(reviewer) for reviewer in body["reviewers"]],
             body["commentCount"],
@@ -81,12 +81,12 @@ class SecureRevisionAccepted:
     lando_link: Optional[str]
     is_ready_to_land: bool
     author: Optional[Recipient]
-    reviewers: List[Recipient]
+    reviewers: list[Recipient]
     comment_count: int
     transaction_link: str
 
     @classmethod
-    def parse(cls, body: Dict):
+    def parse(cls, body: dict):
         return cls(
             body.get("landoLink"),
             body["isReadyToLand"],
@@ -100,11 +100,11 @@ class SecureRevisionAccepted:
 @dataclass
 class SecureRevisionCommented:
     author: Optional[Recipient]
-    reviewers: List[Recipient]
+    reviewers: list[Recipient]
     transaction_link: str
 
     @classmethod
-    def parse(cls, body: Dict):
+    def parse(cls, body: dict):
         return cls(
             Recipient.parse_optional(body.get("author")),
             [Recipient.parse(reviewer) for reviewer in body["reviewers"]],
@@ -115,12 +115,12 @@ class SecureRevisionCommented:
 @dataclass
 class SecureRevisionLanded:
     author: Optional[Recipient]
-    reviewers: List[Recipient]
+    reviewers: list[Recipient]
     comment_count: int
     transaction_link: str
 
     @classmethod
-    def parse(cls, body: Dict):
+    def parse(cls, body: dict):
         return cls(
             Recipient.parse_optional(body.get("author")),
             [Recipient.parse(reviewer) for reviewer in body["reviewers"]],
@@ -135,7 +135,7 @@ class SecureRevisionCommentPinged:
     transaction_link: str
 
     @classmethod
-    def parse(cls, body: Dict):
+    def parse(cls, body: dict):
         return cls(
             Recipient.parse(body["recipient"]),
             body["transactionLink"],
@@ -145,12 +145,12 @@ class SecureRevisionCommentPinged:
 @dataclass
 class SecureRevisionRequestedChanges:
     author: Optional[Recipient]
-    reviewers: List[Recipient]
+    reviewers: list[Recipient]
     comment_count: int
     transaction_link: str
 
     @classmethod
-    def parse(cls, body: Dict):
+    def parse(cls, body: dict):
         return cls(
             Recipient.parse_optional(body.get("author")),
             [Recipient.parse(reviewer) for reviewer in body["reviewers"]],
@@ -161,12 +161,12 @@ class SecureRevisionRequestedChanges:
 
 @dataclass
 class SecureRevisionRequestedReview:
-    reviewers: List[Reviewer]
+    reviewers: list[Reviewer]
     comment_count: int
     transaction_link: str
 
     @classmethod
-    def parse(cls, body: Dict):
+    def parse(cls, body: dict):
         return cls(
             Reviewer.parse_many(body["reviewers"]),
             body["commentCount"],
@@ -178,10 +178,10 @@ class SecureRevisionRequestedReview:
 class SecureRevisionUpdated:
     is_ready_to_land: bool
     new_changes_link: str
-    reviewers: List[Reviewer]
+    reviewers: list[Reviewer]
 
     @classmethod
-    def parse(cls, body: Dict):
+    def parse(cls, body: dict):
         return cls(
             body["isReadyToLand"],
             body["newChangesLink"],

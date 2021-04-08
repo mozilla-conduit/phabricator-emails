@@ -2,14 +2,13 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-from typing import Optional, Dict
-
+from typing import Optional
 from attr import dataclass
 
 
 class MockTemplateStore:
     last_template_path: Optional[str]
-    last_template_params: Optional[Dict]
+    last_template_params: Optional[dict]
 
     def get(self, template_path):
         self.last_template_path = template_path

@@ -4,7 +4,6 @@
 
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Dict
 from unittest import mock
 
 import pytest
@@ -16,7 +15,7 @@ from requests import RequestException
 class MockResponse:
     status_code: int
     text: str
-    _json: Dict
+    _json: dict
 
     def json(self):
         return self._json

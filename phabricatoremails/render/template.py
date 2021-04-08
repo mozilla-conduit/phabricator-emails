@@ -5,7 +5,7 @@
 import textwrap
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Dict, Any
+from typing import Any
 
 import jinja2
 from phabricatoremails.render.events.common import Reviewer, ReviewerStatus
@@ -196,7 +196,7 @@ class Template:
     _html_template: jinja2.Template
     _text_template: jinja2.Template
 
-    def render(self, template_params: Dict):
+    def render(self, template_params: dict):
         html = self._html_template.render(**template_params)
         text = self._text_template.render(**template_params)
 

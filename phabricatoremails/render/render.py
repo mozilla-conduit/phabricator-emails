@@ -3,7 +3,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 from dataclasses import dataclass
-from typing import Dict, List
 
 from phabricatoremails.mail import OutgoingEmail
 from phabricatoremails.render.events.common import ParseError
@@ -40,7 +39,7 @@ from phabricatoremails.render.template import TemplateStore
 from phabricatoremails.thread_store import ThreadStore
 
 
-def parse_body(kind: str, is_secure: bool, raw_body: Dict, batch: MailBatch):
+def parse_body(kind: str, is_secure: bool, raw_body: dict, batch: MailBatch):
     if kind == RevisionAccepted.KIND:
         if is_secure:
             body = SecureRevisionAccepted.parse(raw_body)
@@ -147,8 +146,8 @@ class Render:
     _template_store: TemplateStore
 
     def process_event_to_emails(
-        self, event: Dict, thread_store: ThreadStore
-    ) -> List[OutgoingEmail]:
+        self, event: dict, thread_store: ThreadStore
+    ) -> list[OutgoingEmail]:
         """Turn the raw Phabricator event into an outgoing email."""
 
         is_secure = event["isSecure"]
