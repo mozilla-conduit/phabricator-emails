@@ -3,12 +3,11 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import logging.config
-from typing import Dict
 
 _LOGGER_KEY = "phabricator-emails"
 
 
-def _create_logger(config: Dict):
+def _create_logger(config: dict):
     logging.config.dictConfig(config)
     return logging.getLogger(_LOGGER_KEY)
 
