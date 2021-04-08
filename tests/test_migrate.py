@@ -4,7 +4,9 @@
 
 import pytest
 from kgb import spy_on
-from phabricatoremails.migrate import DBNotInitializedError, migrate
+
+from phabricatoremails.db import DBNotInitializedError
+from phabricatoremails.migrate import migrate
 from tests.mock_db import MockDB
 from tests.mock_settings import MockSettings
 
@@ -12,15 +14,15 @@ from tests.mock_settings import MockSettings
 def test_migrate_doesnt_upgrade_schema_if_not_initialized():
     db = MockDB(is_initialized=False)
     settings = MockSettings(db=db)
-    with spy_on(db.upgrade_schema):
+    with spy_on(db.upgrade_schema) as spy:
         with pytest.raises(DBNotInitializedError):
             migrate(settings)
-        assert not db.upgrade_schema.called
+        assert not spy.called
 
 
 def test_migrate_upgrades_schema():
     db = MockDB(is_initialized=True)
     settings = MockSettings(db=db)
-    with spy_on(db.upgrade_schema):
+    with spy_on(db.upgrade_schema) as spy:
         migrate(settings)
-        assert db.upgrade_schema.called
+        assert spy.called

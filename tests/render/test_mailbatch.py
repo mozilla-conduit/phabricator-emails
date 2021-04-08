@@ -108,7 +108,7 @@ def test_process_public_event():
     assert len(emails) == 1
     email = emails[0]
     assert email.subject == "D1: revision"
-    assert store.last_template_path == PUBLIC_TEMPLATE_PATH_PREFIX + "template-author"
+    assert store.last_template_path() == PUBLIC_TEMPLATE_PATH_PREFIX + "template-author"
 
 
 def test_process_secure_event():
@@ -121,7 +121,7 @@ def test_process_secure_event():
     assert len(emails) == 1
     email = emails[0]
     assert email.subject == "D2: (secure bug 1)"
-    assert store.last_template_path == SECURE_TEMPLATE_PATH_PREFIX + "template-author"
+    assert store.last_template_path() == SECURE_TEMPLATE_PATH_PREFIX + "template-author"
 
 
 def test_passes_arguments_to_template():
@@ -129,4 +129,4 @@ def test_passes_arguments_to_template():
     batch = MailBatch(store)
     batch.target(NON_ACTOR_RECIPIENT, "template-author", extra_template_param="value")
     batch.process(PUBLIC_REVISION, "actor", 0, 0, EVENT)
-    assert store.last_template_params["extra_template_param"] == "value"
+    assert store.last_template_params()["extra_template_param"] == "value"

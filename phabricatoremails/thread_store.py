@@ -3,13 +3,19 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 from dataclasses import dataclass
+from typing import Protocol
 
 from phabricatoremails.models import Thread
 from sqlalchemy.orm import Session
 
 
+class ThreadStore(Protocol):
+    def get_or_create(self, revision_id: int) -> Thread:
+        pass
+
+
 @dataclass
-class ThreadStore:
+class DBThreadStore:
     """Perform operations on the Thread table."""
 
     _db_session: Session

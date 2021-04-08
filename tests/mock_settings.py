@@ -37,8 +37,3 @@ class MockSettings:
 
     def mail(self):
         return self._mail
-
-
-class MockStats:
-    def incr(self, *args, **kwargs):
-        pass

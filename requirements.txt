@@ -19,6 +19,10 @@ attrs==20.3.0 \
 black==20.8b1 \
     --hash=sha256:1c02557aa099101b9d21496f8a914e9ed2222ef70336404eeeac8edba836fbea
     # via -r requirements.in
+boto3-stubs[ses]==1.17.41 \
+    --hash=sha256:09c69096392c1f432b2b6cc8ff23dde3c3cc79fd0aeb0980db4ccaf2ebd9152b \
+    --hash=sha256:354c9de66948b893550dd87697628c5a40d809bbd78b10aea7671a6afd3f4706
+    # via -r requirements.in
 boto3==1.17.41 \
     --hash=sha256:8544878fa8c9cad6972d9c9aae1db1d8fa7a3bb0adabe2fa39e4842d182bb4d7 \
     --hash=sha256:d85b0e05d7de96169b0024b76b292be62b01ef6f5ca853a512506346b82d2abb
@@ -27,6 +31,7 @@ botocore==1.20.41 \
     --hash=sha256:5e88d19a1406ff92d52518ac70a1531582d7af537dc18c8ebc7ab54282c2fa23 \
     --hash=sha256:63f650fc96bce141e8194a761e6890fea2fba6e01253aefa31ae69f145015c21
     # via
+    #   -r requirements.in
     #   boto3
     #   s3transfer
 cachetools==4.2.1 \
@@ -232,6 +237,10 @@ mccabe==0.6.1 \
     --hash=sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42 \
     --hash=sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f
     # via flake8
+mypy-boto3-ses==1.17.41.0 \
+    --hash=sha256:0daab92c7f576ebf263e862b0dd883bcd3b365e55ab43517d6266030d088e8c5 \
+    --hash=sha256:c68235c5329bd62ecc358ddedd12ab4c92bcf0ddb3f543f1afe87e62bc5765ae
+    # via boto3-stubs
 mypy-extensions==0.4.3 \
     --hash=sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d \
     --hash=sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8
@@ -261,7 +270,9 @@ mypy==0.812 \
     --hash=sha256:d23e0ea196702d918b60c8288561e722bf437d82cb7ef2edcd98cfa38905d506 \
     --hash=sha256:d65cc1df038ef55a99e617431f0553cd77763869eebdf9042403e16089fe746c \
     --hash=sha256:d7da2e1d5f558c37d6e8c1246f1aec1e7349e4913d8fb3cb289a35de573fe2eb
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   sqlalchemy-stubs
 packaging==20.9 \
     --hash=sha256:5b327ac1320dc863dca72f4514ecc086f31186744b84a230374cc1fd776feae5 \
     --hash=sha256:67714da7f7bc052e064859c05c595155bd1ee9f69f76557e21f051443c20947a
@@ -387,6 +398,10 @@ six==1.15.0 \
     --hash=sha256:30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259 \
     --hash=sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced
     # via python-dateutil
+sqlalchemy-stubs==0.4 \
+    --hash=sha256:5eec7aa110adf9b957b631799a72fef396b23ff99fe296df726645d01e312aa5 \
+    --hash=sha256:c665d6dd4482ef642f01027fa06c3d5e91befabb219dc71fc2a09e7d7695f7ae
+    # via -r requirements.in
 sqlalchemy==1.4.4 \
     --hash=sha256:015c78ece6f62963dc2fb3b409cafb1e6d97040478fe0ac811ba22833489c19f \
     --hash=sha256:33da0ad3a913de9abac5a3fbac8e11993ce8c83431d123c216463239767db259 \
@@ -476,6 +491,7 @@ typing-extensions==3.7.4.3 \
     # via
     #   black
     #   mypy
+    #   sqlalchemy-stubs
 urllib3==1.26.4 \
     --hash=sha256:2f4da4594db7e1e110a944bb1b551fdf4e6c136ad42e4234131391e21eb5b0df \
     --hash=sha256:e7b021f7241115872f92f43c6508082facffbd1c048e3c6e2bb9c2a157e28937

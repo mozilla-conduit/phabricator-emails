@@ -6,13 +6,25 @@ import signal
 import time
 from dataclasses import dataclass
 from logging import Logger
-from typing import Callable
+from typing import Callable, Protocol
 
 from phabricatoremails.db import DB
-from phabricatoremails.query_position_store import QueryPositionStore
-from phabricatoremails.thread_store import ThreadStore
+from phabricatoremails.query_position_store import (
+    DBQueryPositionStore,
+    QueryPositionStore,
+)
+from phabricatoremails.thread_store import DBThreadStore, ThreadStore
 
 PIPELINE_CALLBACK = Callable[[ThreadStore, int], int]
+
+
+class Worker(Protocol):
+    @staticmethod
+    def set_initial_position(store: QueryPositionStore, position: int):
+        pass
+
+    def process(self, db: DB, pipeline: PIPELINE_CALLBACK):
+        pass
 
 
 class PhabricatorWorker:
@@ -77,8 +89,8 @@ class PhabricatorWorker:
         while not self._is_shutdown_requested:
             with db.session() as db_session:
                 is_caught_up = self._poll(
-                    QueryPositionStore(db_session),
-                    ThreadStore(db_session),
+                    DBQueryPositionStore(db_session),
+                    DBThreadStore(db_session),
                     pipeline,
                 )
 
@@ -117,4 +129,4 @@ class RunOnceWorker:
 
     def process(self, db: DB, pipeline: PIPELINE_CALLBACK):
         with db.session() as db_session:
-            pipeline(ThreadStore(db_session), self._key)
+            pipeline(DBThreadStore(db_session), self._key)

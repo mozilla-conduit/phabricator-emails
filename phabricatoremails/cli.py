@@ -9,7 +9,7 @@ import sentry_sdk
 from phabricatoremails.prepare import prepare
 from phabricatoremails.migrate import migrate
 from phabricatoremails.service import service
-from phabricatoremails.settings import Settings, SETTINGS_PATH_ENV_KEY
+from phabricatoremails.settings import IniSettings, SETTINGS_PATH_ENV_KEY
 from statsd import StatsClient
 
 
@@ -33,7 +33,7 @@ def parse_command():
 
 def cli():
     args = parse_command()
-    settings = Settings.load(os.environ.get(SETTINGS_PATH_ENV_KEY))
+    settings = IniSettings.load(os.environ.get(SETTINGS_PATH_ENV_KEY))
     if settings.sentry_dsn:
         sentry_sdk.init(settings.sentry_dsn)
 

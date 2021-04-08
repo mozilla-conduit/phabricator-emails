@@ -11,7 +11,6 @@ from phabricatoremails.render.events.phabricator import Revision
 from phabricatoremails.render.events.phabricator_secure import SecureRevision
 from phabricatoremails.render.template import TemplateStore
 
-
 PUBLIC_TEMPLATE_PATH_PREFIX = "public/"
 SECURE_TEMPLATE_PATH_PREFIX = "secure/"
 
@@ -94,7 +93,7 @@ class MailBatch:
         unique_number: int,
         timestamp: int,
         event,
-    ):
+    ) -> list[OutgoingEmail]:
         """Process all targets with the provided public event parameters."""
         return [
             self._process(
@@ -123,7 +122,7 @@ class MailBatch:
         unique_number: int,
         timestamp: int,
         event,
-    ):
+    ) -> list[OutgoingEmail]:
         """Process all targets with the provided secure event parameters."""
         return [
             self._process(
