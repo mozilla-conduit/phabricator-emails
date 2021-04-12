@@ -289,16 +289,33 @@ blockquote {
 }
 
 .inline-comment > a[href] {
-    display: block;
+    display: flex;
     border-bottom: 1px solid #d8d8d8;
     color: #464c5c;
     padding: 4px 8px;
     text-decoration: none;
 }
 
+.inline-comment .file-context {
+    flex-grow: 1;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+
+    /* Place ellipsis on the front of the path */
+    direction: rtl;
+    text-align: left;
+}
+
+.inline-comment .file-context > span {
+    /* Resolve "direction: rtl" changing the position of slashes */
+    unicode-bidi: plaintext;
+}
+
 .inline-comment .view-inline {
-    float: right;
+    margin-left: 20px;
     text-decoration: underline;
+    white-space: nowrap;
 }
 
 .inline-comment .scroll-container {
