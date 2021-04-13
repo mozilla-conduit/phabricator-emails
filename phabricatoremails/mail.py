@@ -16,6 +16,8 @@ from typing import Optional, Protocol
 import boto3
 from mypy_boto3_ses import SESClient
 
+from phabricatoremails.render.events.common import Actor
+
 
 class SendEmailState(Enum):
     SUCCESS = enum.auto()
@@ -42,10 +44,17 @@ class OutgoingEmail:
     timestamp: int
     html_contents: str
     text_contents: str
+    actor: Optional[Actor] = None
 
     def to_mime_message(self, from_address, include_target_in_subject=False):
         msg = MIMEMultipart("alternative")
-        msg["From"] = from_address
+        if self.actor:
+            from_header = (
+                f'"{self.actor.user_name} ({self.actor.real_name})" <{from_address}>'
+            )
+        else:
+            from_header = from_address
+        msg["From"] = from_header
         msg["To"] = self.to
         msg["Date"] = formatdate(timeval=self.timestamp)
         msg["Subject"] = (

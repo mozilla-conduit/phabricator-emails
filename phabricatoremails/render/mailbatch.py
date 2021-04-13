@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from phabricatoremails.mail import OutgoingEmail
-from phabricatoremails.render.events.common import Recipient
+from phabricatoremails.render.events.common import Recipient, Actor
 from phabricatoremails.render.events.phabricator import Revision
 from phabricatoremails.render.events.phabricator_secure import SecureRevision
 from phabricatoremails.render.template import TemplateStore
@@ -72,6 +72,7 @@ class MailBatch:
         template_path: str,
         recipient_address: str,
         timestamp: int,
+        actor: Actor,
         template_params: dict,
     ):
         """Render the provided template and parameters into an OutgoingEmail."""
@@ -84,12 +85,13 @@ class MailBatch:
             timestamp,
             html_email,
             text_email,
+            actor,
         )
 
     def process(
         self,
         revision: Revision,
-        actor_name: str,
+        actor: Actor,
         unique_number: int,
         timestamp: int,
         event,
@@ -102,10 +104,11 @@ class MailBatch:
                 subject=f"D{revision.id}: {revision.name}",
                 template_path=PUBLIC_TEMPLATE_PATH_PREFIX + target.template_path,
                 recipient_address=target.recipient_email,
+                actor=actor,
                 timestamp=timestamp,
                 template_params={
                     "revision": revision,
-                    "actor_name": actor_name,
+                    "actor_name": actor.user_name,
                     "recipient_username": target.recipient_username,
                     "unique_number": unique_number,
                     "event": event,
@@ -118,7 +121,7 @@ class MailBatch:
     def process_secure(
         self,
         revision: SecureRevision,
-        actor_name: str,
+        actor: Actor,
         unique_number: int,
         timestamp: int,
         event,
@@ -132,10 +135,11 @@ class MailBatch:
                 subject=f"D{revision.id}: (secure bug {revision.bug.id})",
                 template_path=SECURE_TEMPLATE_PATH_PREFIX + target.template_path,
                 recipient_address=target.recipient_email,
+                actor=actor,
                 timestamp=timestamp,
                 template_params={
                     "revision": revision,
-                    "actor_name": actor_name,
+                    "actor_name": actor.user_name,
                     "recipient_username": target.recipient_username,
                     "unique_number": unique_number,
                     "event": event,
