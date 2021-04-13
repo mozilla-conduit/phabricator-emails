@@ -48,7 +48,7 @@ def test_integration_pipeline():
                         "isSecure": True,
                         "eventKind": "revision-reclaimed",
                         "timestamp": 0,
-                        "actorName": "1",
+                        "actor": {"userName": "1", "realName": "1"},
                         "body": {
                             "reviewers": [
                                 {
@@ -91,7 +91,7 @@ def test_integration_pipeline():
                         "isSecure": False,
                         "eventKind": "revision-abandoned",
                         "timestamp": 1,
-                        "actorName": "4",
+                        "actor": {"userName": "4", "realName": "4"},
                         "body": {
                             "reviewers": [
                                 {
@@ -187,7 +187,7 @@ def test_pipeline_skips_events_that_fail_to_render_and_have_no_minimal_context()
                         "isSecure": True,
                         "eventKind": "revision-reclaimed",
                         "timestamp": 0,
-                        "actorName": "1",
+                        "actor": {"userName": "1", "realName": "1"},
                         "body": {
                             "reviewers": [
                                 {
@@ -310,7 +310,7 @@ def test_retries_failed_full_sends_with_minimal_emails(send_emails_fn):
         "isSecure": True,
         "context": {
             "eventKind": "revision-reclaimed",
-            "actorName": "1",
+            "actor": {"userName": "1", "realName": "1"},
             "body": {
                 "reviewers": [
                     {

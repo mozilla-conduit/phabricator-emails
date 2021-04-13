@@ -5,7 +5,7 @@
 from dataclasses import dataclass
 
 from phabricatoremails.mail import OutgoingEmail
-from phabricatoremails.render.events.common import ParseError, Recipient
+from phabricatoremails.render.events.common import ParseError, Recipient, Actor
 from phabricatoremails.render.events.phabricator import (
     Revision,
     RevisionAccepted,
@@ -151,7 +151,7 @@ class Render:
     ) -> list[OutgoingEmail]:
         """Turn the raw Phabricator context into outgoing emails."""
         batch = MailBatch(self._template_store)
-        actor_name = context["actorName"]
+        actor = Actor.parse(context["actor"])
         body = parse_body(context["eventKind"], is_secure, context["body"], batch)
         if is_secure:
             revision = SecureRevision.parse(context["revision"])
@@ -159,7 +159,7 @@ class Render:
             thread.email_count += 1
             return batch.process_secure(
                 revision,
-                actor_name,
+                actor,
                 thread.email_count,
                 timestamp,
                 body,
@@ -170,7 +170,7 @@ class Render:
             thread.email_count += 1
             return batch.process(
                 revision,
-                actor_name,
+                actor,
                 thread.email_count,
                 timestamp,
                 body,

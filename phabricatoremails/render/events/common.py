@@ -32,6 +32,16 @@ class CommentMessage:
 
 
 @dataclass
+class Actor:
+    user_name: str
+    real_name: str
+
+    @classmethod
+    def parse(cls, actor: dict):
+        return cls(actor["userName"], actor["realName"])
+
+
+@dataclass
 class Recipient:
     email: str
     username: str

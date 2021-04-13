@@ -4,7 +4,7 @@
 
 from datetime import timezone
 
-from phabricatoremails.render.events.common import Recipient
+from phabricatoremails.render.events.common import Recipient, Actor
 from phabricatoremails.render.events.phabricator import Revision, RevisionCreated
 from phabricatoremails.render.events.phabricator_secure import SecureRevision, SecureBug
 from phabricatoremails.render.mailbatch import (
@@ -14,6 +14,7 @@ from phabricatoremails.render.mailbatch import (
 )
 from tests.render.mock_template import MockTemplateStore
 
+ACTOR = Actor("actor", "actor")
 NON_ACTOR_RECIPIENT = Recipient("1@mail", "1", timezone.utc, False)
 PUBLIC_REVISION = Revision(1, "revision", "link", None)
 EVENT = RevisionCreated([], [])
@@ -23,7 +24,7 @@ def test_target():
     batch = MailBatch(MockTemplateStore())
     batch.target(Recipient("1@mail", "1", timezone.utc, False), "template-author")
     batch.target(Recipient("2@mail", "2", timezone.utc, False), "template-reviewer")
-    emails = batch.process(PUBLIC_REVISION, "actor", 0, 0, EVENT)
+    emails = batch.process(PUBLIC_REVISION, ACTOR, 0, 0, EVENT)
     assert len(emails) == 2
     assert emails[0].to == "1@mail"
     assert emails[1].to == "2@mail"
@@ -45,7 +46,7 @@ def test_target_many():
         ],
         "template-reviewer",
     )
-    emails = batch.process(PUBLIC_REVISION, "actor", 0, 0, EVENT)
+    emails = batch.process(PUBLIC_REVISION, ACTOR, 0, 0, EVENT)
     assert len(emails) == 4
     assert emails[0].to == "1@mail"
     assert emails[1].to == "2@mail"
@@ -63,7 +64,7 @@ def test_adds_targets():
         ],
         "template-reviewer",
     )
-    emails = batch.process(PUBLIC_REVISION, "actor", 0, 0, EVENT)
+    emails = batch.process(PUBLIC_REVISION, ACTOR, 0, 0, EVENT)
     assert len(emails) == 3
     assert emails[0].to == "1@mail"
     assert emails[1].to == "2@mail"
@@ -80,7 +81,7 @@ def test_only_sends_to_each_recipient_once():
         ],
         "template-reviewer",
     )
-    emails = batch.process(PUBLIC_REVISION, "actor", 0, 0, EVENT)
+    emails = batch.process(PUBLIC_REVISION, ACTOR, 0, 0, EVENT)
     assert len(emails) == 2
     assert emails[0].to == "1@mail"
     assert emails[1].to == "2@mail"
@@ -89,14 +90,14 @@ def test_only_sends_to_each_recipient_once():
 def test_filter_target_no_recipient():
     batch = MailBatch(MockTemplateStore())
     batch.target(None, "template-author")
-    emails = batch.process(PUBLIC_REVISION, "actor", 0, 0, EVENT)
+    emails = batch.process(PUBLIC_REVISION, ACTOR, 0, 0, EVENT)
     assert len(emails) == 0
 
 
 def test_filter_target_is_actor():
     batch = MailBatch(MockTemplateStore())
     batch.target(Recipient("1@mail", "1", timezone.utc, True), "template-author")
-    emails = batch.process(PUBLIC_REVISION, "actor", 0, 0, EVENT)
+    emails = batch.process(PUBLIC_REVISION, ACTOR, 0, 0, EVENT)
     assert len(emails) == 0
 
 
@@ -104,7 +105,7 @@ def test_process_public_event():
     store = MockTemplateStore()
     batch = MailBatch(store)
     batch.target(NON_ACTOR_RECIPIENT, "template-author")
-    emails = batch.process(PUBLIC_REVISION, "actor", 0, 0, EVENT)
+    emails = batch.process(PUBLIC_REVISION, ACTOR, 0, 0, EVENT)
     assert len(emails) == 1
     email = emails[0]
     assert email.subject == "D1: revision"
@@ -116,7 +117,7 @@ def test_process_secure_event():
     batch = MailBatch(store)
     batch.target(NON_ACTOR_RECIPIENT, "template-author")
     emails = batch.process_secure(
-        SecureRevision(2, "link", SecureBug(1, "bug link")), "actor", 0, 0, EVENT
+        SecureRevision(2, "link", SecureBug(1, "bug link")), ACTOR, 0, 0, EVENT
     )
     assert len(emails) == 1
     email = emails[0]
@@ -128,5 +129,5 @@ def test_passes_arguments_to_template():
     store = MockTemplateStore()
     batch = MailBatch(store)
     batch.target(NON_ACTOR_RECIPIENT, "template-author", extra_template_param="value")
-    batch.process(PUBLIC_REVISION, "actor", 0, 0, EVENT)
+    batch.process(PUBLIC_REVISION, ACTOR, 0, 0, EVENT)
     assert store.last_template_params()["extra_template_param"] == "value"

@@ -32,6 +32,7 @@ BODY = {
 def _create_public_context(revision_id: int = 1):
     return {
         "eventKind": RevisionUpdated.KIND,
+        "actor": {"userName": "actor", "realName": "actor"},
         "actorName": "actor",
         "revision": {"revisionId": revision_id, "name": "revision", "link": "link"},
         "body": BODY,
@@ -41,7 +42,7 @@ def _create_public_context(revision_id: int = 1):
 def _create_secure_context(revision_id: int, bug_id: int):
     return {
         "eventKind": RevisionUpdated.KIND,
-        "actorName": "actor",
+        "actor": {"userName": "actor", "realName": "actor"},
         "revision": {
             "revisionId": revision_id,
             "name": "revision",
