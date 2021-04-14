@@ -2,10 +2,8 @@
 
 {{- macros.secure_revision_info(revision) }}
 
-{{ actor_name }} updated this revision.
-
-Changes since last update:
-{{ event.new_changes_link }}
+{{ actor_name }} created this revision.
+{{- macros.reviewer_action(reviewer, revision) }}
 
 {{- macros.reviewers_status(event.reviewers) }}
 {{- macros.footer(recipient_username) }}

@@ -17,7 +17,7 @@ from tests.render.mock_template import MockTemplateStore
 ACTOR = Actor("actor", "actor")
 NON_ACTOR_RECIPIENT = Recipient("1@mail", "1", timezone.utc, False)
 PUBLIC_REVISION = Revision(1, "revision", "link", None)
-EVENT = RevisionCreated([], [])
+EVENT = RevisionCreated([], [], [])
 
 
 def test_target():
@@ -131,3 +131,11 @@ def test_passes_arguments_to_template():
     batch.target(NON_ACTOR_RECIPIENT, "template-author", extra_template_param="value")
     batch.process(PUBLIC_REVISION, ACTOR, 0, 0, EVENT)
     assert store.last_template_params()["extra_template_param"] == "value"
+
+
+def test_dont_override_target():
+    batch = MailBatch(MockTemplateStore())
+    batch.target(NON_ACTOR_RECIPIENT, "template-author")
+    batch.target(NON_ACTOR_RECIPIENT, "template-subscriber")
+    emails = batch.process(PUBLIC_REVISION, ACTOR, 0, 0, EVENT)
+    assert len(emails) == 1

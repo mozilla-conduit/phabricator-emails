@@ -1,0 +1,31 @@
+{% import '_macros.html.jinja2' as macros %}
+{{ macros.head() }}
+<div class="event-content">
+
+    {% call macros.preview(reviewer.is_actionable, unique_number) %}
+        {{ emoji("keyboard") | safe }}
+        {% if reviewer is accepted_reviewer %}
+            {{ actor_name }} updated this revision that you've accepted.
+        {% else %}
+            {{ actor_name }} updated this revision.
+        {% endif %}
+    {% endcall %}
+
+    {{ macros.title(revision) }}
+
+    <div class="summary">
+        <span class="emoji">{{ emoji("keyboard") | safe }}</span>
+        {% if reviewer is accepted_reviewer %}
+            <span class="text"><span><span class="actor">{{ actor_name }}</span> updated this revision that you've accepted</span></span>
+        {% else %}
+            <span class="text"><span><span class="actor">{{ actor_name }}</span> updated this revision</span></span>
+            {{ macros.reviewer_action(reviewer, revision) }}
+        {% endif %}
+    </div>
+
+    {{ macros.new_changes_link(event.new_changes_link) }}
+    {{ macros.reviewers_status(event.reviewers) }}
+    {{ macros.affected_files(event.affected_files) }}
+
+    {{ macros.footer(recipient_username, unique_number) }}
+</div>

@@ -181,6 +181,7 @@ class RevisionAbandoned:
     inline_comments: list[InlineComment]
     transaction_link: str
     reviewers: list[Recipient]
+    subscribers: list[Recipient]
 
     @classmethod
     def parse(cls, body: dict):
@@ -188,7 +189,8 @@ class RevisionAbandoned:
             CommentMessage.parse_optional(body.get("mainCommentMessage")),
             InlineComment.parse_many(body["inlineComments"]),
             body["transactionLink"],
-            [Recipient.parse(reviewer) for reviewer in body["reviewers"]],
+            Recipient.parse_many(body["reviewers"]),
+            Recipient.parse_many(body["subscribers"]),
         )
 
 
@@ -197,12 +199,14 @@ class RevisionCreated:
     KIND = "revision-created"
     affected_files: list[AffectedFile]
     reviewers: list[Reviewer]
+    subscribers: list[Recipient]
 
     @classmethod
     def parse(cls, body: dict):
         return cls(
             AffectedFile.parse_many(body["affectedFiles"]),
             Reviewer.parse_many(body["reviewers"]),
+            Recipient.parse_many(body["subscribers"]),
         )
 
 
@@ -213,6 +217,7 @@ class RevisionReclaimed:
     inline_comments: list[InlineComment]
     transaction_link: str
     reviewers: list[Reviewer]
+    subscribers: list[Recipient]
 
     @classmethod
     def parse(cls, body: dict):
@@ -220,7 +225,8 @@ class RevisionReclaimed:
             CommentMessage.parse_optional(body.get("mainCommentMessage")),
             InlineComment.parse_many(body["inlineComments"]),
             body["transactionLink"],
-            [Reviewer.parse(reviewer) for reviewer in body["reviewers"]],
+            Reviewer.parse_many(body["reviewers"]),
+            Recipient.parse_many(body["subscribers"]),
         )
 
 
@@ -234,6 +240,7 @@ class RevisionAccepted:
     is_ready_to_land: bool
     author: Optional[Recipient]
     reviewers: list[Recipient]
+    subscribers: list[Recipient]
 
     @classmethod
     def parse(cls, body: dict):
@@ -244,7 +251,8 @@ class RevisionAccepted:
             body.get("landoLink"),
             body["isReadyToLand"],
             Recipient.parse_optional(body.get("author")),
-            [Recipient.parse(reviewer) for reviewer in body["reviewers"]],
+            Recipient.parse_many(body["reviewers"]),
+            Recipient.parse_many(body["subscribers"]),
         )
 
 
@@ -256,6 +264,7 @@ class RevisionCommented:
     transaction_link: str
     author: Optional[Recipient]
     reviewers: list[Recipient]
+    subscribers: list[Recipient]
 
     @classmethod
     def parse(cls, body: dict):
@@ -264,7 +273,8 @@ class RevisionCommented:
             InlineComment.parse_many(body["inlineComments"]),
             body["transactionLink"],
             Recipient.parse_optional(body.get("author")),
-            [Recipient.parse(reviewer) for reviewer in body["reviewers"]],
+            Recipient.parse_many(body["reviewers"]),
+            Recipient.parse_many(body["subscribers"]),
         )
 
 
@@ -276,6 +286,7 @@ class RevisionLanded:
     transaction_link: str
     author: Optional[Recipient]
     reviewers: list[Recipient]
+    subscribers: list[Recipient]
 
     @classmethod
     def parse(cls, body: dict):
@@ -284,7 +295,8 @@ class RevisionLanded:
             InlineComment.parse_many(body["inlineComments"]),
             body["transactionLink"],
             Recipient.parse_optional(body.get("author")),
-            [Recipient.parse(reviewer) for reviewer in body["reviewers"]],
+            Recipient.parse_many(body["reviewers"]),
+            Recipient.parse_many(body["subscribers"]),
         )
 
 
@@ -314,6 +326,7 @@ class RevisionRequestedChanges:
     transaction_link: str
     author: Optional[Recipient]
     reviewers: list[Recipient]
+    subscribers: list[Recipient]
 
     @classmethod
     def parse(cls, body: dict):
@@ -322,7 +335,8 @@ class RevisionRequestedChanges:
             InlineComment.parse_many(body["inlineComments"]),
             body["transactionLink"],
             Recipient.parse_optional(body.get("author")),
-            [Recipient.parse(reviewer) for reviewer in body["reviewers"]],
+            Recipient.parse_many(body["reviewers"]),
+            Recipient.parse_many(body["subscribers"]),
         )
 
 
@@ -333,6 +347,7 @@ class RevisionRequestedReview:
     inline_comments: list[InlineComment]
     transaction_link: str
     reviewers: list[Reviewer]
+    subscribers: list[Recipient]
 
     @classmethod
     def parse(cls, body: dict):
@@ -341,6 +356,7 @@ class RevisionRequestedReview:
             InlineComment.parse_many(body["inlineComments"]),
             body["transactionLink"],
             Reviewer.parse_many(body["reviewers"]),
+            Recipient.parse_many(body["subscribers"]),
         )
 
 
@@ -352,6 +368,7 @@ class RevisionMetadataEdited:
     is_bug_changed: bool
     author: Optional[Recipient]
     reviewers: list[MetadataEditedReviewer]
+    subscribers: list[Recipient]
 
     @classmethod
     def parse(cls, body: dict):
@@ -361,6 +378,7 @@ class RevisionMetadataEdited:
             body["isBugChanged"],
             Recipient.parse_optional(body.get("author")),
             MetadataEditedReviewer.parse_many(body["reviewers"]),
+            Recipient.parse_many(body["subscribers"]),
         )
 
 
@@ -371,6 +389,7 @@ class RevisionUpdated:
     new_changes_link: str
     affected_files: list[AffectedFile]
     reviewers: list[Reviewer]
+    subscribers: list[Recipient]
 
     @classmethod
     def parse(cls, body: dict):
@@ -379,4 +398,5 @@ class RevisionUpdated:
             body["newChangesLink"],
             AffectedFile.parse_many(body["affectedFiles"]),
             Reviewer.parse_many(body["reviewers"]),
+            Recipient.parse_many(body["subscribers"]),
         )

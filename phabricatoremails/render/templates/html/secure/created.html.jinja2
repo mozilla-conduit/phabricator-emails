@@ -2,7 +2,7 @@
 {{ macros.head() }}
 <div class="event-content">
 
-    {% call macros.preview(reviewer.is_actionable, unique_number) %}
+    {% call macros.preview(False, unique_number) %}
         {{ emoji("keyboard") | safe }} {{ actor_name }} created this revision.
     {% endcall %}
 
@@ -11,7 +11,6 @@
     <div class="summary">
         <span class="emoji">{{ emoji("keyboard") | safe }}</span>
         <span class="text"><span><span class="actor">{{ actor_name }}</span> created this revision</span></span>
-        {{ macros.reviewer_action(reviewer, revision) }}
     </div>
 
     {{ macros.reviewers_status(event.reviewers) }}

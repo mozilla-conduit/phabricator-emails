@@ -2,7 +2,7 @@
 {{ macros.head() }}
 <div class="event-content">
 
-    {% call macros.preview(reviewer.is_actionable, unique_number) %}
+    {% call macros.preview(False, unique_number) %}
         {{ emoji("circle_arrows") | safe }} {{ actor_name }} requested a review {{- event | comment_summary }}.
     {% endcall %}
 
@@ -12,7 +12,6 @@
         <span class="emoji">{{ emoji("circle_arrows") | safe }}</span>
         <span class="text"><span><span
                 class="actor">{{ actor_name }}</span> requested a review {{- event | comment_summary }}</span></span>
-        {{ macros.reviewer_action(reviewer, revision) }}
     </div>
 
     {% if event is commented_on %}

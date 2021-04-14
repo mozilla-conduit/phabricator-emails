@@ -2,7 +2,12 @@
 
 {{- macros.revision_info(revision) }}
 
-{{ actor_name }} updated this revision.
+{% if reviewer is accepted_reviewer %}
+{{- actor_name }} updated this revision that you've accepted.
+{%- else %}
+{{- actor_name }} updated this revision.
+{{- macros.reviewer_action(reviewer, revision) }}
+{%- endif %}
 
 Changes since last update:
 {{ event.new_changes_link }}

@@ -3,7 +3,6 @@
 {{- macros.secure_revision_info(revision) }}
 
 {{ actor_name }} requested a review {{- event | secure_comment_summary }}.
-{{- macros.reviewer_action(reviewer, revision) }}
 
 {{- macros.reviewers_status(event.reviewers) }}
 {{- macros.footer(recipient_username) }}
