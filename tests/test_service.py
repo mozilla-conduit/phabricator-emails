@@ -78,6 +78,14 @@ def test_integration_pipeline():
                                     ],
                                 },
                             ],
+                            "subscribers": [
+                                {
+                                    "email": "3@mail",
+                                    "username": "3",
+                                    "timezoneOffset": 0,
+                                    "isActor": False,
+                                }
+                            ],
                             "commentCount": 1,
                             "transactionLink": "link",
                         },
@@ -101,6 +109,7 @@ def test_integration_pipeline():
                                     "isActor": False,
                                 }
                             ],
+                            "subscribers": [],
                             "mainCommentMessage": {
                                 "asText": "Main comment",
                                 "asHtml": "<p>Main comment</p>",
@@ -204,6 +213,7 @@ def test_pipeline_skips_events_that_fail_to_render_and_have_no_minimal_context()
                                     ],
                                 }
                             ],
+                            "subscribers": [],
                             "commentCount": 1,
                             "transactionLink": "link",
                         },
@@ -333,6 +343,7 @@ def test_retries_failed_full_sends_with_minimal_emails(send_emails_fn):
                         ],
                     }
                 ],
+                "subscribers": [],
                 "commentCount": 1,
                 "transactionLink": "link",
             },

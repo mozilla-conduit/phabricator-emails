@@ -2,19 +2,18 @@
 {{ macros.head() }}
 <div class="event-content">
 
-    {% call macros.preview(False, unique_number) %}
-        {{ emoji("keyboard") | safe }}
-        {{ actor_name }} updated this revision.
+    {% call macros.preview(reviewer.is_actionable, unique_number) %}
+        {{ emoji("keyboard") | safe }} {{ actor_name }} created this revision.
     {% endcall %}
 
     {{ macros.title(revision) }}
 
     <div class="summary">
         <span class="emoji">{{ emoji("keyboard") | safe }}</span>
-        <span class="text"><span><span class="actor">{{ actor_name }}</span> updated this revision</span></span>
+        <span class="text"><span><span class="actor">{{ actor_name }}</span> created this revision</span></span>
+        {{ macros.reviewer_action(reviewer, revision) }}
     </div>
 
-    {{ macros.new_changes_link(event.new_changes_link) }}
     {{ macros.reviewers_status(event.reviewers) }}
     {{ macros.affected_files(event.affected_files) }}
 

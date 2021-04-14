@@ -26,6 +26,7 @@ BODY = {
             ],
         }
     ],
+    "subscribers": [],
 }
 
 

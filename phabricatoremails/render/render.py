@@ -48,12 +48,13 @@ def parse_body(kind: str, is_secure: bool, raw_body: dict, batch: MailBatch):
             body = RevisionAccepted.parse(raw_body)
 
         batch.target(body.author, "accepted-as-author")
-        batch.target_many(body.reviewers, "accepted-as-reviewer")
+        batch.target_many(body.reviewers, "accepted")
+        batch.target_many(body.subscribers, "accepted")
     elif kind == RevisionMetadataEdited.KIND:
         # There's no "insecure" variant for when metadata is edited
         body = RevisionMetadataEdited.parse(raw_body)
 
-        batch.target(body.author, "edited-metadata-as-author")
+        batch.target(body.author, "edited-metadata")
         for reviewer in body.reviewers:
             if reviewer.metadata_change == ExistenceChange.ADDED:
                 batch.target_many(
@@ -67,6 +68,7 @@ def parse_body(kind: str, is_secure: bool, raw_body: dict, batch: MailBatch):
                     "edited-metadata-as-reviewer",
                     reviewer=reviewer,
                 )
+        batch.target_many(body.subscribers, "edited-metadata")
     elif kind == RevisionCommented.KIND:
         if is_secure:
             body = SecureRevisionCommented.parse(raw_body)
@@ -75,6 +77,7 @@ def parse_body(kind: str, is_secure: bool, raw_body: dict, batch: MailBatch):
 
         batch.target(body.author, "commented")
         batch.target_many(body.reviewers, "commented")
+        batch.target_many(body.subscribers, "commented")
     elif kind == RevisionLanded.KIND:
         if is_secure:
             body = SecureRevisionLanded.parse(raw_body)
@@ -82,6 +85,7 @@ def parse_body(kind: str, is_secure: bool, raw_body: dict, batch: MailBatch):
             body = RevisionLanded.parse(raw_body)
         batch.target(body.author, "landed")
         batch.target_many(body.reviewers, "landed")
+        batch.target_many(body.subscribers, "landed")
     elif kind == RevisionCommentPinged.KIND:
         if is_secure:
             body = SecureRevisionCommentPinged.parse(raw_body)
@@ -95,16 +99,19 @@ def parse_body(kind: str, is_secure: bool, raw_body: dict, batch: MailBatch):
             body = RevisionRequestedChanges.parse(raw_body)
 
         batch.target(body.author, "requested-changes-as-author")
-        batch.target_many(body.reviewers, "requested-changes-as-reviewer")
+        batch.target_many(body.reviewers, "requested-changes")
+        batch.target_many(body.subscribers, "requested-changes")
     elif kind == RevisionRequestedReview.KIND:
         if is_secure:
             body = SecureRevisionRequestedReview.parse(raw_body)
         else:
             body = RevisionRequestedReview.parse(raw_body)
+
         for reviewer in body.reviewers:
             batch.target_many(
-                reviewer.recipients, "requested-review", reviewer=reviewer
+                reviewer.recipients, "requested-review-as-reviewer", reviewer=reviewer
             )
+        batch.target_many(body.subscribers, "requested-review")
     elif kind == RevisionUpdated.KIND:
         if is_secure:
             body = SecureRevisionUpdated.parse(raw_body)
@@ -112,13 +119,17 @@ def parse_body(kind: str, is_secure: bool, raw_body: dict, batch: MailBatch):
             body = RevisionUpdated.parse(raw_body)
 
         for reviewer in body.reviewers:
-            batch.target_many(reviewer.recipients, "updated", reviewer=reviewer)
+            batch.target_many(
+                reviewer.recipients, "updated-as-reviewer", reviewer=reviewer
+            )
+        batch.target_many(body.subscribers, "updated")
     elif kind == RevisionAbandoned.KIND:
         if is_secure:
             body = SecureRevisionAbandoned.parse(raw_body)
         else:
             body = RevisionAbandoned.parse(raw_body)
         batch.target_many(body.reviewers, "abandoned")
+        batch.target_many(body.subscribers, "abandoned")
     elif kind == RevisionReclaimed.KIND:
         if is_secure:
             body = SecureRevisionReclaimed.parse(raw_body)
@@ -126,14 +137,21 @@ def parse_body(kind: str, is_secure: bool, raw_body: dict, batch: MailBatch):
             body = RevisionReclaimed.parse(raw_body)
 
         for reviewer in body.reviewers:
-            batch.target_many(reviewer.recipients, "reclaimed", reviewer=reviewer)
+            batch.target_many(
+                reviewer.recipients, "reclaimed-as-reviewer", reviewer=reviewer
+            )
+        batch.target_many(body.subscribers, "reclaimed")
     elif kind == RevisionCreated.KIND:
         if is_secure:
             body = SecureRevisionCreated.parse(raw_body)
         else:
             body = RevisionCreated.parse(raw_body)
+
         for reviewer in body.reviewers:
-            batch.target_many(reviewer.recipients, "created", reviewer=reviewer)
+            batch.target_many(
+                reviewer.recipients, "created-as-reviewer", reviewer=reviewer
+            )
+        batch.target_many(body.subscribers, "created")
     else:
         raise ParseError(f"Unexpected revision event kind: {kind}")
 

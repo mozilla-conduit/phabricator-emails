@@ -40,13 +40,15 @@ class SecureRevision:
 @dataclass
 class SecureRevisionAbandoned:
     reviewers: list[Recipient]
+    subscribers: list[Recipient]
     comment_count: int
     transaction_link: str
 
     @classmethod
     def parse(cls, body: dict):
         return cls(
-            [Recipient.parse(reviewer) for reviewer in body["reviewers"]],
+            Recipient.parse_many(body["reviewers"]),
+            Recipient.parse_many(body["subscribers"]),
             body["commentCount"],
             body["transactionLink"],
         )
@@ -55,22 +57,28 @@ class SecureRevisionAbandoned:
 @dataclass
 class SecureRevisionCreated:
     reviewers: list[Reviewer]
+    subscribers: list[Recipient]
 
     @classmethod
     def parse(cls, body: dict):
-        return cls(Reviewer.parse_many(body["reviewers"]))
+        return cls(
+            Reviewer.parse_many(body["reviewers"]),
+            Recipient.parse_many(body["subscribers"]),
+        )
 
 
 @dataclass
 class SecureRevisionReclaimed:
     reviewers: list[Reviewer]
+    subscribers: list[Recipient]
     comment_count: int
     transaction_link: str
 
     @classmethod
     def parse(cls, body: dict):
         return cls(
-            [Reviewer.parse(reviewer) for reviewer in body["reviewers"]],
+            Reviewer.parse_many(body["reviewers"]),
+            Recipient.parse_many(body["subscribers"]),
             body["commentCount"],
             body["transactionLink"],
         )
@@ -82,6 +90,7 @@ class SecureRevisionAccepted:
     is_ready_to_land: bool
     author: Optional[Recipient]
     reviewers: list[Recipient]
+    subscribers: list[Recipient]
     comment_count: int
     transaction_link: str
 
@@ -91,7 +100,8 @@ class SecureRevisionAccepted:
             body.get("landoLink"),
             body["isReadyToLand"],
             Recipient.parse_optional(body.get("author")),
-            [Recipient.parse(reviewer) for reviewer in body["reviewers"]],
+            Recipient.parse_many(body["reviewers"]),
+            Recipient.parse_many(body["subscribers"]),
             body["commentCount"],
             body["transactionLink"],
         )
@@ -101,13 +111,15 @@ class SecureRevisionAccepted:
 class SecureRevisionCommented:
     author: Optional[Recipient]
     reviewers: list[Recipient]
+    subscribers: list[Recipient]
     transaction_link: str
 
     @classmethod
     def parse(cls, body: dict):
         return cls(
             Recipient.parse_optional(body.get("author")),
-            [Recipient.parse(reviewer) for reviewer in body["reviewers"]],
+            Recipient.parse_many(body["reviewers"]),
+            Recipient.parse_many(body["subscribers"]),
             body["transactionLink"],
         )
 
@@ -116,6 +128,7 @@ class SecureRevisionCommented:
 class SecureRevisionLanded:
     author: Optional[Recipient]
     reviewers: list[Recipient]
+    subscribers: list[Recipient]
     comment_count: int
     transaction_link: str
 
@@ -123,7 +136,8 @@ class SecureRevisionLanded:
     def parse(cls, body: dict):
         return cls(
             Recipient.parse_optional(body.get("author")),
-            [Recipient.parse(reviewer) for reviewer in body["reviewers"]],
+            Recipient.parse_many(body["reviewers"]),
+            Recipient.parse_many(body["subscribers"]),
             body["commentCount"],
             body["transactionLink"],
         )
@@ -146,6 +160,7 @@ class SecureRevisionCommentPinged:
 class SecureRevisionRequestedChanges:
     author: Optional[Recipient]
     reviewers: list[Recipient]
+    subscribers: list[Recipient]
     comment_count: int
     transaction_link: str
 
@@ -153,7 +168,8 @@ class SecureRevisionRequestedChanges:
     def parse(cls, body: dict):
         return cls(
             Recipient.parse_optional(body.get("author")),
-            [Recipient.parse(reviewer) for reviewer in body["reviewers"]],
+            Recipient.parse_many(body["reviewers"]),
+            Recipient.parse_many(body["subscribers"]),
             body["commentCount"],
             body["transactionLink"],
         )
@@ -162,6 +178,7 @@ class SecureRevisionRequestedChanges:
 @dataclass
 class SecureRevisionRequestedReview:
     reviewers: list[Reviewer]
+    subscribers: list[Recipient]
     comment_count: int
     transaction_link: str
 
@@ -169,6 +186,7 @@ class SecureRevisionRequestedReview:
     def parse(cls, body: dict):
         return cls(
             Reviewer.parse_many(body["reviewers"]),
+            Recipient.parse_many(body["subscribers"]),
             body["commentCount"],
             body["transactionLink"],
         )
@@ -179,6 +197,7 @@ class SecureRevisionUpdated:
     is_ready_to_land: bool
     new_changes_link: str
     reviewers: list[Reviewer]
+    subscribers: list[Recipient]
 
     @classmethod
     def parse(cls, body: dict):
@@ -186,4 +205,5 @@ class SecureRevisionUpdated:
             body["isReadyToLand"],
             body["newChangesLink"],
             Reviewer.parse_many(body["reviewers"]),
+            Recipient.parse_many(body["subscribers"]),
         )

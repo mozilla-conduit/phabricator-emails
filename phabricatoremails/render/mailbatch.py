@@ -48,8 +48,15 @@ class MailBatch:
         The email contents will be rendered from the provided template and sent
         to the provided recipient. Additional parameters can be made available to the
         template using kwargs.
+
+        Each recipient can only be targeted once per MailBatch. Attempts to target
+        the same recipient multiple times are ignored (the first template + args are
+        used).
         """
         if not recipient or recipient.is_actor:
+            return
+
+        if recipient.email in self._targets:
             return
 
         kwargs["recipient_timezone"] = recipient.timezone
