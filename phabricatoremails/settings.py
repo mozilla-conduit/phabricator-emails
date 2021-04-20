@@ -109,6 +109,7 @@ class Settings:
     sentry_dsn: str
     db_url: str
     is_dev: bool
+    temporary_mail_error_retry_seconds: int
     _config: ConfigParser
 
     def __init__(self, config: ConfigParser):
@@ -123,6 +124,9 @@ class Settings:
         self.sentry_dsn = config.get("sentry", "dsn", fallback="")
         self.db_url = config.get("db", "url")
         self.is_dev = is_dev
+        self.temporary_mail_error_retry_seconds = int(
+            config.get("mail", "temporary_retry_delay_seconds", fallback="30")
+        )
         self._config = config
 
     def db(self):

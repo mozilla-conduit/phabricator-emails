@@ -117,6 +117,8 @@ url=[!] postgresql://dev:dev@127.0.0.1/phabricator_emails
 from_address=phabricator@mozilla.com
 ; chooses which email implementation to use. Possible options are "fs", "smtp" and "ses"
 implementation=fs
+; time before retrying to send an email if a temporary error is encountered
+temporary_error_retry_delay_seconds=[optional] [default=30]
 
 ; one of the following three [email-*] sections need to be uncommented so that "phabricator-emails" knows
 ; which email driver to use.
