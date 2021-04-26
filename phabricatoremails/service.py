@@ -3,7 +3,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import enum
 import time
-import traceback
 from dataclasses import dataclass, field
 from enum import Enum
 from logging import Logger
@@ -21,6 +20,7 @@ from phabricatoremails.constants import (
     STAT_FAILED_TO_SEND_MINIMAL_CONTEXT_MAIL,
 )
 from phabricatoremails.db import DBNotInitializedError
+from phabricatoremails.exception import render_exception
 from phabricatoremails.mail import FsMail, SendEmailState, OutgoingEmail
 from phabricatoremails.render.render import Render
 from phabricatoremails.render.template import TemplateStore
@@ -47,7 +47,7 @@ class ProcessEventResult:
 
 
 def _report_render_failure(logger: Logger, e: Exception):
-    logger.warning(traceback.format_exc())
+    logger.warning(render_exception(e))
     sentry_sdk.capture_exception(e)
 
 
@@ -83,7 +83,7 @@ def _send_emails(
                 time.sleep(retry_delay_seconds)
                 continue  # retry sending this email
             elif result.status == SendEmailState.PERMANENT_FAILURE:
-                logger.warning(traceback.format_exc())
+                logger.warning(render_exception(result.exception))
                 sentry_sdk.capture_exception(result.exception)
                 failed_recipients.append(email.to)
             break
