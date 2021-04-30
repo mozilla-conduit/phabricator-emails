@@ -141,6 +141,11 @@ send_to=[optional] developer@mail.com
 [email-ses]
 aws_access_key_id=[!] [optional] token
 aws_secret_access_key=[!] [optional] token
+# The aws_session_token is only needed if using credentials that require MFA validation
+# to be accepted. It can be obtained by running:
+# $ aws sts get-session-token --serial-number <serial> --token-code <token>
+# See the docs here: https://docs.aws.amazon.com/cli/latest/reference/sts/get-session-token.html
+aws_session_token=[!] [optional] token
 
 ; this section is for local development options. If "phabricator-emails" sees the "[dev]" header, it will
 ; print logs in plaintext, rather than in JSON, which is far easier for debugging/readability. 

@@ -159,6 +159,7 @@ class SesMail:
         send_to: Optional[str],
         aws_access_key_id: Optional[str] = None,
         aws_secret_access_key: Optional[str] = None,
+        aws_session_token: Optional[str] = None,
     ):
         """Automatically creates an SES client.
 
@@ -173,6 +174,7 @@ class SesMail:
             "ses",
             aws_access_key_id=aws_access_key_id,
             aws_secret_access_key=aws_secret_access_key,
+            aws_session_token=aws_session_token,
         )
         return cls(client, from_address, logger, send_to)
 
