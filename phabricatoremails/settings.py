@@ -78,8 +78,14 @@ def _parse_mail(config: ConfigParser, logger: Logger):
         aws_secret_access_key = config.get(
             "email-ses", "aws_secret_access_key", fallback=None
         )
+        aws_session_token = config.get("email-ses", "aws_session_token", fallback=None)
         return SesMail.from_aws_credentials(
-            from_address, logger, send_to, aws_access_key_id, aws_secret_access_key
+            from_address,
+            logger,
+            send_to,
+            aws_access_key_id,
+            aws_secret_access_key,
+            aws_session_token,
         )
 
     if implementation == "smtp":
