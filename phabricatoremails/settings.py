@@ -8,14 +8,14 @@ import smtplib
 from configparser import ConfigParser
 from dataclasses import dataclass
 from logging import Logger
-from typing import Any
+from typing import Protocol
 
 from phabricatoremails import PACKAGE_DIRECTORY
 from phabricatoremails.db import DB
 from phabricatoremails.logging import create_dev_logger, create_logger
-from phabricatoremails.mail import SesMail, SmtpMail, FsMail
-from phabricatoremails.worker import RunOnceWorker, PhabricatorWorker
-from phabricatoremails.source import FileSource, PhabricatorSource
+from phabricatoremails.mail import SesMail, SmtpMail, FsMail, Mail
+from phabricatoremails.worker import RunOnceWorker, PhabricatorWorker, Worker
+from phabricatoremails.source import FileSource, PhabricatorSource, Source
 from sqlalchemy import create_engine
 
 
@@ -93,16 +93,34 @@ def _parse_mail(config: ConfigParser, logger: Logger):
         return FsMail(from_address, logger, pathlib.Path(output).resolve())
 
 
+class Settings(Protocol):
+    source: Source
+    worker: Worker
+    bugzilla_host: str
+    phabricator_host: str
+    logger: Logger
+    sentry_dsn: str
+    db_url: str
+    is_dev: bool
+    temporary_mail_error_retry_seconds: int
+
+    def db(self) -> DB:
+        pass
+
+    def mail(self) -> Mail:
+        pass
+
+
 @dataclass
-class Settings:
+class IniSettings:
     """Stores and parses configuration the settings INI file.
 
     Some values are lazy-loaded from functions (instead of properties) because
     they may have side-effects, such as connecting to an SMTP server.
     """
 
-    source: Any
-    worker: Any
+    source: Source
+    worker: Worker
     bugzilla_host: str
     phabricator_host: str
     logger: Logger

@@ -5,9 +5,18 @@
 import json
 import pathlib
 from dataclasses import dataclass
+from typing import Protocol, Dict
 
 import requests
 from requests import RequestException
+
+
+class Source(Protocol):
+    def fetch_feed_end(self) -> int:
+        pass
+
+    def fetch_next(self, after: int) -> Dict:
+        pass
 
 
 class PhabricatorException(Exception):

@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 from phabricatoremails.db import DBInitializedError
-from phabricatoremails.query_position_store import QueryPositionStore
+from phabricatoremails.query_position_store import DBQueryPositionStore
 from phabricatoremails.settings import Settings
 
 
@@ -32,7 +32,7 @@ def prepare(settings: Settings):
     db.upgrade_schema()
 
     with db.session() as db_session:
-        worker.set_initial_position(QueryPositionStore(db_session), end_key)
+        worker.set_initial_position(DBQueryPositionStore(db_session), end_key)
 
     settings.logger.info(
         f'Database initialized, current Phabricator position is "{end_key}".'

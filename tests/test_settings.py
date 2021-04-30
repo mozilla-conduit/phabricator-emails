@@ -5,8 +5,8 @@
 import configparser
 from configparser import ConfigParser
 from io import StringIO
-from typing import Any
 from unittest import mock
+from unittest.mock import Mock
 
 import pytest
 
@@ -16,7 +16,7 @@ from phabricatoremails.settings import (
     _parse_logger,
     _parse_pipeline,
     _parse_mail,
-    Settings,
+    IniSettings,
 )
 from phabricatoremails.source import FileSource, PhabricatorSource
 from phabricatoremails.worker import RunOnceWorker, PhabricatorWorker
@@ -46,7 +46,7 @@ def test_parse_file_pipeline():
     file=example.json
     """
     )
-    source, worker = _parse_pipeline(config, Any, True)
+    source, worker = _parse_pipeline(config, Mock(), True)
     assert isinstance(source, FileSource)
     assert isinstance(worker, RunOnceWorker)
 
@@ -62,7 +62,7 @@ def test_parse_run_once_pipeline():
     since_key=10
     """
     )
-    source, worker = _parse_pipeline(config, Any, True)
+    source, worker = _parse_pipeline(config, Mock(), True)
     assert isinstance(source, PhabricatorSource)
     assert isinstance(worker, RunOnceWorker)
 
@@ -79,7 +79,7 @@ def test_parse_production_pipeline():
     story_limit=10
     """
     )
-    source, worker = _parse_pipeline(config, Any, True)
+    source, worker = _parse_pipeline(config, Mock(), True)
     assert isinstance(source, PhabricatorSource)
     assert isinstance(worker, PhabricatorWorker)
 
@@ -96,7 +96,7 @@ def test_parse_ses_mail(mock_boto3_client):
     [email-ses]
     """
     )
-    mail = _parse_mail(config, Any)
+    mail = _parse_mail(config, Mock())
     assert isinstance(mail, SesMail)
 
 
@@ -113,7 +113,7 @@ def test_parse_smtp_mail(mock_smtp):
     host=smtp-host
     """
     )
-    mail = _parse_mail(config, Any)
+    mail = _parse_mail(config, Mock())
     assert isinstance(mail, SmtpMail)
 
 
@@ -147,7 +147,7 @@ def test_settings():
     url=postgres://db
     """
     )
-    settings = Settings(config)
+    settings = IniSettings(config)
     assert settings.phabricator_host == "phabricator.host"
     assert settings.bugzilla_host == "bugzilla.host"
 
@@ -160,4 +160,4 @@ def test_settings_missing_property_throws_error():
         """
     )
     with pytest.raises(configparser.Error):
-        Settings(config)
+        IniSettings(config)

@@ -11,9 +11,10 @@ from email.mime.text import MIMEText
 from email.utils import formatdate
 from enum import Enum
 from logging import Logger
-from typing import Optional, Any
+from typing import Optional, Protocol
 
 import boto3
+from mypy_boto3_ses import SESClient
 
 
 class SendEmailState(Enum):
@@ -54,6 +55,11 @@ class OutgoingEmail:
         msg.attach(MIMEText(self.text_contents, "plain"))
         msg.attach(MIMEText(self.html_contents, "html"))
         return msg
+
+
+class Mail(Protocol):
+    def send(self, email: OutgoingEmail) -> SendEmailResult:
+        pass
 
 
 class FsMail:
@@ -140,7 +146,7 @@ class SmtpMail:
 class SesMail:
     """Sends emails via Amazon SES."""
 
-    _client: Any
+    _client: SESClient
     _from_address: str
     _logger: Logger
     _send_to: Optional[str]

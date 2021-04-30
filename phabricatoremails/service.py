@@ -6,7 +6,7 @@ import time
 from dataclasses import dataclass, field
 from enum import Enum
 from logging import Logger
-from typing import Any, List, Optional
+from typing import List, Optional
 
 import jinja2
 import sentry_sdk
@@ -21,11 +21,11 @@ from phabricatoremails.constants import (
 )
 from phabricatoremails.db import DBNotInitializedError
 from phabricatoremails.exception import render_exception
-from phabricatoremails.mail import FsMail, SendEmailState, OutgoingEmail
+from phabricatoremails.mail import FsMail, SendEmailState, OutgoingEmail, Mail
 from phabricatoremails.render.render import Render
-from phabricatoremails.render.template import TemplateStore
+from phabricatoremails.render.template import JinjaTemplateStore
 from phabricatoremails.settings import Settings
-from phabricatoremails.source import PhabricatorException
+from phabricatoremails.source import PhabricatorException, Source
 from phabricatoremails.thread_store import ThreadStore
 from statsd import StatsClient
 
@@ -282,10 +282,10 @@ def process_event(
 class Pipeline:
     """Fetch events from Phabricator and emails accordingly."""
 
-    _source: Any
-    _render: Any
-    _mail: Any
-    _logger: Any
+    _source: Source
+    _render: Render
+    _mail: Mail
+    _logger: Logger
     _retry_delay_seconds: int
     _stats: StatsClient
     _is_dev: bool
@@ -353,7 +353,7 @@ def service(settings: Settings, stats: StatsClient):
 
     raw_css_path = PACKAGE_DIRECTORY / "render/templates/html/style.css"
     css_text = raw_css_path.read_text()
-    template_store = TemplateStore(
+    template_store = JinjaTemplateStore(
         settings.phabricator_host,
         css_text,
         # Keep CSS classes when outputting to local files, since that indicates local

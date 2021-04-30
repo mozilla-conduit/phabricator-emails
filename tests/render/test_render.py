@@ -113,14 +113,14 @@ def test_unique_number_is_different_for_each_thread_email():
     render.process_event_to_emails_with_full_context(
         False, 123, _create_public_context(1), thread_store
     )
-    assert template_store.last_template_params["unique_number"] == 1
+    assert template_store.last_template_params()["unique_number"] == 1
 
     render.process_event_to_emails_with_full_context(
         False, 123, _create_public_context(1), thread_store
     )
-    assert template_store.last_template_params["unique_number"] == 2
+    assert template_store.last_template_params()["unique_number"] == 2
 
     render.process_event_to_emails_with_full_context(
         False, 123, _create_public_context(2), thread_store
     )
-    assert template_store.last_template_params["unique_number"] == 1
+    assert template_store.last_template_params()["unique_number"] == 1

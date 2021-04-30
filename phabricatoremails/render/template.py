@@ -5,7 +5,7 @@
 import textwrap
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any
+from typing import Protocol
 
 import jinja2
 from phabricatoremails.render.events.common import Reviewer, ReviewerStatus
@@ -193,7 +193,7 @@ class Template:
     with complex email clients.
     """
 
-    _css_inline: Any
+    _css_inline: Premailer
     _html_template: jinja2.Template
     _text_template: jinja2.Template
 
@@ -204,7 +204,12 @@ class Template:
         return self._css_inline.transform(html, False), text
 
 
-class TemplateStore:
+class TemplateStore(Protocol):
+    def get(self, template_path: str) -> Template:
+        pass
+
+
+class JinjaTemplateStore:
     """Configures Jinja and exposes the templates.
 
     There's two sets of templates: text and html. Each set has its own

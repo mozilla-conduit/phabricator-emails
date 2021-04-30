@@ -22,7 +22,7 @@ from phabricatoremails.render.events.phabricator import (
 )
 from phabricatoremails.render.mailbatch import PUBLIC_TEMPLATE_PATH_PREFIX
 from phabricatoremails.render.template import (
-    TemplateStore,
+    JinjaTemplateStore,
     Template,
     _jinja_html,
     _jinja_text,
@@ -48,7 +48,7 @@ def test_templates_end_with_newline():
 
 
 def test_integration_templates():
-    template_store = TemplateStore("", "", False)
+    template_store = JinjaTemplateStore("", "", False)
     template = template_store.get(PUBLIC_TEMPLATE_PATH_PREFIX + "pinged")
 
     html, text = template.render(
@@ -73,7 +73,7 @@ def test_integration_templates():
 
 
 def test_template_throws_error_if_invalid_template():
-    template_store = TemplateStore("", "", False)
+    template_store = JinjaTemplateStore("", "", False)
     with pytest.raises(TemplateNotFound):
         template_store.get(PUBLIC_TEMPLATE_PATH_PREFIX + "invalid")
 
@@ -94,7 +94,7 @@ def test_template_is_rendered_with_parameters():
 
 
 def test_css_is_inlined():
-    template_store = TemplateStore(
+    template_store = JinjaTemplateStore(
         "",
         ".custom-class { display: none }",
         False,
@@ -127,7 +127,7 @@ def test_html_environment():
     date = datetime.fromtimestamp(10000, timezone.utc)
     html = template.render(
         {
-            "comment_context": ReplyContext("author", date, "comment"),
+            "comment_context": ReplyContext("author", date, CommentMessage("", "")),
             "timezone": timezone(timedelta(hours=-7)),
         }
     )
@@ -146,7 +146,7 @@ def test_text_environment():
     template = jinja_env.get_template("example.text.jinja2")
     text = template.render(
         {
-            "reviewer": Reviewer("reviewer", False, ReviewerStatus.ACCEPTED, None),
+            "reviewer": Reviewer("reviewer", False, ReviewerStatus.ACCEPTED, []),
             "raw_comment": "this is a long comment with a lot of text. This is to test "
             "that wrapping happens correctly when rendered down to text. ",
         }
