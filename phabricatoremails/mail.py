@@ -205,10 +205,10 @@ class SesMail:
             # https://docs.aws.amazon.com/ses/latest/APIReference/API_SendRawEmail.html#API_SendRawEmail_Errors  # noqa
             error_code = error.response["Error"]["Code"]
             if error_code in (
-                "AccountSendingPaused",
+                "AccountSendingPausedException",
                 "ConfigurationSetDoesNotExist",
-                "ConfigurationSetSendingPaused",
-                "MailFromDomainNotVerified",
+                "ConfigurationSetSendingPausedException",
+                "MailFromDomainNotVerifiedException",
             ):
                 return SendEmailResult(
                     SendEmailState.TEMPORARY_FAILURE, error_code, error

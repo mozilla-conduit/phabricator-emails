@@ -125,7 +125,7 @@ class Settings:
         self.db_url = config.get("db", "url")
         self.is_dev = is_dev
         self.temporary_mail_error_retry_seconds = int(
-            config.get("mail", "temporary_retry_delay_seconds", fallback="30")
+            config.get("email", "temporary_error_retry_delay_seconds", fallback="30")
         )
         self._config = config
 
