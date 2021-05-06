@@ -3,20 +3,15 @@
 <div class="event-content">
 
     {% call macros.preview(false, unique_number) %}
-        {{ emoji("airplane_arrival") | safe }} {{ actor_name }} landed this revision {{- event | secure_comment_summary }}.
+        {{ emoji("airplane_arrival") | safe }} Revision has landed.
     {% endcall %}
 
     {{ macros.secure_title(revision) }}
 
     <div class="summary">
         <span class="emoji">{{ emoji("airplane_arrival") | safe }}</span>
-        <span class="text"><span><span
-                class="actor">{{ actor_name }}</span> landed this revision {{- event | secure_comment_summary }}</span></span>
+        <span class="text">Revision has landed</span>
     </div>
-
-    {% if event is commented_on_secure %}
-        {{ macros.comments_link(event.transaction_link) }}
-    {% endif %}
 
     {{ macros.footer(recipient_username, unique_number) }}
 </div>

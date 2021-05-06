@@ -2,8 +2,8 @@
 
 {{- macros.revision_info(revision) }}
 
-{{ actor_name }} landed this revision {{- event | comment_summary }}.
+Revision has landed as {{ event.revision_hash }}.
 
-{{- macros.main_comment(event.main_comment_message) }}
-{{- macros.inline_comments(event.inline_comments) }}
+View in HG:    {{ event.hg_link }}
+View in Lando: {{ event.lando_link }}
 {{- macros.footer(recipient_username) }}

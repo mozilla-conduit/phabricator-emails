@@ -125,7 +125,7 @@ class SecureRevisionCommented:
 
 
 @dataclass
-class SecureRevisionLanded:
+class SecureRevisionClosed:
     author: Optional[Recipient]
     reviewers: list[Recipient]
     subscribers: list[Recipient]
@@ -140,6 +140,21 @@ class SecureRevisionLanded:
             Recipient.parse_many(body["subscribers"]),
             body["commentCount"],
             body["transactionLink"],
+        )
+
+
+@dataclass
+class SecureRevisionLanded:
+    author: Optional[Recipient]
+    reviewers: list[Recipient]
+    subscribers: list[Recipient]
+
+    @classmethod
+    def parse(cls, body: dict):
+        return cls(
+            Recipient.parse_optional(body.get("author")),
+            Recipient.parse_many(body["reviewers"]),
+            Recipient.parse_many(body["subscribers"]),
         )
 
 

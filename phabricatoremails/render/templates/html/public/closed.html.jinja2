@@ -1,0 +1,30 @@
+{% import '_macros.html.jinja2' as macros %}
+{{ macros.head() }}
+<div class="event-content">
+
+    {% call macros.preview(false, unique_number) %}
+        {{ emoji("chequered_flag") | safe }} {{ actor_name }} closed this revision {{- event | comment_summary }}.
+    {% endcall %}
+
+    {{ macros.title(revision) }}
+
+    <div class="summary">
+        <span class="emoji">{{ emoji("chequered_flag") | safe }}</span>
+        <span class="text"><span><span
+                class="actor">{{ actor_name }}</span> closed this revision {{- event | comment_summary }}</span></span>
+    </div>
+
+    {% if event is commented_on %}
+        {{ macros.comments_link(event.transaction_link) }}
+    {% endif %}
+
+    {% if event.main_comment_message %}
+        {{ macros.main_comment(event.main_comment_message) }}
+    {% endif %}
+
+    {% for comment in event.inline_comments %}
+        {{ macros.inline_comment(comment, recipient_timezone) }}
+    {% endfor %}
+
+    {{ macros.footer(recipient_username, unique_number) }}
+</div>

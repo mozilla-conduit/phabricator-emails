@@ -3,28 +3,24 @@
 <div class="event-content">
 
     {% call macros.preview(false, unique_number) %}
-        {{ emoji("airplane_arrival") | safe }} {{ actor_name }} landed this revision {{- event | comment_summary }}.
+        {{ emoji("airplane_arrival") | safe }} Revision has landed.
     {% endcall %}
 
     {{ macros.title(revision) }}
 
     <div class="summary">
         <span class="emoji">{{ emoji("airplane_arrival") | safe }}</span>
-        <span class="text"><span><span
-                class="actor">{{ actor_name }}</span> landed this revision {{- event | comment_summary }}</span></span>
+        <span class="text">Revision has landed as <span class="revision">{{ event.revision_hash }}</span></span>
     </div>
 
-    {% if event is commented_on %}
-        {{ macros.comments_link(event.transaction_link) }}
-    {% endif %}
-
-    {% if event.main_comment_message %}
-        {{ macros.main_comment(event.main_comment_message) }}
-    {% endif %}
-
-    {% for comment in event.inline_comments %}
-        {{ macros.inline_comment(comment, recipient_timezone) }}
-    {% endfor %}
+    <div class="revision-landed-link-group">
+        {% if event.hg_link %}
+            <div><a href="{{ event.hg_link }}">View in HG</a></div>
+        {% endif %}
+        {% if event.lando_link %}
+            <div><a href="{{ event.lando_link }}">View in Lando</a></div>
+        {% endif %}
+    </div>
 
     {{ macros.footer(recipient_username, unique_number) }}
 </div>
