@@ -1,0 +1,9 @@
+{% import '_macros.text.jinja2' as macros %}
+
+{{- macros.revision_info(revision) }}
+
+{{ actor_name }} closed this revision {{- event | comment_summary }}.
+
+{{- macros.main_comment(event.main_comment_message) }}
+{{- macros.inline_comments(event.inline_comments) }}
+{{- macros.footer(recipient_username) }}

@@ -25,6 +25,7 @@ EMOJI = {
     "bell": 0x1F514,
     "building_construction": 0x1F3D7,
     "check_mark": 0x2714,
+    "chequered_flag": 0x1F3C1,
     "circle_arrows": 0x1F504,
     "deny_x": 0x2716,
     "gear": 0x2699,

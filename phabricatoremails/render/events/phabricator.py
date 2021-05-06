@@ -279,8 +279,8 @@ class RevisionCommented:
 
 
 @dataclass
-class RevisionLanded:
-    KIND = "revision-landed"
+class RevisionClosed:
+    KIND = "revision-closed"
     main_comment_message: Optional[CommentMessage]
     inline_comments: list[InlineComment]
     transaction_link: str
@@ -297,6 +297,28 @@ class RevisionLanded:
             Recipient.parse_optional(body.get("author")),
             Recipient.parse_many(body["reviewers"]),
             Recipient.parse_many(body["subscribers"]),
+        )
+
+
+@dataclass
+class RevisionLanded:
+    KIND = "revision-landed"
+    author: Optional[Recipient]
+    reviewers: list[Recipient]
+    subscribers: list[Recipient]
+    revision_hash: str
+    hg_link: Optional[str]
+    lando_link: Optional[str]
+
+    @classmethod
+    def parse(cls, body: dict):
+        return cls(
+            Recipient.parse_optional(body.get("author")),
+            Recipient.parse_many(body["reviewers"]),
+            Recipient.parse_many(body["subscribers"]),
+            body["revisionHash"],
+            body.get("hgLink"),
+            body.get("landoLink"),
         )
 
 

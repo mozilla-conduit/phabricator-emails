@@ -21,6 +21,7 @@ from phabricatoremails.render.events.phabricator import (
     RevisionMetadataEdited,
     ExistenceChange,
     MinimalRevision,
+    RevisionClosed,
 )
 from phabricatoremails.render.events.phabricator_secure import (
     SecureRevision,
@@ -34,10 +35,29 @@ from phabricatoremails.render.events.phabricator_secure import (
     SecureRevisionAbandoned,
     SecureRevisionReclaimed,
     SecureRevisionCreated,
+    SecureRevisionClosed,
 )
 from phabricatoremails.render.mailbatch import MailBatch
 from phabricatoremails.render.template import TemplateStore
 from phabricatoremails.thread_store import ThreadStore
+
+
+def _is_legacy_revision_landed(kind: str, raw_body: dict):
+    """True if the API is providing legacy "revision landed" events
+
+    Functionality will be landing server-side to properly represent
+    the "land" and "close" events. The existing (legacy) behaviour
+    was to represent them as the same event.
+
+    After the change to the server:
+    * "revision-closed" is identical to the old "revision-landed" event.
+    * "revision-landed" now includes context for which revision is
+      associated with the landing.
+    """
+
+    # legacy RevisionLanded events have a "transactionLink" property,
+    # but modern ones do not.
+    return kind == RevisionLanded.KIND and "transactionLink" in raw_body
 
 
 def parse_body(kind: str, is_secure: bool, raw_body: dict, batch: MailBatch):
@@ -78,6 +98,14 @@ def parse_body(kind: str, is_secure: bool, raw_body: dict, batch: MailBatch):
         batch.target(body.author, "commented")
         batch.target_many(body.reviewers, "commented")
         batch.target_many(body.subscribers, "commented")
+    elif kind == RevisionClosed.KIND or _is_legacy_revision_landed(kind, raw_body):
+        if is_secure:
+            body = SecureRevisionClosed.parse(raw_body)
+        else:
+            body = RevisionClosed.parse(raw_body)
+        batch.target(body.author, "closed")
+        batch.target_many(body.reviewers, "closed")
+        batch.target_many(body.subscribers, "closed")
     elif kind == RevisionLanded.KIND:
         if is_secure:
             body = SecureRevisionLanded.parse(raw_body)

@@ -85,11 +85,19 @@ div.summary {
     padding-bottom: 5px;
 }
 
-div.event-link {
+.summary .revision {
+    font-family: monospace;
+}
+
+div.event-link, div.revision-landed-link-group {
     margin-top: 4px;
 }
 
-.event-link a[href] {
+.revision-landed-link-group div {
+    margin-top: 4px;
+}
+
+.event-link a[href], .revision-landed-link-group a[href] {
     padding: 6px 10px;
     border-left: 3px solid #464c5c;
     border-radius: 2px;
