@@ -4,11 +4,8 @@
     </head>
 {% endmacro %}
 
-{% macro preview(is_actionable, unique_number) %}
+{% macro preview(unique_number) %}
     <div class="preview" aria-hidden="true">
-        {% if is_actionable %}
-            {{ emoji("bell") | safe }}
-        {% endif %}
         {{ caller() }}
 
         {# We want the above preview text to be the only content visible in the "email preview" of Gmail/Mac Mail.

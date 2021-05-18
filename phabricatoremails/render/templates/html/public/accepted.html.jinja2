@@ -2,7 +2,7 @@
 {{ macros.head() }}
 <div class="event-content">
 
-    {% call macros.preview(false, unique_number) %}
+    {% call macros.preview(unique_number) %}
         {{ emoji("check_mark") | safe }} {{ actor_name }} accepted this revision {{- event | comment_summary }}.
     {% endcall %}
 

@@ -2,7 +2,7 @@
 {{ macros.head() }}
 <div class="event-content">
 
-    {% call macros.preview(false, unique_number) %}
+    {% call macros.preview(unique_number) %}
         {{ emoji("memo") | safe }} {{ actor_name }}removed you as a reviewer.
     {% endcall %}
 
