@@ -2,7 +2,7 @@
 {{ macros.head() }}
 <div class="event-content">
 
-    {% call macros.preview(reviewer.is_actionable, unique_number) %}
+    {% call macros.preview(unique_number) %}
         {{ emoji("keyboard") | safe }}
         {% if reviewer is accepted_reviewer %}
             {{ actor_name }} updated this revision that you've accepted.
