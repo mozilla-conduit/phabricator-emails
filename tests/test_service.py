@@ -46,102 +46,106 @@ def test_integration_pipeline():
                 "events": [
                     {
                         "isSecure": True,
-                        "eventKind": "revision-reclaimed",
                         "timestamp": 0,
-                        "actor": {"userName": "1", "realName": "1"},
-                        "body": {
-                            "reviewers": [
-                                {
-                                    "name": "2",
-                                    "isActionable": False,
-                                    "status": "accepted",
-                                    "recipients": [
-                                        {
-                                            "timezoneOffset": 0,
-                                            "username": "2",
-                                            "email": "2@mail",
-                                            "isActor": False,
-                                        }
-                                    ],
-                                },
-                                {
-                                    "name": "3",
-                                    "isActionable": True,
-                                    "status": "requested-changes",
-                                    "recipients": [
-                                        {
-                                            "timezoneOffset": 0,
-                                            "username": "3",
-                                            "email": "3@mail",
-                                            "isActor": False,
-                                        }
-                                    ],
-                                },
-                            ],
-                            "subscribers": [
-                                {
-                                    "email": "3@mail",
-                                    "username": "3",
-                                    "timezoneOffset": 0,
-                                    "isActor": False,
-                                }
-                            ],
-                            "commentCount": 1,
-                            "transactionLink": "link",
-                        },
-                        "revision": {
-                            "revisionId": 1,
-                            "repositoryName": "repo",
-                            "link": "link",
-                            "bug": {"bugId": 1, "link": "link"},
+                        "context": {
+                            "eventKind": "revision-reclaimed",
+                            "actor": {"userName": "1", "realName": "1"},
+                            "body": {
+                                "reviewers": [
+                                    {
+                                        "name": "2",
+                                        "isActionable": False,
+                                        "status": "accepted",
+                                        "recipients": [
+                                            {
+                                                "timezoneOffset": 0,
+                                                "username": "2",
+                                                "email": "2@mail",
+                                                "isActor": False,
+                                            }
+                                        ],
+                                    },
+                                    {
+                                        "name": "3",
+                                        "isActionable": True,
+                                        "status": "requested-changes",
+                                        "recipients": [
+                                            {
+                                                "timezoneOffset": 0,
+                                                "username": "3",
+                                                "email": "3@mail",
+                                                "isActor": False,
+                                            }
+                                        ],
+                                    },
+                                ],
+                                "subscribers": [
+                                    {
+                                        "email": "3@mail",
+                                        "username": "3",
+                                        "timezoneOffset": 0,
+                                        "isActor": False,
+                                    }
+                                ],
+                                "commentCount": 1,
+                                "transactionLink": "link",
+                            },
+                            "revision": {
+                                "revisionId": 1,
+                                "repositoryName": "repo",
+                                "link": "link",
+                                "bug": {"bugId": 1, "link": "link"},
+                            },
                         },
                     },
                     {
                         "isSecure": False,
-                        "eventKind": "revision-abandoned",
                         "timestamp": 1,
-                        "actor": {"userName": "4", "realName": "4"},
-                        "body": {
-                            "reviewers": [
-                                {
-                                    "username": "5",
-                                    "email": "5@mail",
-                                    "timezoneOffset": 0,
-                                    "isActor": False,
-                                }
-                            ],
-                            "subscribers": [],
-                            "mainCommentMessage": {
-                                "asText": "Main comment",
-                                "asHtml": "<p>Main comment</p>",
+                        "context": {
+                            "eventKind": "revision-abandoned",
+                            "actor": {"userName": "4", "realName": "4"},
+                            "body": {
+                                "reviewers": [
+                                    {
+                                        "username": "5",
+                                        "email": "5@mail",
+                                        "timezoneOffset": 0,
+                                        "isActor": False,
+                                    }
+                                ],
+                                "subscribers": [],
+                                "mainCommentMessage": {
+                                    "asText": "Main comment",
+                                    "asHtml": "<p>Main comment</p>",
+                                },
+                                "inlineComments": [
+                                    {
+                                        "contextKind": "code",
+                                        "context": {
+                                            "diff": [
+                                                {
+                                                    "lineNumber": 10,
+                                                    "type": "added",
+                                                    "rawContent": "hello world",
+                                                }
+                                            ]
+                                        },
+                                        "fileContext": "/README:20",
+                                        "link": "link",
+                                        "message": {
+                                            "asText": "great content here.",
+                                            "asHtml": "<em>great content here.</em>",
+                                        },
+                                    }
+                                ],
+                                "transactionLink": "link",
                             },
-                            "inlineComments": [
-                                {
-                                    "contextKind": "code",
-                                    "context": {
-                                        "diff": [
-                                            {
-                                                "lineNumber": 10,
-                                                "type": "added",
-                                                "rawContent": "hello world",
-                                            }
-                                        ]
-                                    },
-                                    "fileContext": "/README:20",
-                                    "link": "link",
-                                    "message": {
-                                        "asText": "great content here.",
-                                        "asHtml": "<em>great content here.</em>",
-                                    },
-                                }
-                            ],
-                            "transactionLink": "link",
-                        },
-                        "revision": {
-                            "revisionId": 2,
-                            "name": "name 2",
-                            "repositoryName": "repo",
-                            "link": "link",
+                            "revision": {
+                                "revisionId": 2,
+                                "name": "name 2",
+                                "repositoryName": "repo",
+                                "link": "link",
+                            },
                         },
                     },
                 ],
@@ -188,63 +192,6 @@ def test_pipeline_returns_same_position_if_fetch_fails():
         source, Mock(), Mock(), logging.create_dev_logger(), 0, Mock(), False
     )
     assert pipeline.run(MockThreadStore(), 10) == 10
-
-
-def test_pipeline_skips_events_that_fail_to_render_and_have_no_minimal_context():
-    # Note: this behaviour is only needed until the Phabricator server
-    # implements "minimalContext".
-    source = MockSource(
-        next_result={
-            "data": {
-                "storyErrors": 0,
-                "events": [
-                    {
-                        "isSecure": True,
-                        "eventKind": "revision-reclaimed",
-                        "timestamp": 0,
-                        "actor": {"userName": "1", "realName": "1"},
-                        "body": {
-                            "reviewers": [
-                                {
-                                    "name": "2",
-                                    "isActionable": False,
-                                    "status": "unreviewed",
-                                    "recipients": [
-                                        {
-                                            "username": "2",
-                                            "email": "2@mail",
-                                            "timezoneOffset": 0,
-                                            "isActor": False,
-                                        }
-                                    ],
-                                }
-                            ],
-                            "subscribers": [],
-                            "commentCount": 1,
-                            "transactionLink": "link",
-                        },
-                        "revision": {
-                            "revisionId": 1,
-                            "link": "link",
-                            "bug": {"bugId": 1, "link": "link"},
-                        },
-                    },
-                    {
-                        "timestamp": 123,
-                        "thisEventIsMissingProperties": True,
-                    },
-                ],
-            },
-            "cursor": {"after": 20},
-        }
-    )
-    mail = MockMail()
-    render = Render(JinjaTemplateStore("", "", False))
-    logger = logging.create_dev_logger()
-    pipeline = Pipeline(source, render, mail, logger, 0, Mock(), False)
-    with spy_on(mail.send) as spy:
-        pipeline.run(MockThreadStore(), 10)
-        assert len(spy.calls) == 1
 
 
 def test_pipeline_updates_position_even_if_no_new_events():
