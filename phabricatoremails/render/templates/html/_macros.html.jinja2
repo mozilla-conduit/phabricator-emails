@@ -37,6 +37,9 @@
                 <a href="{{ revision.bug.link }}">bug {{ revision.bug.id }}: {{ revision.bug.name }}</a>
             </div>
         {% endif %}
+        <div class="repository">
+            For repository <span class="repository-name">{{ revision.repository_name }}</span>
+        </div>
     </div>
 {% endmacro %}
 

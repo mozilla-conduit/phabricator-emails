@@ -16,7 +16,7 @@ from tests.render.mock_template import MockTemplateStore
 
 ACTOR = Actor("actor", "actor")
 NON_ACTOR_RECIPIENT = Recipient("1@mail", "1", timezone.utc, False)
-PUBLIC_REVISION = Revision(1, "revision", "link", None)
+PUBLIC_REVISION = Revision(1, "revision", "link", "repo", None)
 EVENT = RevisionCreated([], [], [])
 
 
