@@ -209,22 +209,8 @@ class SesMail:
                 SendEmailState.TEMPORARY_FAILURE, type(error).__name__, error
             )
         except botocore.exceptions.ClientError as error:
-            # Potential error list fetched from
+            # Potential error list determined from hand-testing and the docs:
             # https://docs.aws.amazon.com/ses/latest/APIReference/API_SendRawEmail.html#API_SendRawEmail_Errors  # noqa
             error_code = error.response["Error"]["Code"]
-            if error_code in (
-                "AccountSendingPausedException",
-                "ConfigurationSetDoesNotExist",
-                "ConfigurationSetSendingPausedException",
-                "MailFromDomainNotVerifiedException",
-            ):
-                return SendEmailResult(
-                    SendEmailState.TEMPORARY_FAILURE, error_code, error
-                )
-            else:
-                # If this is "MessageRejected" or some other unexpected Amazon error,
-                # then pass it upwards as a permanent error.
-                return SendEmailResult(
-                    SendEmailState.PERMANENT_FAILURE, error_code, error
-                )
+            return SendEmailResult(SendEmailState.TEMPORARY_FAILURE, error_code, error)
         return SendEmailResult(SendEmailState.SUCCESS)
