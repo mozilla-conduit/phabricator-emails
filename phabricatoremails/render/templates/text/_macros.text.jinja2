@@ -1,5 +1,6 @@
 {% macro revision_info(revision) %}
 {{- revision.link }}
+Repository: {{ revision.repository_name }}
 {%- if revision.bug %}
 
 (Associated with bug {{ revision.bug.id }}: {{ revision.bug.name }})

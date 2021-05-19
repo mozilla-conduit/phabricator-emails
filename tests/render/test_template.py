@@ -53,7 +53,7 @@ def test_integration_templates():
 
     html, text = template.render(
         {
-            "revision": Revision(1, "revision", "link", None),
+            "revision": Revision(1, "revision", "link", "repo", None),
             "actor_name": "actor",
             "recipient_username": "1",
             "unique_number": 0,

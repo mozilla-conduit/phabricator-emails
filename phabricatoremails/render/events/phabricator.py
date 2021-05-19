@@ -33,6 +33,7 @@ class Revision:
     id: int
     name: str
     link: str
+    repository_name: str
     bug: Optional[Bug]
 
     @classmethod
@@ -41,7 +42,13 @@ class Revision:
         bug = (
             Bug(raw_bug["bugId"], raw_bug["name"], raw_bug["link"]) if raw_bug else None
         )
-        return cls(revision["revisionId"], revision["name"], revision["link"], bug)
+        return cls(
+            revision["revisionId"],
+            revision["name"],
+            revision["link"],
+            revision["repositoryName"],
+            bug,
+        )
 
 
 @dataclass

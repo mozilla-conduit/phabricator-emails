@@ -35,7 +35,12 @@ def _create_public_context(revision_id: int = 1):
         "eventKind": RevisionUpdated.KIND,
         "actor": {"userName": "actor", "realName": "actor"},
         "actorName": "actor",
-        "revision": {"revisionId": revision_id, "name": "revision", "link": "link"},
+        "revision": {
+            "revisionId": revision_id,
+            "name": "revision",
+            "repositoryName": "repo",
+            "link": "link",
+        },
         "body": BODY,
     }
 
@@ -48,6 +53,7 @@ def _create_secure_context(revision_id: int, bug_id: int):
             "revisionId": revision_id,
             "name": "revision",
             "link": "link",
+            "repositoryName": "repo",
             "bug": {"bugId": bug_id, "link": "link"},
         },
         "body": BODY,

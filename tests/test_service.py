@@ -91,6 +91,7 @@ def test_integration_pipeline():
                         },
                         "revision": {
                             "revisionId": 1,
+                            "repositoryName": "repo",
                             "link": "link",
                             "bug": {"bugId": 1, "link": "link"},
                         },
@@ -136,7 +137,12 @@ def test_integration_pipeline():
                             ],
                             "transactionLink": "link",
                         },
-                        "revision": {"revisionId": 2, "name": "name 2", "link": "link"},
+                        "revision": {
+                            "revisionId": 2,
+                            "name": "name 2",
+                            "repositoryName": "repo",
+                            "link": "link",
+                        },
                     },
                 ],
             },
