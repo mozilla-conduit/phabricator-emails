@@ -93,7 +93,8 @@ def _send_emails(
 
 def process_emails_full(
     timestamp: int,
-    event: dict,
+    is_secure: bool,
+    context: dict,
     render: Render,
     thread_store: ThreadStore,
     stats: StatsClient,
@@ -107,18 +108,9 @@ def process_emails_full(
     contextual information (number of emails sent, recipients who didn't receive
     email, etc).
     """
-    # We have full context if it's on the event ("context"), or if the Phabricator
-    # API hasn't been updated to have a minimal context yet (in the interim,
-    # each event *is* the full context).
-    has_full_context = event.get("context", None) or "minimalContext" not in event
-    if not has_full_context:
-        return ProcessEventResult(ProcessEventState.FAILED_TO_RENDER, 0)
-
-    full_context = event.get("context", event)
     try:
-        is_secure = event["isSecure"]
         emails = render.process_event_to_emails_with_full_context(
-            is_secure, timestamp, full_context, thread_store
+            is_secure, timestamp, context, thread_store
         )
     except _RENDER_EXCEPTIONS as e:
         _report_render_failure(logger, e)
@@ -211,43 +203,53 @@ def process_event(
     Returns the number of emails successfully sent.
     """
     timestamp = event["timestamp"]
-    process_full_result = process_emails_full(
-        timestamp, event, render, thread_store, stats, logger, retry_delay_seconds, mail
-    )
-
-    successful_full_email_count = process_full_result.successfully_sent_email_count
-    if process_full_result.state == ProcessEventState.SUCCESS:
-        return successful_full_email_count
-    elif process_full_result.state == ProcessEventState.FAILED_TO_RENDER:
+    full_context = event.get("context")
+    recipient_filter_list = None
+    if not full_context:
         stats.incr(STAT_FAILED_TO_RENDER_FULL_CONTEXT_EVENT)
         logger.warning(
-            "Failed to render emails for a Phabricator event with full "
-            "context. Falling back to sending a simpler, more resilient email."
+            'Phabricator event didn\'t have "full" context. '
+            "Falling back to sending a simpler, more resilient email."
         )
-        recipient_filter_list = None
+        successful_full_email_count = 0
     else:
-        stats.incr(
-            STAT_FAILED_TO_SEND_FULL_CONTEXT_MAIL,
-            count=len(process_full_result.failed_to_send_recipients),
+        process_full_result = process_emails_full(
+            timestamp,
+            event["isSecure"],
+            full_context,
+            render,
+            thread_store,
+            stats,
+            logger,
+            retry_delay_seconds,
+            mail,
         )
-        logger.warning(
-            "Failed to send at least one email with full context. Falling "
-            "back to sending a simpler, more resilient email for the "
-            "affected recipient(s)."
-        )
-        recipient_filter_list = process_full_result.failed_to_send_recipients
+        successful_full_email_count = process_full_result.successfully_sent_email_count
+        if process_full_result.state == ProcessEventState.SUCCESS:
+            return successful_full_email_count
+        elif process_full_result.state == ProcessEventState.FAILED_TO_RENDER:
+            stats.incr(STAT_FAILED_TO_RENDER_FULL_CONTEXT_EVENT)
+            logger.warning(
+                "Failed to render emails for a Phabricator event with full "
+                "context. Falling back to sending a simpler, more resilient email."
+            )
+        else:
+            stats.incr(
+                STAT_FAILED_TO_SEND_FULL_CONTEXT_MAIL,
+                count=len(process_full_result.failed_to_send_recipients),
+            )
+            logger.warning(
+                "Failed to send at least one email with full context. Falling "
+                "back to sending a simpler, more resilient email for the "
+                "affected recipient(s)."
+            )
+            recipient_filter_list = process_full_result.failed_to_send_recipients
 
-    # If we've reached this point, we either don't have full context, or we've
-    # failed to render with full context.
-    minimal_context = event.get("minimalContext", None)
-    if not minimal_context:
-        # The Phabricator API hasn't implemented "minimalContext" yet, so we
-        # have to skip this event.
-        return successful_full_email_count
-
+    # If we've reached this point, we've failed to render or send emails with
+    # full context.
     process_minimal_result = process_events_minimal(
         timestamp,
-        minimal_context,
+        event["minimalContext"],
         render,
         thread_store,
         stats,
