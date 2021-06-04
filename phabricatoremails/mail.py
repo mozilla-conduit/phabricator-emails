@@ -6,6 +6,7 @@ import pathlib
 import smtplib
 from builtins import classmethod
 from dataclasses import dataclass
+from email.header import Header
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formatdate
@@ -46,15 +47,17 @@ class OutgoingEmail:
     text_contents: str
     actor: Optional[Actor] = None
 
+    def encode_from(self, from_address):
+        if self.actor:
+            actor_header = Header(f"{self.actor.user_name} ({self.actor.real_name})")
+            return f"{actor_header.encode()} <{from_address}>"
+        else:
+            return from_address
+
     def to_mime_message(self, from_address, include_target_in_subject=False):
         msg = MIMEMultipart("alternative")
-        if self.actor:
-            from_header = (
-                f'"{self.actor.user_name} ({self.actor.real_name})" <{from_address}>'
-            )
-        else:
-            from_header = from_address
-        msg["From"] = from_header
+
+        msg["From"] = self.encode_from(from_address)
         msg["To"] = self.to
         msg["Date"] = formatdate(timeval=self.timestamp)
         msg["Subject"] = (
@@ -207,7 +210,7 @@ class SesMail:
             # possible with `send_email()`).
             self._client.send_raw_email(
                 RawMessage={"Data": mime_message.as_string()},
-                Source=self._from_address,
+                Source=email.encode_from(self._from_address),
                 Destinations=[destination],
             )
         except (
