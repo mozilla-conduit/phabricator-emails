@@ -236,11 +236,11 @@
 {% endmacro %}
 
 {% macro footer(recipient_username, unique_number) %}
-    <span class="prevent-fold">{{ unique_number }}</span>
     <div class="footer">
         <a href="{{ phabricator_host }}/settings/user/{{ recipient_username }}/page/emaildelivery/">Email preferences</a>.
         Feedback/issues/comments for this email are very welcome, please
         <a href="https://bugzilla.mozilla.org/enter_bug.cgi?product=Conduit&component=Phabricator">report them on
             Bugzilla</a>
     </div>
+    <span class="prevent-fold">{{ unique_number }}</span>
 {% endmacro %}
