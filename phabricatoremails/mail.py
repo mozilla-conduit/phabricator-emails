@@ -50,7 +50,7 @@ class OutgoingEmail:
     def encode_from(self, from_address):
         if self.actor:
             actor_header = Header(f"{self.actor.user_name} ({self.actor.real_name})")
-            return f"{actor_header.encode()} <{from_address}>"
+            return f'"{actor_header.encode()}" <{from_address}>'
         else:
             return from_address
 
