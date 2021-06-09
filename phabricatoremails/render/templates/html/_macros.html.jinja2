@@ -6,8 +6,7 @@
 
 {% macro preview(unique_number) %}
     <div class="preview" aria-hidden="true">
-        {{ caller() }}
-
+        {{ caller() | remove_newlines | safe -}}
         {# We want the above preview text to be the only content visible in the "email preview" of Gmail/Mac Mail.
            However, GMail folds content in an email thread that recipients have seen before. So, we need to make a
            _unique_ chain of (unbreakable space + zero width non joiner) strings so that it doesn't get folded.
@@ -15,10 +14,18 @@
            This unique chain of spaces has to be long enough to push content past the end of the "email preview" line,
            and "100" spaces seems to be enough.
 
+           Additionally, the chain has to be on the same line as the preview text. Otherwise, the
+           preview text may be folded away, and other (different) content will show up in
+           the preview instead.
+
+           Finally, additional unique text (which is pushed off-screen) is needed at the end of the
+           line to avoid folding and to ensure that the preview shows up.
+
            As seen on litmus.com:
            https://litmus.com/blog/the-little-known-preview-text-hack-you-may-want-to-use-in-every-email
         #}
-        {{ ("&nbsp;&zwnj;" * (100 + unique_number)) | safe }}
+        {{- ("&nbsp;&zwnj;" * (100 + unique_number)) | safe }}
+        {{- unique_number }}
     </div>
     <div class="end-preview">
 
