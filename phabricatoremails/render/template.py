@@ -184,6 +184,10 @@ def _text_existence_change(change: ExistenceChange):
         return ""
 
 
+def _remove_newlines(markup):
+    return " ".join(markup.splitlines())
+
+
 @dataclass
 class Template:
     """Renders the raw HTML and text Jinja templates.
@@ -285,6 +289,7 @@ def _jinja_html(loader, phabricator_host: str):
     jinja_env.filters["file_change"] = _file_change
     jinja_env.filters["comment_summary"] = _comment_summary
     jinja_env.filters["secure_comment_summary"] = _secure_comment_summary
+    jinja_env.filters["remove_newlines"] = _remove_newlines
     jinja_env.globals["emoji"] = _emoji_html
     jinja_env.globals["phabricator_host"] = phabricator_host
     return jinja_env
