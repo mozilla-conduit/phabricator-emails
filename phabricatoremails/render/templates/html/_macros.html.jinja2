@@ -34,11 +34,11 @@
 
 {% macro title(revision) %}
     <div class="title">
-        <a class="revision" href="{{ revision.link }}">D{{ revision.id }}: {{ revision.name }}</a>
+        <a class="revision" href="{{ revision.link }}">D{{ revision.id }}</a>: {{ revision.name }}
         {% if revision.bug %}
             <div class="bug">
                 Associated with
-                <a href="{{ revision.bug.link }}">bug {{ revision.bug.id }}: {{ revision.bug.name }}</a>
+                <a href="{{ revision.bug.link }}">bug {{ revision.bug.id }}</a>: {{ revision.bug.name }}
             </div>
         {% endif %}
         <div class="repository">
