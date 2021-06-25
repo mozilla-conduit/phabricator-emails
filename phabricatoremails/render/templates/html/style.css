@@ -24,8 +24,6 @@ div.preview, div.end-preview {
 }
 
 .title {
-    font-size: 16px;
-    line-height: 16px;
     margin-bottom: 0.2em;
 }
 
@@ -37,7 +35,7 @@ a[href].revision {
 
 .bug, .repository {
     color: #000;
-    font-size: 13px;
+    font-size: 80%;
     font-style: italic;
 }
 
@@ -65,7 +63,7 @@ div.summary {
     background-color: #f3f5f7;
     border-radius: 2px;
     /*line-height: 18px;*/
-    font-size: 14px;
+    font-size: 90%;
     display: table-cell;
     vertical-align: middle;
 }
@@ -106,14 +104,13 @@ div.event-link, div.revision-landed-link-group {
     border-left: 3px solid #464c5c;
     border-radius: 2px;
     color: #464c5c;
-    font-size: 16px;
     font-weight: bold;
     background-color: #f3f5f7;
     display: inline-block;
 }
 
 .changes-title {
-    font-size: 14px;
+    font-size: 90%;
     font-weight: bold;
     margin-bottom: 0.5em;
 }
@@ -128,7 +125,7 @@ table td:first-child {
 }
 
 .reviewers, .metadata-changes, .affected-files {
-    font-size: 14px;
+    font-size: 90%;
     color: #464c5c;
 }
 
@@ -279,7 +276,7 @@ blockquote {
     /* the !important here is to override Android's "padding-left: 0 !important" for blockquotes that we don't want */
     padding: 8px 12px !important;
     color: #464c5c;
-    font-size: 14px;
+    font-size: 90%;
     border-radius: 2px;
 }
 
@@ -294,7 +291,7 @@ blockquote {
 }
 
 .inline-comment {
-    font-size: 14px;
+    font-size: 90%;
     overflow: hidden;
     border: 1px solid #d8d8d8;
     border-radius: 2px;
@@ -415,8 +412,8 @@ except with some adjustments to make them "fit better" with our custom style.
 }
 
 .message .remarkup-code {
-    font-size: 11px;
-    line-height: 15px;
+    font-size: 70%;
+    line-height: 1.4em;
     padding: 12px;
 }
 
@@ -452,8 +449,8 @@ except with some adjustments to make them "fit better" with our custom style.
 
 .code td {
     font: inherit;
-    font-size: 11px;
-    line-height: 15px;
+    font-size: 70%;
+    line-height: 1.4em;
 }
 
 .line-number {
@@ -515,7 +512,7 @@ except with some adjustments to make them "fit better" with our custom style.
 div.footer {
     border-top: 1px solid #d8d8d8;
     color: #464c5c;
-    font-size: 13px;
+    font-size: 80%;
     font-style: italic;
     padding-top: 8px;
     margin-top: 10px;
