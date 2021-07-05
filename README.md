@@ -68,7 +68,7 @@ For testing locally, you're going to need a couple things:
 6. Activate the virtualenv: `. env/bin/activate`
 7. Install dependencies: `pip install -r requirements.txt`
 8. Install the email CLI: `pip install -e .`
-9. `export http_proxy=127.0.0.1:1080` so that python can see Phabricator from outside of Docker
+9. `export http_proxy=http://127.0.0.1:1080` so that python can see Phabricator from outside of Docker
 10. Copy `settings.development-example.ini` to `settings.ini`, set `phabricator.token` with the value from step 2.5.
     * You can adjust the behaviour to enhance your testing using the [configuration reference below](#configuration-reference).
 11. `phabricator-emails prepare` to initialize the database tables and synchronize the feed position.
