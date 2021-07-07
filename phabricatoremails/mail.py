@@ -1,9 +1,12 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+import base64
 import enum
+import hashlib
 import pathlib
 import smtplib
+import struct
 from builtins import classmethod
 from dataclasses import dataclass
 from email.header import Header
@@ -43,6 +46,7 @@ class OutgoingEmail:
     subject: str
     to: str
     timestamp: int
+    revision_id: int
     html_contents: str
     text_contents: str
     actor: Optional[Actor] = None
@@ -54,15 +58,57 @@ class OutgoingEmail:
         else:
             return from_address
 
+    def _generate_threading_headers(self, from_address):
+        """Return a dictionary of all necessary threading mail headers.
+
+        Uses from_address to decide which domain to associate the thread with.
+        """
+
+        # There's four email threading headers that we use:
+        # * Thread-Topic and Thread-Index are for Outlook.
+        # * In-Reply-To and References are RFC 2822 compliant and and used by
+        #   almost everything else.
+        # Note: just like Phabricator, we don't track the parent-child relationship of
+        # each message as a long interconnected chain. Instead, we configure each
+        # message such that it is "In-Reply-To"/"References" an imaginary first message
+        # (defined here as "thread_message_id").
+        # This is sufficient for email clients to associate emails together into a
+        # thread. Then, we have them sort the messages either by timestamp or the
+        # trailer of "Thread-Index" (for Outlook).
+        thread_id = f"revision-{self.revision_id}"
+        domain = from_address.split("@")[1]
+        thread_message_id = f"<{thread_id}@{domain}>"
+
+        # The Thread-Index header is used by Outlook to group and sort email threads.
+        # Its format is:
+        # * 27 bytes that are unique to the email thread.
+        # * a byte containing a space character
+        # * A 4-byte trailer used for ordering the messages.
+        # Our implementation here is heavily inspired by that of Phabricator's
+        # "generateThreadIndex()". We generate our unique first 27 bytes by
+        # hashing our unique thread id, then encode the current timestamp as
+        # the last 4 bytes.
+        thread_id_md5 = hashlib.md5(thread_id.encode("utf-8")).hexdigest()
+        thread_index_base = thread_id_md5.encode("utf-8")[:27]
+        thread_index = thread_index_base + b" " + struct.pack(">i", self.timestamp)
+
+        return {
+            "Thread-Topic": thread_id,
+            "Thread-Index": base64.encodebytes(thread_index).decode("utf-8"),
+            "In-Reply-To": thread_message_id,
+            "References": thread_message_id,
+        }
+
     def to_mime_message(self, from_address, include_target_in_subject=False):
         msg = MIMEMultipart("alternative")
-
         msg["From"] = self.encode_from(from_address)
         msg["To"] = self.to
         msg["Date"] = formatdate(timeval=self.timestamp)
         msg["Subject"] = (
             f"|{self.to}| {self.subject}" if include_target_in_subject else self.subject
         )
+        for name, value in self._generate_threading_headers(from_address).items():
+            msg[name] = value
 
         msg.attach(MIMEText(self.text_contents, "plain"))
         msg.attach(MIMEText(self.html_contents, "html"))

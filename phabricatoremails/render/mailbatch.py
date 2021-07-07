@@ -80,6 +80,7 @@ class MailBatch:
         recipient_address: str,
         timestamp: int,
         actor: Actor,
+        revision_id: int,
         template_params: dict,
     ):
         """Render the provided template and parameters into an OutgoingEmail."""
@@ -90,6 +91,7 @@ class MailBatch:
             subject,
             recipient_address,
             timestamp,
+            revision_id,
             html_email,
             text_email,
             actor,
@@ -113,6 +115,7 @@ class MailBatch:
                 recipient_address=target.recipient_email,
                 actor=actor,
                 timestamp=timestamp,
+                revision_id=revision.id,
                 template_params={
                     "revision": revision,
                     "actor_name": actor.user_name,
@@ -144,6 +147,7 @@ class MailBatch:
                 recipient_address=target.recipient_email,
                 actor=actor,
                 timestamp=timestamp,
+                revision_id=revision.id,
                 template_params={
                     "revision": revision,
                     "actor_name": actor.user_name,

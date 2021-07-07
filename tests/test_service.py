@@ -359,14 +359,14 @@ def test_retries_temporary_email_failures(_):
         mail,
         Mock(),
         logging.create_dev_logger(),
-        [OutgoingEmail("", "", "", 0, "", "")],
+        [OutgoingEmail("", "", "", 0, 1, "", "")],
         0,
     )
     _send_emails(
         mail,
         Mock(),
         logging.create_dev_logger(),
-        [OutgoingEmail("", "", "", 1, "", "")],
+        [OutgoingEmail("", "", "", 1, 1, "", "")],
         0,
     )
     assert mail.call_count == 3

@@ -250,6 +250,7 @@ class Render:
                     f"D{revision.id}",
                     recipient.email,
                     timestamp,
+                    revision.id,
                     html_email,
                     text_email,
                 )

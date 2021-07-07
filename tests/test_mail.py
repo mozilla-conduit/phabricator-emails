@@ -19,6 +19,7 @@ MOCK_EMAIL = OutgoingEmail(
     "phabricator subject",
     "to@mail",
     0,
+    1,
     "summary in html",
     "summary in text",
 )
