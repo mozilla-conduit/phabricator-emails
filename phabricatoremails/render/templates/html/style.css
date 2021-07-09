@@ -301,15 +301,30 @@ blockquote {
 }
 
 .inline-comment > a[href] {
-    display: flex;
+    display: block;
     border-bottom: 1px solid #d8d8d8;
     color: #464c5c;
     padding: 4px 8px;
     text-decoration: none;
 }
 
-.inline-comment .file-context {
-    flex-grow: 1;
+.inline-comment .view-inline-container {
+    display: inline-table;
+}
+
+.view-inline-container .file-context {
+    /* Not all email clients support CSS Flex.
+       So, to make the file context "grow" as
+       much as possible, we make the parent
+       "display: table" and we make this
+       fake cell have "width: 100%".
+       "max-width: 0;" is needed for overflow
+       ellipsis to work.
+       A hack, but it does its job. */
+    display: table-cell;
+    width: 100%;
+    max-width: 0;
+
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
@@ -319,13 +334,14 @@ blockquote {
     text-align: left;
 }
 
-.inline-comment .file-context > span {
+.view-inline-container .file-context > span {
     /* Resolve "direction: rtl" changing the position of slashes */
     unicode-bidi: plaintext;
 }
 
-.inline-comment .view-inline {
-    margin-left: 20px;
+.view-inline-container .view-inline {
+    display: table-cell;
+    padding-left: 20px;
     text-decoration: underline;
     white-space: nowrap;
 }
