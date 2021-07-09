@@ -92,8 +92,10 @@
 {% macro inline_comment(comment, recipient_timezone) %}
     <div class="inline-comment">
         <a href="{{ comment.link }}">
-            <span class="file-context"><span>{{ comment.file_context }}</span></span>
-            <span class="view-inline">View inline</span>
+            <div class="view-inline-container">
+                <span class="file-context"><span>{{ comment.file_context }}</span></span>
+                <span class="view-inline">View inline</span>
+            </div>
         </a>
         {% if comment.context is reply %}
             <div class="comment">
