@@ -388,9 +388,9 @@ s3transfer==0.4.2 \
     --hash=sha256:9b3752887a2880690ce628bc263d6d13a3864083aeacff4890c1c9839a5eb0bc \
     --hash=sha256:cb022f4b16551edebbb31a377d3f09600dbada7363d8c5db7976e7f47732e1b2
     # via boto3
-sentry-sdk==1.1.0 \
-    --hash=sha256:c1227d38dca315ba35182373f129c3e2722e8ed999e52584e6aca7d287870739 \
-    --hash=sha256:c7d380a21281e15be3d9f67a3c4fbb4f800c481d88ff8d8931f39486dd7b4ada
+sentry-sdk==1.14.0 \
+    --hash=sha256:273fe05adf052b40fd19f6d4b9a5556316807246bd817e5e3482930730726bb0 \
+    --hash=sha256:72c00322217d813cf493fe76590b23a757e063ff62fec59299f4af7201dd4448
     # via -r requirements.in
 six==1.16.0 \
     --hash=sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926 \
@@ -456,9 +456,9 @@ typing-extensions==3.10.0.0 \
     # via
     #   mypy
     #   sqlalchemy-stubs
-urllib3==1.26.6 \
-    --hash=sha256:39fb8672126159acb139a7718dd10806104dec1e2f0f6c88aab05d17df10c8d4 \
-    --hash=sha256:f57b4c16c62fa2760b7e3d97c35b255512fb6b59a259730f36ba32ce9f8e342f
+urllib3==1.26.15 \
+    --hash=sha256:8a388717b9476f934a21484e8c8e61875ab60644d29b9b39e11e4b9dc1c6b305 \
+    --hash=sha256:aa751d169e23c7479ce47a0cb0da579e3ede798f994f5816a74e4f4500dcea42
     # via
     #   botocore
     #   requests
