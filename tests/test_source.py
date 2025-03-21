@@ -23,9 +23,17 @@ class MockResponse:
 
 @contextmanager
 def mock_http(response):
-    with mock.patch("phabricatoremails.source.requests.post") as mock_post:
+    with mock.patch("phabricatoremails.source.requests.Session.post") as mock_post:
         mock_post.return_value = response
         yield mock_post
+
+
+@contextmanager
+def mock_prepared_request(response):
+    "Deep mock allowing to inspect the contents of the prepared_request to be sent."
+    with mock.patch("phabricatoremails.source.requests.Session.send") as mock_send:
+        mock_send.return_value = response
+        yield mock_send
 
 
 def test_fetch_feed_end():
@@ -58,6 +66,15 @@ def test_requests_are_authenticated():
         assert args[0] == "http://phabricator.test/api/feed.for_email.status"
         kwargs = mock_post.call_args.kwargs
         assert kwargs["data"] == {"params": '{"__conduit__": {"token": "token"}}'}
+
+
+def test_requests_have_user_agent():
+    source = PhabricatorSource("http://phabricator.test", "token", 100)
+    response_json = {"result": 0, "error_code": None}
+    with mock_prepared_request(MockResponse(200, "", response_json)) as mock_send:
+        source.fetch_feed_end()
+        prepared_request = mock_send.call_args[0][0]
+        assert "Phabricator-Emails" in prepared_request.headers.get("User-Agent")
 
 
 def test_http_error_throws_exception():
