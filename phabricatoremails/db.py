@@ -12,10 +12,6 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker
 
 
-class DBInitializedError(Exception):
-    pass
-
-
 class DBNotInitializedError(Exception):
     pass
 
