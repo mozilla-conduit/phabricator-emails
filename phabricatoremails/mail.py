@@ -49,6 +49,7 @@ class OutgoingEmail:
     revision_id: int
     html_contents: str
     text_contents: str
+    phab_stamps: str = ""
     actor: Optional[Actor] = None
 
     def encode_from(self, from_address):
@@ -109,6 +110,9 @@ class OutgoingEmail:
         )
         for name, value in self._generate_threading_headers(from_address).items():
             msg[name] = value
+
+        if self.phab_stamps:
+            msg["X-Phabricator-Stamps"] = self.phab_stamps
 
         msg.attach(MIMEText(self.text_contents, "plain"))
         msg.attach(MIMEText(self.html_contents, "html"))
