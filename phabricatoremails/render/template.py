@@ -15,6 +15,7 @@ from phabricatoremails.render.events.phabricator import (
     DiffLineType,
     AffectedFileChange,
     ExistenceChange,
+    MetadataEditedReviewer,
 )
 from premailer import Premailer
 
@@ -347,10 +348,10 @@ def generate_phab_stamps(revision, actor, event):
     if event:
         event_reviewers = getattr(event, "reviewers", [])
         reviewers = []
-        # Note that reviewers can be either list[Reviewer] or list[Recipient],
-        # depending on the event...
+        # Note that reviewers can be either list[Reviewer], list[MetadataEditedReviewer],
+        # or list[Recipient], depending on the event...
         for r in event_reviewers:
-            if isinstance(r, Reviewer):
+            if isinstance(r, (Reviewer, MetadataEditedReviewer)):
                 prefix = "@" if len(r.recipients) <= 1 else "#"
                 reviewer = prefix + r.name
             else:  # Recipient, assume individual reviewer?
