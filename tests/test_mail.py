@@ -22,7 +22,6 @@ MOCK_EMAIL = OutgoingEmail(
     1,
     "summary in html",
     "summary in text",
-    "mystamp",
 )
 
 
@@ -53,4 +52,3 @@ def test_ses():
     assert "phabricator subject" in ses_kwargs["RawMessage"]["Data"]
     assert "summary in html" in ses_kwargs["RawMessage"]["Data"]
     assert "summary in text" in ses_kwargs["RawMessage"]["Data"]
-    assert "mystamp" in ses_kwargs["RawMessage"]["Data"]

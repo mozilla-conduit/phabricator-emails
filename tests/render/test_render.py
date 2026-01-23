@@ -88,9 +88,6 @@ def test_processes_events():
     assert email.subject == "D1: revision"
     assert email.timestamp == 123
     assert email.to == "reviewer@mail"
-    assert set(filter(lambda s: s.strip(), email.phab_stamps.split(" "))) == set(
-        ["actor(@actor)", "reviewer(@reviewer)", "revision-repository(rREPO)"]
-    )
 
 
 def test_processes_secure_events():

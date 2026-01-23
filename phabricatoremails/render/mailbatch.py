@@ -9,7 +9,7 @@ from phabricatoremails.mail import OutgoingEmail
 from phabricatoremails.render.events.common import Recipient, Actor
 from phabricatoremails.render.events.phabricator import Revision
 from phabricatoremails.render.events.phabricator_secure import SecureRevision
-from phabricatoremails.render.template import TemplateStore, generate_phab_stamps
+from phabricatoremails.render.template import TemplateStore
 
 PUBLIC_TEMPLATE_PATH_PREFIX = "public/"
 SECURE_TEMPLATE_PATH_PREFIX = "secure/"
@@ -86,7 +86,6 @@ class MailBatch:
         """Render the provided template and parameters into an OutgoingEmail."""
         template = self._template_store.get(template_path)
         html_email, text_email = template.render(template_params)
-        phab_stamps = template_params.get("phab_stamps", "")
         return OutgoingEmail(
             template_path,
             subject,
@@ -95,7 +94,6 @@ class MailBatch:
             revision_id,
             html_email,
             text_email,
-            phab_stamps,
             actor,
         )
 
@@ -124,7 +122,6 @@ class MailBatch:
                     "recipient_username": target.recipient_username,
                     "unique_number": unique_number,
                     "event": event,
-                    "phab_stamps": generate_phab_stamps(revision, actor, event),
                     **target.kwargs,
                 },
             )
@@ -157,7 +154,6 @@ class MailBatch:
                     "recipient_username": target.recipient_username,
                     "unique_number": unique_number,
                     "event": event,
-                    "phab_stamps": generate_phab_stamps(revision, actor, event),
                     **target.kwargs,
                 },
             )

@@ -63,16 +63,13 @@ def test_integration_templates():
                 [],
                 "link",
             ),
-            "phab_stamps": "mystamps",
         }
     )
 
     assert "actor mentioned you" in html
     assert "you've been pinged" in html
-    assert ">X-Phabricator-Stamps: mystamps</div>" in html
     assert "actor mentioned you" in text
     assert "you've been pinged" in text
-    assert "X-Phabricator-Stamps: mystamps" in text
 
 
 def test_template_throws_error_if_invalid_template():
