@@ -223,5 +223,4 @@ def test_generate_phab_stamps_with_metadata_edited_reviewer():
     # Verify the complete stamps string structure
     stamp_parts = stamps.split()
     assert len(stamp_parts) == 4
-    assert all(part for part in stamp_parts)  # All parts should be non-empty
 
