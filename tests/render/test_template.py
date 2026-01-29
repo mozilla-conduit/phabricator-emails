@@ -3,7 +3,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 from datetime import timezone, datetime, timedelta
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 import jinja2
 import pytest
@@ -258,7 +258,7 @@ def test_generate_phab_stamps_with_regular_reviewer():
     )
     
     # Create a mock event with regular reviewers
-    event = type('Event', (), {'reviewers': [individual_reviewer, group_reviewer]})()
+    event = Mock(reviewers=[individual_reviewer, group_reviewer])
     
     # Generate phab stamps
     stamps = generate_phab_stamps(revision, actor, event)
