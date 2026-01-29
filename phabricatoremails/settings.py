@@ -18,7 +18,6 @@ from phabricatoremails.worker import RunOnceWorker, PhabricatorWorker, Worker
 from phabricatoremails.source import FileSource, PhabricatorSource, Source
 from sqlalchemy import create_engine
 
-
 SETTINGS_PATH_ENV_KEY = "PHABRICATOR_EMAILS_SETTINGS_PATH"
 
 

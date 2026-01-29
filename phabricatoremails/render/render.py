@@ -38,7 +38,7 @@ from phabricatoremails.render.events.phabricator_secure import (
     SecureRevisionClosed,
 )
 from phabricatoremails.render.mailbatch import MailBatch
-from phabricatoremails.render.template import TemplateStore
+from phabricatoremails.render.template import TemplateStore, generate_phab_stamps
 from phabricatoremails.thread_store import ThreadStore
 
 
@@ -231,6 +231,7 @@ class Render:
         thread = thread_store.get_or_create(revision.id)
         thread.email_count += 1
         emails = []
+        phab_stamps = generate_phab_stamps(revision, None, None)
         for recipient in recipients:
             if recipient.is_actor:
                 continue
@@ -242,6 +243,7 @@ class Render:
                     "recipient_username": recipient.username,
                     "unique_number": thread.email_count,
                     "event": context,
+                    "phab_stamps": phab_stamps,
                 }
             )
             emails.append(
@@ -253,6 +255,7 @@ class Render:
                     revision.id,
                     html_email,
                     text_email,
+                    phab_stamps,
                 )
             )
         return emails

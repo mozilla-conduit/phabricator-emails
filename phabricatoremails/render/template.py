@@ -15,6 +15,7 @@ from phabricatoremails.render.events.phabricator import (
     DiffLineType,
     AffectedFileChange,
     ExistenceChange,
+    MetadataEditedReviewer,
 )
 from premailer import Premailer
 
@@ -193,6 +194,9 @@ class Template:
     """Renders the raw HTML and text Jinja templates.
 
 
+    Adds Phabricator Stamps header inline for improved email filtering in
+    clients that do not allow filtering on headers.
+
     Additionally, for the rendered HTML, the CSS is inlined to improve compatibility
     with complex email clients.
     """
@@ -204,8 +208,17 @@ class Template:
     def render(self, template_params: dict):
         html = self._html_template.render(**template_params)
         text = self._text_template.render(**template_params)
+        html, text = self._insert_stamps(html, text, template_params.get("phab_stamps"))
 
         return self._css_inline.transform(html, False), text
+
+    def _insert_stamps(self, html, text, stamps):
+        if stamps:
+            html += (
+                f"\n\n<div style='color: #fff'>X-Phabricator-Stamps: {stamps}</div>\n"
+            )
+            text += f"\nX-Phabricator-Stamps: {stamps}\n"
+        return html, text
 
 
 class TemplateStore(Protocol):
@@ -238,15 +251,19 @@ class JinjaTemplateStore:
             strip_important=False,
         )
         self.html_jinja_env = _jinja_html(
-            html_loader
-            if html_loader
-            else jinja2.PackageLoader("phabricatoremails", "render/templates/html"),
+            (
+                html_loader
+                if html_loader
+                else jinja2.PackageLoader("phabricatoremails", "render/templates/html")
+            ),
             phabricator_host,
         )
         self.text_jinja_env = _jinja_text(
-            text_loader
-            if text_loader
-            else jinja2.PackageLoader("phabricatoremails", "render/templates/text"),
+            (
+                text_loader
+                if text_loader
+                else jinja2.PackageLoader("phabricatoremails", "render/templates/text")
+            ),
             phabricator_host,
         )
 
@@ -318,3 +335,36 @@ def _jinja_text(loader, phabricator_host: str):
     jinja_env.filters["secure_comment_summary"] = _secure_comment_summary
     jinja_env.globals["phabricator_host"] = phabricator_host
     return jinja_env
+
+
+def generate_phab_stamps(revision, actor, event):
+    """Generate content for X-Phabricator-Stamps based on the revision,
+    actor and event data that is available."""
+
+    stamps = []
+    # MinimalRevision does not even have repository_name:
+    if repo_name := getattr(revision, "repository_name", None):
+        stamps.append(f"revision-repository(r{repo_name.upper()})")
+
+    if actor:
+        stamps.append(f"actor(@{actor.user_name})")
+
+    if event:
+        event_reviewers = getattr(event, "reviewers", [])
+        reviewers = []
+        # Note that reviewers can be either list[Reviewer],
+        # list[MetadataEditedReviewer],
+        # or list[Recipient], depending on the event...
+        for r in event_reviewers:
+            if isinstance(r, (Reviewer, MetadataEditedReviewer)):
+                prefix = "@" if len(r.recipients) <= 1 else "#"
+                reviewer = prefix + r.name
+            else:  # Recipient, assume individual reviewer?
+                reviewer = "@" + r.username
+            reviewers.append(f"reviewer({reviewer})")
+        stamps += reviewers
+
+    # XXXgijs how to determine revision status?
+    # XXXgijs should we also add subscribers?
+
+    return " ".join(stamps)
