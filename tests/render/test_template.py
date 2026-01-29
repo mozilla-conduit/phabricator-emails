@@ -14,11 +14,15 @@ from phabricatoremails.render.events.common import (
     Reviewer,
     ReviewerStatus,
     CommentMessage,
+    Actor,
 )
 from phabricatoremails.render.events.phabricator import (
     RevisionCommentPinged,
     Revision,
     ReplyContext,
+    MetadataEditedReviewer,
+    RevisionMetadataEdited,
+    ExistenceChange,
 )
 from phabricatoremails.render.mailbatch import PUBLIC_TEMPLATE_PATH_PREFIX
 from phabricatoremails.render.template import (
@@ -26,6 +30,7 @@ from phabricatoremails.render.template import (
     Template,
     _jinja_html,
     _jinja_text,
+    generate_phab_stamps,
 )
 
 
@@ -160,3 +165,63 @@ def test_text_environment():
         "This is to test that wrapping\n"
         "> happens correctly when rendered down to text."
     )
+
+
+def test_generate_phab_stamps_with_metadata_edited_reviewer():
+    """Test that generate_phab_stamps handles MetadataEditedReviewer objects correctly.
+    
+    This test verifies the fix for handling MetadataEditedReviewer objects in the
+    RevisionMetadataEdited event type, ensuring phab_stamps are correctly generated
+    when reviewers are MetadataEditedReviewer objects.
+    """
+    # Create test recipients
+    recipient1 = Recipient("user1@example.com", "user1", timezone.utc, False)
+    recipient2 = Recipient("user2@example.com", "user2", timezone.utc, False)
+    
+    # Create a revision with repository name
+    revision = Revision(123, "D123", "http://example.com/D123", "test-repo", None)
+    
+    # Create an actor
+    actor = Actor(user_name="test-actor", real_name="Test Actor")
+    
+    # Create MetadataEditedReviewer objects (individual and group reviewers)
+    individual_reviewer = MetadataEditedReviewer(
+        name="reviewer1",
+        is_actionable=True,
+        status=ReviewerStatus.ACCEPTED,
+        metadata_change=ExistenceChange.ADDED,
+        recipients=[recipient1],
+    )
+    
+    group_reviewer = MetadataEditedReviewer(
+        name="reviewers-group",
+        is_actionable=True,
+        status=ReviewerStatus.UNREVIEWED,
+        metadata_change=ExistenceChange.ADDED,
+        recipients=[recipient1, recipient2],
+    )
+    
+    # Create a RevisionMetadataEdited event with MetadataEditedReviewer objects
+    event = RevisionMetadataEdited(
+        is_ready_to_land=False,
+        is_title_changed=False,
+        is_bug_changed=False,
+        author=None,
+        reviewers=[individual_reviewer, group_reviewer],
+        subscribers=[],
+    )
+    
+    # Generate phab stamps
+    stamps = generate_phab_stamps(revision, actor, event)
+    
+    # Verify the stamps contain expected values
+    assert "revision-repository(rTEST-REPO)" in stamps
+    assert "actor(@test-actor)" in stamps
+    assert "reviewer(@reviewer1)" in stamps  # Individual reviewer gets @ prefix
+    assert "reviewer(#reviewers-group)" in stamps  # Group reviewer gets # prefix
+    
+    # Verify the complete stamps string structure
+    stamp_parts = stamps.split()
+    assert len(stamp_parts) == 4
+    assert all(part for part in stamp_parts)  # All parts should be non-empty
+
