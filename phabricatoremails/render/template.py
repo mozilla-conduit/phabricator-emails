@@ -251,15 +251,19 @@ class JinjaTemplateStore:
             strip_important=False,
         )
         self.html_jinja_env = _jinja_html(
-            html_loader
-            if html_loader
-            else jinja2.PackageLoader("phabricatoremails", "render/templates/html"),
+            (
+                html_loader
+                if html_loader
+                else jinja2.PackageLoader("phabricatoremails", "render/templates/html")
+            ),
             phabricator_host,
         )
         self.text_jinja_env = _jinja_text(
-            text_loader
-            if text_loader
-            else jinja2.PackageLoader("phabricatoremails", "render/templates/text"),
+            (
+                text_loader
+                if text_loader
+                else jinja2.PackageLoader("phabricatoremails", "render/templates/text")
+            ),
             phabricator_host,
         )
 
@@ -348,7 +352,8 @@ def generate_phab_stamps(revision, actor, event):
     if event:
         event_reviewers = getattr(event, "reviewers", [])
         reviewers = []
-        # Note that reviewers can be either list[Reviewer], list[MetadataEditedReviewer],
+        # Note that reviewers can be either list[Reviewer],
+        # list[MetadataEditedReviewer],
         # or list[Recipient], depending on the event...
         for r in event_reviewers:
             if isinstance(r, (Reviewer, MetadataEditedReviewer)):

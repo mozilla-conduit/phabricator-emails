@@ -40,36 +40,31 @@ def test_parse_logger():
 
 
 def test_parse_file_pipeline():
-    config = _config_parser(
-        """
+    config = _config_parser("""
     [dev]
     file=example.json
-    """
-    )
+    """)
     source, worker = _parse_pipeline(config, Mock(), True)
     assert isinstance(source, FileSource)
     assert isinstance(worker, RunOnceWorker)
 
 
 def test_parse_run_once_pipeline():
-    config = _config_parser(
-        """
+    config = _config_parser("""
     [phabricator]
     host=http://phabricator.test
     token=token
 
     [dev]
     since_key=10
-    """
-    )
+    """)
     source, worker = _parse_pipeline(config, Mock(), True)
     assert isinstance(source, PhabricatorSource)
     assert isinstance(worker, RunOnceWorker)
 
 
 def test_parse_production_pipeline():
-    config = _config_parser(
-        """
+    config = _config_parser("""
     [phabricator]
     host=http://phabricator.test
     token=token
@@ -77,8 +72,7 @@ def test_parse_production_pipeline():
 
     [dev]
     story_limit=10
-    """
-    )
+    """)
     source, worker = _parse_pipeline(config, Mock(), True)
     assert isinstance(source, PhabricatorSource)
     assert isinstance(worker, PhabricatorWorker)
@@ -88,14 +82,12 @@ def test_parse_production_pipeline():
 # want to worry about in this test
 @mock.patch("phabricatoremails.mail.boto3.client")
 def test_parse_ses_mail(mock_boto3_client):
-    config = _config_parser(
-        """
+    config = _config_parser("""
     [email]
     from_address=from@mail
     implementation=ses
     [email-ses]
-    """
-    )
+    """)
     mail = _parse_mail(config, Mock())
     assert isinstance(mail, SesMail)
 
@@ -104,36 +96,31 @@ def test_parse_ses_mail(mock_boto3_client):
 # which isn't wanted in these tests, so the constructor is mocked out here.
 @mock.patch("phabricatoremails.settings.smtplib.SMTP")
 def test_parse_smtp_mail(mock_smtp):
-    config = _config_parser(
-        """
+    config = _config_parser("""
     [email]
     from_address=from@mail
     implementation=smtp
     [email-smtp]
     host=smtp-host
-    """
-    )
+    """)
     mail = _parse_mail(config, Mock())
     assert isinstance(mail, SmtpMail)
 
 
 def test_parse_fs_mail(tmp_path):
-    config = _config_parser(
-        """
+    config = _config_parser("""
     [email]
     from_address=from@mail
     implementation=fs
     [email-fs]
     "output_path={tmp_path}
-    """
-    )
+    """)
     mail = _parse_mail(config, logging.create_dev_logger())
     assert isinstance(mail, FsMail)
 
 
 def test_settings():
-    config = _config_parser(
-        """
+    config = _config_parser("""
     [phabricator]
     host=phabricator.host
 
@@ -145,19 +132,16 @@ def test_settings():
 
     [db]
     url=postgres://db
-    """
-    )
+    """)
     settings = IniSettings(config)
     assert settings.phabricator_host == "phabricator.host"
     assert settings.bugzilla_host == "bugzilla.host"
 
 
 def test_settings_missing_property_throws_error():
-    config = _config_parser(
-        """
+    config = _config_parser("""
         [db]
         url=postgres://db
-        """
-    )
+        """)
     with pytest.raises(configparser.Error):
         IniSettings(config)
