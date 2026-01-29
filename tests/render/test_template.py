@@ -169,7 +169,7 @@ def test_text_environment():
 
 def test_generate_phab_stamps_with_metadata_edited_reviewer():
     """Test that generate_phab_stamps handles MetadataEditedReviewer objects correctly.
-    
+
     This test verifies the fix for handling MetadataEditedReviewer objects in the
     RevisionMetadataEdited event type, ensuring phab_stamps are correctly generated
     when reviewers are MetadataEditedReviewer objects.
@@ -177,13 +177,13 @@ def test_generate_phab_stamps_with_metadata_edited_reviewer():
     # Create test recipients
     recipient1 = Recipient("user1@example.com", "user1", timezone.utc, False)
     recipient2 = Recipient("user2@example.com", "user2", timezone.utc, False)
-    
+
     # Create a revision with repository name
     revision = Revision(123, "D123", "http://example.com/D123", "test-repo", None)
-    
+
     # Create an actor
     actor = Actor(user_name="test-actor", real_name="Test Actor")
-    
+
     # Create MetadataEditedReviewer objects (individual and group reviewers)
     individual_reviewer = MetadataEditedReviewer(
         name="reviewer1",
@@ -192,7 +192,7 @@ def test_generate_phab_stamps_with_metadata_edited_reviewer():
         metadata_change=ExistenceChange.ADDED,
         recipients=[recipient1],
     )
-    
+
     group_reviewer = MetadataEditedReviewer(
         name="reviewers-group",
         is_actionable=True,
@@ -200,7 +200,7 @@ def test_generate_phab_stamps_with_metadata_edited_reviewer():
         metadata_change=ExistenceChange.ADDED,
         recipients=[recipient1, recipient2],
     )
-    
+
     # Create a RevisionMetadataEdited event with MetadataEditedReviewer objects
     event = RevisionMetadataEdited(
         is_ready_to_land=False,
@@ -210,16 +210,16 @@ def test_generate_phab_stamps_with_metadata_edited_reviewer():
         reviewers=[individual_reviewer, group_reviewer],
         subscribers=[],
     )
-    
+
     # Generate phab stamps
     stamps = generate_phab_stamps(revision, actor, event)
-    
+
     # Verify the stamps contain expected values
     assert "revision-repository(rTEST-REPO)" in stamps
     assert "actor(@test-actor)" in stamps
     assert "reviewer(@reviewer1)" in stamps  # Individual reviewer gets @ prefix
     assert "reviewer(#reviewers-group)" in stamps  # Group reviewer gets # prefix
-    
+
     # Verify the complete stamps string structure
     stamp_parts = stamps.split()
     assert len(stamp_parts) == 4
@@ -227,7 +227,7 @@ def test_generate_phab_stamps_with_metadata_edited_reviewer():
 
 def test_generate_phab_stamps_with_regular_reviewer():
     """Test that generate_phab_stamps handles regular Reviewer objects correctly.
-    
+
     This test verifies backward compatibility with regular Reviewer objects,
     ensuring the function still works with events that have Reviewer objects
     rather than MetadataEditedReviewer objects.
@@ -235,13 +235,13 @@ def test_generate_phab_stamps_with_regular_reviewer():
     # Create test recipients
     recipient1 = Recipient("user1@example.com", "user1", timezone.utc, False)
     recipient2 = Recipient("user2@example.com", "user2", timezone.utc, False)
-    
+
     # Create a revision with repository name
     revision = Revision(456, "D456", "http://example.com/D456", "my-repo", None)
-    
+
     # Create an actor
     actor = Actor(user_name="reviewer-actor", real_name="Reviewer Actor")
-    
+
     # Create regular Reviewer objects
     individual_reviewer = Reviewer(
         name="alice",
@@ -249,27 +249,26 @@ def test_generate_phab_stamps_with_regular_reviewer():
         status=ReviewerStatus.ACCEPTED,
         recipients=[recipient1],
     )
-    
+
     group_reviewer = Reviewer(
         name="security-team",
         is_actionable=False,
         status=ReviewerStatus.BLOCKING,
         recipients=[recipient1, recipient2],
     )
-    
+
     # Create a mock event with regular reviewers
     event = Mock(reviewers=[individual_reviewer, group_reviewer])
-    
+
     # Generate phab stamps
     stamps = generate_phab_stamps(revision, actor, event)
-    
+
     # Verify the stamps contain expected values
     assert "revision-repository(rMY-REPO)" in stamps
     assert "actor(@reviewer-actor)" in stamps
     assert "reviewer(@alice)" in stamps  # Individual reviewer gets @ prefix
     assert "reviewer(#security-team)" in stamps  # Group reviewer gets # prefix
-    
+
     # Verify the complete stamps string structure
     stamp_parts = stamps.split()
     assert len(stamp_parts) == 4
-
