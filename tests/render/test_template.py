@@ -237,7 +237,9 @@ def test_generate_phab_stamps_for_requested_changes_with_groups():
     member1 = Recipient("m1@example.com", "member1", timezone.utc, False)
     member2 = Recipient("m2@example.com", "member2", timezone.utc, False)
 
-    revision = Revision(279938, "D279938", "http://example.com/D279938", "firefox-autoland", None)
+    revision = Revision(
+        279938, "D279938", "http://example.com/D279938", "firefox-autoland", None
+    )
     actor = Actor(user_name="gregtatum", real_name="Greg Tatum")
 
     individual_reviewer = Reviewer(
@@ -264,11 +266,12 @@ def test_generate_phab_stamps_for_requested_changes_with_groups():
 
     stamps = generate_phab_stamps(revision, actor, event)
 
-    assert "reviewer(@bgrins)" in stamps    # individual gets @
+    assert "reviewer(@bgrins)" in stamps  # individual gets @
     assert "reviewer(#some-team)" in stamps  # group gets #
     # group members must NOT appear as individual reviewer stamps
     assert "reviewer(@member1)" not in stamps
     assert "reviewer(@member2)" not in stamps
+
 
 def test_generate_phab_stamps_with_regular_reviewer():
     """Test that generate_phab_stamps handles regular Reviewer objects correctly.
