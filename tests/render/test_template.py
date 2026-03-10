@@ -18,6 +18,7 @@ from phabricatoremails.render.events.common import (
 )
 from phabricatoremails.render.events.phabricator import (
     RevisionCommentPinged,
+    RevisionRequestedChanges,
     Revision,
     ReplyContext,
     MetadataEditedReviewer,
@@ -224,6 +225,50 @@ def test_generate_phab_stamps_with_metadata_edited_reviewer():
     stamp_parts = stamps.split()
     assert len(stamp_parts) == 4
 
+
+def test_generate_phab_stamps_for_requested_changes_with_groups():
+    """Test that revision-requested-changes emits group stamps, not expanded members.
+
+    When a reviewer group is assigned, the stamp should show reviewer(#group-name)
+    rather than reviewer(@member1) reviewer(@member2) ... for each group member.
+    This allows recipients to filter on whether they were personally targeted vs.
+    targeted as a member of a group.
+    """
+    member1 = Recipient("m1@example.com", "member1", timezone.utc, False)
+    member2 = Recipient("m2@example.com", "member2", timezone.utc, False)
+
+    revision = Revision(279938, "D279938", "http://example.com/D279938", "firefox-autoland", None)
+    actor = Actor(user_name="gregtatum", real_name="Greg Tatum")
+
+    individual_reviewer = Reviewer(
+        name="bgrins",
+        is_actionable=False,
+        status=ReviewerStatus.REQUESTED_CHANGES,
+        recipients=[member1],
+    )
+    group_reviewer = Reviewer(
+        name="some-team",
+        is_actionable=False,
+        status=ReviewerStatus.UNREVIEWED,
+        recipients=[member1, member2],
+    )
+
+    event = RevisionRequestedChanges(
+        main_comment_message=None,
+        inline_comments=[],
+        transaction_link="http://example.com/tx",
+        author=None,
+        reviewers=[individual_reviewer, group_reviewer],
+        subscribers=[],
+    )
+
+    stamps = generate_phab_stamps(revision, actor, event)
+
+    assert "reviewer(@bgrins)" in stamps    # individual gets @
+    assert "reviewer(#some-team)" in stamps  # group gets #
+    # group members must NOT appear as individual reviewer stamps
+    assert "reviewer(@member1)" not in stamps
+    assert "reviewer(@member2)" not in stamps
 
 def test_generate_phab_stamps_with_regular_reviewer():
     """Test that generate_phab_stamps handles regular Reviewer objects correctly.

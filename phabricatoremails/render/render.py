@@ -68,7 +68,8 @@ def parse_body(kind: str, is_secure: bool, raw_body: dict, batch: MailBatch):
             body = RevisionAccepted.parse(raw_body)
 
         batch.target(body.author, "accepted-as-author")
-        batch.target_many(body.reviewers, "accepted")
+        for reviewer in body.reviewers:
+            batch.target_many(reviewer.recipients, "accepted")
         batch.target_many(body.subscribers, "accepted")
     elif kind == RevisionMetadataEdited.KIND:
         # There's no "insecure" variant for when metadata is edited
@@ -96,7 +97,8 @@ def parse_body(kind: str, is_secure: bool, raw_body: dict, batch: MailBatch):
             body = RevisionCommented.parse(raw_body)
 
         batch.target(body.author, "commented")
-        batch.target_many(body.reviewers, "commented")
+        for reviewer in body.reviewers:
+            batch.target_many(reviewer.recipients, "commented")
         batch.target_many(body.subscribers, "commented")
     elif kind == RevisionClosed.KIND or _is_legacy_revision_landed(kind, raw_body):
         if is_secure:
@@ -104,7 +106,8 @@ def parse_body(kind: str, is_secure: bool, raw_body: dict, batch: MailBatch):
         else:
             body = RevisionClosed.parse(raw_body)
         batch.target(body.author, "closed")
-        batch.target_many(body.reviewers, "closed")
+        for reviewer in body.reviewers:
+            batch.target_many(reviewer.recipients, "closed")
         batch.target_many(body.subscribers, "closed")
     elif kind == RevisionLanded.KIND:
         if is_secure:
@@ -112,7 +115,8 @@ def parse_body(kind: str, is_secure: bool, raw_body: dict, batch: MailBatch):
         else:
             body = RevisionLanded.parse(raw_body)
         batch.target(body.author, "landed")
-        batch.target_many(body.reviewers, "landed")
+        for reviewer in body.reviewers:
+            batch.target_many(reviewer.recipients, "landed")
         batch.target_many(body.subscribers, "landed")
     elif kind == RevisionCommentPinged.KIND:
         if is_secure:
@@ -127,7 +131,8 @@ def parse_body(kind: str, is_secure: bool, raw_body: dict, batch: MailBatch):
             body = RevisionRequestedChanges.parse(raw_body)
 
         batch.target(body.author, "requested-changes-as-author")
-        batch.target_many(body.reviewers, "requested-changes")
+        for reviewer in body.reviewers:
+            batch.target_many(reviewer.recipients, "requested-changes")
         batch.target_many(body.subscribers, "requested-changes")
     elif kind == RevisionRequestedReview.KIND:
         if is_secure:
@@ -156,7 +161,8 @@ def parse_body(kind: str, is_secure: bool, raw_body: dict, batch: MailBatch):
             body = SecureRevisionAbandoned.parse(raw_body)
         else:
             body = RevisionAbandoned.parse(raw_body)
-        batch.target_many(body.reviewers, "abandoned")
+        for reviewer in body.reviewers:
+            batch.target_many(reviewer.recipients, "abandoned")
         batch.target_many(body.subscribers, "abandoned")
     elif kind == RevisionReclaimed.KIND:
         if is_secure:
