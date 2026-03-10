@@ -107,10 +107,17 @@ def test_integration_pipeline():
                             "body": {
                                 "reviewers": [
                                     {
-                                        "username": "5",
-                                        "email": "5@mail",
-                                        "timezoneOffset": 0,
-                                        "isActor": False,
+                                        "name": "5",
+                                        "isActionable": True,
+                                        "status": "requested-changes",
+                                        "recipients": [
+                                            {
+                                                "timezoneOffset": 0,
+                                                "username": "5",
+                                                "email": "5@mail",
+                                                "isActor": False,
+                                            }
+                                        ],
                                     }
                                 ],
                                 "subscribers": [],

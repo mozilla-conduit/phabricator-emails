@@ -8,7 +8,7 @@ class MockWorker:
     def set_initial_position(
         self, query_position_store: QueryPositionStore, position: int
     ) -> int:
-        pass
+        return position
 
     def process(self, db, pipeline_callback) -> None:
         pass
