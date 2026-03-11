@@ -242,11 +242,12 @@ def test_generate_phab_stamps_for_requested_changes_with_groups():
     )
     actor = Actor(user_name="gregtatum", real_name="Greg Tatum")
 
+    bgrins = Recipient("bgrins@example.com", "bgrins", timezone.utc, False)
     individual_reviewer = Reviewer(
         name="bgrins",
         is_actionable=False,
         status=ReviewerStatus.REQUESTED_CHANGES,
-        recipients=[member1],
+        recipients=[bgrins],
     )
     group_reviewer = Reviewer(
         name="some-team",
