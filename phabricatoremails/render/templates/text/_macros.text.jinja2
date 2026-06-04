@@ -49,6 +49,11 @@ Inline comments:
 {%- for inline_comment in inline_comments %}
 
 {{ inline_comment.link }}
+{%- if inline_comment.has_suggestion %}
+
+Suggestion:
+{{ inline_comment.suggestion_text }}
+{%- endif %}
 {{ inline_comment.message.as_text | comment }}
 {%- endfor %}
 {%- endif %}
