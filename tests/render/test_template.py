@@ -24,6 +24,10 @@ from phabricatoremails.render.events.phabricator import (
     MetadataEditedReviewer,
     RevisionMetadataEdited,
     ExistenceChange,
+    InlineComment,
+    CodeContext,
+    DiffLine,
+    DiffLineType,
 )
 from phabricatoremails.render.mailbatch import PUBLIC_TEMPLATE_PATH_PREFIX
 from phabricatoremails.render.template import (
@@ -321,3 +325,42 @@ def test_generate_phab_stamps_with_regular_reviewer():
     # Verify the complete stamps string structure
     stamp_parts = stamps.split()
     assert len(stamp_parts) == 4
+
+
+def test_inline_comment_with_suggestion_renders():
+    template_store = JinjaTemplateStore("", "", False)
+    template = template_store.get(PUBLIC_TEMPLATE_PATH_PREFIX + "requested-changes")
+
+    comment = InlineComment(
+        file_context="/foo.py:10",
+        link="link",
+        message=CommentMessage("nit", "<em>nit</em>"),
+        context=CodeContext([DiffLine(10, DiffLineType.NO_CHANGE, "old line")]),
+        has_suggestion=True,
+        suggestion_text="new line",
+    )
+    event = RevisionRequestedChanges(
+        main_comment_message=None,
+        inline_comments=[comment],
+        transaction_link="link",
+        author=None,
+        reviewers=[],
+        subscribers=[],
+    )
+
+    html, text = template.render(
+        {
+            "revision": Revision(1, "revision", "link", "repo", None),
+            "actor_name": "actor",
+            "recipient_username": "r",
+            "recipient_timezone": timezone.utc,
+            "unique_number": 0,
+            "event": event,
+            "phab_stamps": "",
+        }
+    )
+
+    assert "Suggestion:" in html
+    assert "new line" in html
+    assert "Suggestion:" in text
+    assert "new line" in text
