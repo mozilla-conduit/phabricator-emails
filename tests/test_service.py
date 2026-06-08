@@ -143,6 +143,8 @@ def test_integration_pipeline():
                                             "asText": "great content here.",
                                             "asHtml": "<em>great content here.</em>",
                                         },
+                                        "hasSuggestion": False,
+                                        "suggestionText": "",
                                     }
                                 ],
                                 "transactionLink": "link",

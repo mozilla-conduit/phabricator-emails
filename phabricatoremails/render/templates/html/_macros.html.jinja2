@@ -126,6 +126,12 @@
                     {% endfor %}
                 </table>
             </div>
+            {% if comment.has_suggestion %}
+                <div class="suggestion">
+                    <div class="suggestion-label">Suggestion:</div>
+                    <pre class="suggestion-text">{{ comment.suggestion_text }}</pre>
+                </div>
+            {% endif %}
             <blockquote class="comment message" aria-level="1">
                 {{ comment.message.as_html | safe }}
             </blockquote>

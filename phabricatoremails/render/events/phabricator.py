@@ -95,6 +95,8 @@ class InlineComment:
     link: str
     message: CommentMessage
     context: InlineCommentContext
+    has_suggestion: bool = False
+    suggestion_text: str = ""
 
     @classmethod
     def parse(cls, inline: dict):
@@ -125,6 +127,8 @@ class InlineComment:
             inline["link"],
             CommentMessage.parse(inline["message"]),
             context,
+            inline.get("hasSuggestion", False),
+            inline.get("suggestionText", ""),
         )
 
     @classmethod
