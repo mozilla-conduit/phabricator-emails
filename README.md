@@ -48,7 +48,7 @@ Phabricator for email events, and send them using the driver you specified with 
 
 #### Updating deployments
 
-There may be changes to the the database schema, so you'll want to run `phabricator-emails migrate` to upgrade
+There may be changes to the database schema, so you'll want to run `phabricator-emails migrate` to upgrade
 the database schema after updating the `phabricator-emails` code.
 
 ### Development
