@@ -33,7 +33,7 @@ jobs:
           }' > version.json
 
       - name: Login to Docker Hub
-        if: ${{ env.DOCKERHUB_REPO != '' && env.DOCKER_USER != '' && env.DOCKER_PASS != '' }}
+        if: ${{ secrets.DOCKERHUB_REPO != '' && secrets.DOCKER_USER != '' && secrets.DOCKER_PASS != '' }}
         run: echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
         env:
           DOCKERHUB_REPO: ${{ secrets.DOCKERHUB_REPO }}
