@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-FROM python:3.9.4-slim
+FROM python:3.10-slim
 LABEL maintainer="Mitchell Hentges <mhentges@mozilla.com>"
 LABEL community="https://chat.mozilla.org/#/room/#conduit:mozilla.org"
 LABEL bug-component="https://bugzilla.mozilla.org/enter_bug.cgi?product=Conduit&component=Phabricator"
@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
 RUN addgroup --gid 10001 app && adduser -q --gecos "" --disabled-password --uid 10001 --gid 10001 --home /app --shell /bin/sh app
 WORKDIR /app
 USER app
-ENV PATH "/app/.local/bin:${PATH}"
+ENV PATH="/app/.local/bin:${PATH}"
 
 COPY requirements.txt .
 RUN pip install --user -r requirements.txt

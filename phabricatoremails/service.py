@@ -29,7 +29,6 @@ from phabricatoremails.source import PhabricatorException, Source
 from phabricatoremails.thread_store import ThreadStore
 from statsd import StatsClient
 
-
 _RENDER_EXCEPTIONS = (LookupError, TypeError, ValueError, jinja2.TemplateError)
 
 

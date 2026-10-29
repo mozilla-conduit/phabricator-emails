@@ -5,10 +5,10 @@
 import json
 import pathlib
 from dataclasses import dataclass
-from typing import Protocol, Dict
+from typing import Optional, Protocol, Dict
 
 import requests
-from requests import RequestException
+from requests import RequestException, Session
 
 
 class Source(Protocol):
@@ -32,10 +32,20 @@ class PhabricatorSource:
     token: str
     story_limit: int
 
-    def __init__(self, server, token, story_limit):
+    _session: Session
+
+    def __init__(
+        self, server, token, story_limit, requests_session: Optional[Session] = None
+    ):
         self.base_url = f"{server}/api"
         self.token = token
         self.story_limit = story_limit
+
+        if not requests_session:
+            requests_session = requests.Session()
+            requests_session.headers.update({"User-Agent": "Phabricator-Emails"})
+
+        self._session = requests_session
 
     def _request(self, endpoint, **query_parameters):
         """Make an HTTP POST request to phabricator.
@@ -58,7 +68,7 @@ class PhabricatorSource:
 
         try:
             # Use POST instead of GET so that the conduit token isn't part of the URL
-            result = requests.post(url, data=body)
+            result = self._session.post(url, data=body)
         except RequestException:
             raise PhabricatorException("Could not communicate with Phabricator")
 
