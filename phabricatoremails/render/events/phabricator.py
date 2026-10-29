@@ -187,7 +187,7 @@ class RevisionAbandoned:
     main_comment_message: Optional[CommentMessage]
     inline_comments: list[InlineComment]
     transaction_link: str
-    reviewers: list[Recipient]
+    reviewers: list[Reviewer]
     subscribers: list[Recipient]
 
     @classmethod
@@ -196,7 +196,7 @@ class RevisionAbandoned:
             CommentMessage.parse_optional(body.get("mainCommentMessage")),
             InlineComment.parse_many(body["inlineComments"]),
             body["transactionLink"],
-            Recipient.parse_many(body["reviewers"]),
+            Reviewer.parse_many(body["reviewers"]),
             Recipient.parse_many(body["subscribers"]),
         )
 
@@ -246,7 +246,7 @@ class RevisionAccepted:
     lando_link: Optional[str]
     is_ready_to_land: bool
     author: Optional[Recipient]
-    reviewers: list[Recipient]
+    reviewers: list[Reviewer]
     subscribers: list[Recipient]
 
     @classmethod
@@ -258,7 +258,7 @@ class RevisionAccepted:
             body.get("landoLink"),
             body["isReadyToLand"],
             Recipient.parse_optional(body.get("author")),
-            Recipient.parse_many(body["reviewers"]),
+            Reviewer.parse_many(body["reviewers"]),
             Recipient.parse_many(body["subscribers"]),
         )
 
@@ -270,7 +270,7 @@ class RevisionCommented:
     inline_comments: list[InlineComment]
     transaction_link: str
     author: Optional[Recipient]
-    reviewers: list[Recipient]
+    reviewers: list[Reviewer]
     subscribers: list[Recipient]
 
     @classmethod
@@ -280,7 +280,7 @@ class RevisionCommented:
             InlineComment.parse_many(body["inlineComments"]),
             body["transactionLink"],
             Recipient.parse_optional(body.get("author")),
-            Recipient.parse_many(body["reviewers"]),
+            Reviewer.parse_many(body["reviewers"]),
             Recipient.parse_many(body["subscribers"]),
         )
 
@@ -292,7 +292,7 @@ class RevisionClosed:
     inline_comments: list[InlineComment]
     transaction_link: str
     author: Optional[Recipient]
-    reviewers: list[Recipient]
+    reviewers: list[Reviewer]
     subscribers: list[Recipient]
 
     @classmethod
@@ -302,7 +302,7 @@ class RevisionClosed:
             InlineComment.parse_many(body["inlineComments"]),
             body["transactionLink"],
             Recipient.parse_optional(body.get("author")),
-            Recipient.parse_many(body["reviewers"]),
+            Reviewer.parse_many(body["reviewers"]),
             Recipient.parse_many(body["subscribers"]),
         )
 
@@ -311,7 +311,7 @@ class RevisionClosed:
 class RevisionLanded:
     KIND = "revision-landed"
     author: Optional[Recipient]
-    reviewers: list[Recipient]
+    reviewers: list[Reviewer]
     subscribers: list[Recipient]
     revision_hash: str
     hg_link: Optional[str]
@@ -321,7 +321,7 @@ class RevisionLanded:
     def parse(cls, body: dict):
         return cls(
             Recipient.parse_optional(body.get("author")),
-            Recipient.parse_many(body["reviewers"]),
+            Reviewer.parse_many(body["reviewers"]),
             Recipient.parse_many(body["subscribers"]),
             body["revisionHash"],
             body.get("hgLink"),
@@ -354,7 +354,7 @@ class RevisionRequestedChanges:
     inline_comments: list[InlineComment]
     transaction_link: str
     author: Optional[Recipient]
-    reviewers: list[Recipient]
+    reviewers: list[Reviewer]
     subscribers: list[Recipient]
 
     @classmethod
@@ -364,7 +364,7 @@ class RevisionRequestedChanges:
             InlineComment.parse_many(body["inlineComments"]),
             body["transactionLink"],
             Recipient.parse_optional(body.get("author")),
-            Recipient.parse_many(body["reviewers"]),
+            Reviewer.parse_many(body["reviewers"]),
             Recipient.parse_many(body["subscribers"]),
         )
 
