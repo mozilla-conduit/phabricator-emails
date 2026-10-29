@@ -2,10 +2,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import pytest
 from kgb import spy_on
 
-from phabricatoremails.db import DBInitializedError
 from phabricatoremails.prepare import prepare
 from tests.mock_db import MockDB
 from tests.mock_settings import MockSettings
@@ -13,12 +11,12 @@ from tests.mock_source import MockSource
 from tests.mock_worker import MockWorker
 
 
-def test_prepare_doesnt_upgrade_schema_if_already_initialized():
+def test_prepare_doesnt_upgrade_schema_if_already_initialized(caplog):
     db = MockDB(is_initialized=True)
     settings = MockSettings(db=db)
     with spy_on(db.upgrade_schema) as spy:
-        with pytest.raises(DBInitializedError):
-            prepare(settings)
+        prepare(settings)
+        assert "already been initialized!" in caplog.text
         assert not spy.called
 
 
