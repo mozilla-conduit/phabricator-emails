@@ -1,7 +1,6 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-from phabricatoremails.db import DBInitializedError
 from phabricatoremails.query_position_store import DBQueryPositionStore
 from phabricatoremails.settings import Settings
 
@@ -20,11 +19,12 @@ def prepare(settings: Settings):
     # want to invoke multiple times. This check asserts that "prepare" isn't
     # run more than one time.
     if db.is_initialized():
-        raise DBInitializedError(
+        settings.logger.warning(
             "Database has already been initialized! Run "
             "`phabricator-emails migrate` to upgrade an existing "
             "database"
         )
+        return
 
     # We fetch the end key at the beginning here so that we fail early if
     # we can't successfully communicate with Phabricator

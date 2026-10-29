@@ -107,10 +107,17 @@ def test_integration_pipeline():
                             "body": {
                                 "reviewers": [
                                     {
-                                        "username": "5",
-                                        "email": "5@mail",
-                                        "timezoneOffset": 0,
-                                        "isActor": False,
+                                        "name": "5",
+                                        "isActionable": True,
+                                        "status": "requested-changes",
+                                        "recipients": [
+                                            {
+                                                "timezoneOffset": 0,
+                                                "username": "5",
+                                                "email": "5@mail",
+                                                "isActor": False,
+                                            }
+                                        ],
                                     }
                                 ],
                                 "subscribers": [],
@@ -359,14 +366,14 @@ def test_retries_temporary_email_failures(_):
         mail,
         Mock(),
         logging.create_dev_logger(),
-        [OutgoingEmail("", "", "", 0, 1, "", "")],
+        [OutgoingEmail("", "", "", 0, 1, "", "", "")],
         0,
     )
     _send_emails(
         mail,
         Mock(),
         logging.create_dev_logger(),
-        [OutgoingEmail("", "", "", 1, 1, "", "")],
+        [OutgoingEmail("", "", "", 1, 1, "", "", "")],
         0,
     )
     assert mail.call_count == 3
