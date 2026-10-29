@@ -119,12 +119,12 @@ def test_parse_smtp_mail(mock_smtp):
 
 def test_parse_fs_mail(tmp_path):
     config = _config_parser(
-        """
+        f"""
     [email]
     from_address=from@mail
     implementation=fs
     [email-fs]
-    "output_path={tmp_path}
+    output_path={tmp_path}
     """
     )
     mail = _parse_mail(config, logging.create_dev_logger())
