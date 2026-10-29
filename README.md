@@ -51,6 +51,28 @@ Phabricator for email events, and send them using the driver you specified with 
 There may be changes to the the database schema, so you'll want to run `phabricator-emails migrate` to upgrade
 the database schema after updating the `phabricator-emails` code.
 
+##### One-time: switching from chronological keys to feed IDs
+
+Older versions stored a Phabricator `chronologicalKey` in `query_position.up_to_key`. The current version
+uses `feed.for_email.query_id`, which pages by the sequential `feed_storydata.id` instead, so the stored
+position must be translated once when deploying this change:
+
+1. Stop the `phabricator-emails service`.
+2. Read the current position from the emails database: `SELECT up_to_key FROM query_position;`
+3. Find the matching feed ID in the Phabricator (MySQL) database. `<=` handles the case where the exact
+   story no longer exists:
+   ```sql
+   SELECT id FROM phabricator_feed.feed_storydata
+   WHERE chronologicalKey <= <up_to_key>
+   ORDER BY chronologicalKey DESC
+   LIMIT 1;
+   ```
+4. Store it in the emails database: `UPDATE query_position SET up_to_key = <id> WHERE id;`
+5. Deploy the new version and start the service.
+
+If this step is skipped, the stored chronological key is far larger than any feed ID, so no events are
+returned and no emails are sent until the position is fixed.
+
 ### Development
 
 For testing locally, you're going to need a couple things:
@@ -156,9 +178,9 @@ aws_session_token=[!] [optional] token
 ;file=[optional] example.json
 ;
 ; rather than fetching events from Phabricator and progressing through them, setting "since_key" forces
-; "phabricator-emails" to query from the provided key (these keys are timestamps).
+; "phabricator-emails" to query from the provided key (these keys are feed story IDs).
 ; This is useful if you want to end-to-end test a specific event that happened on Phabricator.
-;since_key=[optional] 6809009593164319710
+;since_key=[optional] 1234
 ; Only fetch "story_limit" number of stories from Phabricator. Ignored unless "since_key" is set. 
 ;story_limit=[optional] 20
 ```
