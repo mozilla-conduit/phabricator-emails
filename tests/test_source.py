@@ -50,6 +50,7 @@ def test_fetch_next():
         )
     ) as mock_post:
         assert source.fetch_next(5) == {"data": [], "cursor": {}}
+        assert mock_post.call_args.args[0] == "/api/feed.for_email.query_id"
         kwargs = mock_post.call_args.kwargs
         assert (
             kwargs["data"]["params"]
@@ -63,7 +64,7 @@ def test_requests_are_authenticated():
     with mock_http(MockResponse(200, "", response_json)) as mock_post:
         source.fetch_feed_end()
         args = mock_post.call_args.args
-        assert args[0] == "http://phabricator.test/api/feed.for_email.status"
+        assert args[0] == "http://phabricator.test/api/feed.for_email.status_id"
         kwargs = mock_post.call_args.kwargs
         assert kwargs["data"] == {"params": '{"__conduit__": {"token": "token"}}'}
 
