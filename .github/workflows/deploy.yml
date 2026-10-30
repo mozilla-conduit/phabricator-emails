@@ -20,6 +20,10 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    env:
+      DOCKERHUB_REPO: ${{ secrets.DOCKERHUB_REPO }}
+      DOCKER_USER: ${{ secrets.DOCKER_USER }}
+      DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
     steps:
       - uses: actions/checkout@v4
 
@@ -33,12 +37,8 @@ jobs:
           }' > version.json
 
       - name: Login to Docker Hub
-        if: ${{ secrets.DOCKERHUB_REPO != '' && secrets.DOCKER_USER != '' && secrets.DOCKER_PASS != '' }}
+        if: ${{ env.DOCKERHUB_REPO != '' && env.DOCKER_USER != '' && env.DOCKER_PASS != '' }}
         run: echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
-        env:
-          DOCKERHUB_REPO: ${{ secrets.DOCKERHUB_REPO }}
-          DOCKER_USER: ${{ secrets.DOCKER_USER }}
-          DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
 
       - name: Build the image
         run: |
@@ -59,10 +59,6 @@ jobs:
 
       - name: Push to Docker Hub
         if: ${{ env.DOCKERHUB_REPO != '' && env.DOCKER_USER != '' && env.DOCKER_PASS != '' }}
-        env:
-          DOCKERHUB_REPO: ${{ secrets.DOCKERHUB_REPO }}
-          DOCKER_USER: ${{ secrets.DOCKER_USER }}
-          DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
         run: |
           docker tag "mozilla/phabricator-emails" "${{ secrets.DOCKERHUB_REPO }}:${{ github.sha }}"
           docker push "${{ secrets.DOCKERHUB_REPO }}:${{ github.sha }}"
