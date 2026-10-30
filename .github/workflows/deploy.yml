@@ -4,9 +4,9 @@
 
 # These secrets must be set in the GitHub repository settings:
 #
-# DOCKERHUB_REPO - docker hub repo, format: <username>/<repo>
-# DOCKER_USER    - login info for docker hub
-# DOCKER_PASS
+# DOCKERHUB_REPO     - docker hub repo, format: <username>/<repo>
+# DOCKERHUB_USERNAME - docker hub username
+# DOCKERHUB_TOKEN    - docker hub personal access token with write access to DOCKERHUB_REPO
 
 name: Deploy
 
@@ -22,8 +22,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DOCKERHUB_REPO: ${{ secrets.DOCKERHUB_REPO }}
-      DOCKER_USER: ${{ secrets.DOCKER_USER }}
-      DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -37,8 +37,8 @@ jobs:
           }' > version.json
 
       - name: Login to Docker Hub
-        if: ${{ env.DOCKERHUB_REPO != '' && env.DOCKER_USER != '' && env.DOCKER_PASS != '' }}
-        run: echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
+        if: ${{ env.DOCKERHUB_REPO != '' && env.DOCKERHUB_USERNAME != '' && env.DOCKERHUB_TOKEN != '' }}
+        run: echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
 
       - name: Build the image
         run: |
@@ -58,7 +58,7 @@ jobs:
           path: docker-image-id.txt
 
       - name: Push to Docker Hub
-        if: ${{ env.DOCKERHUB_REPO != '' && env.DOCKER_USER != '' && env.DOCKER_PASS != '' }}
+        if: ${{ env.DOCKERHUB_REPO != '' && env.DOCKERHUB_USERNAME != '' && env.DOCKERHUB_TOKEN != '' }}
         run: |
           docker tag "mozilla/phabricator-emails" "${{ secrets.DOCKERHUB_REPO }}:${{ github.sha }}"
           docker push "${{ secrets.DOCKERHUB_REPO }}:${{ github.sha }}"
