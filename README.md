@@ -57,9 +57,11 @@ Older versions stored a Phabricator `chronologicalKey` in `query_position.up_to_
 uses `feed.for_email.query_id`, which pages by the sequential `feed_storydata.id` instead, so the stored
 position must be translated once when deploying this change:
 
-1. Stop the `phabricator-emails service`.
-2. Read the current position from the emails database: `SELECT up_to_key FROM query_position;`
-3. Find the matching feed ID in the Phabricator (MySQL) database. `<=` handles the case where the exact
+1. Deploy the Phabricator change that adds the `feed.for_email.query_id` and `feed.for_email.status_id`
+   Conduit methods. Until it is live, every poll fails.
+2. Stop the `phabricator-emails service`.
+3. Read the current position from the emails database: `SELECT up_to_key FROM query_position;`
+4. Find the matching feed ID in the Phabricator (MySQL) database. `<=` handles the case where the exact
    story no longer exists:
    ```sql
    SELECT id FROM phabricator_feed.feed_storydata
@@ -67,11 +69,11 @@ position must be translated once when deploying this change:
    ORDER BY chronologicalKey DESC
    LIMIT 1;
    ```
-4. Store it in the emails database: `UPDATE query_position SET up_to_key = <id> WHERE id;`
-5. Deploy the new version and start the service.
+5. Store it in the emails database (it has a single row): `UPDATE query_position SET up_to_key = <id>;`
+6. Deploy the new version and start the service.
 
 If this step is skipped, the stored chronological key is far larger than any feed ID, so no events are
-returned and no emails are sent until the position is fixed.
+returned. The service detects this at startup and exits with an error until the position is fixed.
 
 ### Development
 
