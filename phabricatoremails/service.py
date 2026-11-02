@@ -22,14 +22,23 @@ from phabricatoremails.constants import (
 from phabricatoremails.db import DBNotInitializedError
 from phabricatoremails.exception import render_exception
 from phabricatoremails.mail import FsMail, SendEmailState, OutgoingEmail, Mail
+from phabricatoremails.query_position_store import (
+    DBQueryPositionStore,
+    QueryPositionStore,
+)
 from phabricatoremails.render.render import Render
 from phabricatoremails.render.template import JinjaTemplateStore
 from phabricatoremails.settings import Settings
 from phabricatoremails.source import PhabricatorException, Source
 from phabricatoremails.thread_store import ThreadStore
+from phabricatoremails.worker import PhabricatorWorker
 from statsd import StatsClient
 
 _RENDER_EXCEPTIONS = (LookupError, TypeError, ValueError, jinja2.TemplateError)
+
+
+class QueryPositionAheadOfFeedError(Exception):
+    pass
 
 
 class ProcessEventState(Enum):
@@ -330,6 +339,24 @@ class Pipeline:
         return int(result["cursor"]["after"])
 
 
+def check_position_not_ahead_of_feed(store: QueryPositionStore, source: Source):
+    """Raise if the stored position is past the end of the Phabricator feed.
+
+    Phabricator only returns stories after the stored position, so a position past
+    the end of the feed would silently send no emails. This happens if a legacy
+    "chronologicalKey" position wasn't translated to a feed story ID.
+    """
+    position = store.get_position().up_to_key
+    feed_end = source.fetch_feed_end()
+    if position > feed_end:
+        raise QueryPositionAheadOfFeedError(
+            f'Stored feed position "{position}" is past the end of the Phabricator '
+            f'feed "{feed_end}". If it is a legacy chronological key, translate it '
+            "to a feed story ID (see the README section on switching from "
+            "chronological keys to feed IDs)."
+        )
+
+
 def service(settings: Settings, stats: StatsClient):
     """Runs the service: fetches Phabricator events and sends emails.
 
@@ -351,6 +378,11 @@ def service(settings: Settings, stats: StatsClient):
             "Database has not been initialized yet, run "
             "`phabricator-emails prepare` first."
         )
+
+    # Only the continuous worker resumes from the stored position
+    if isinstance(worker, PhabricatorWorker):
+        with db.session() as db_session:
+            check_position_not_ahead_of_feed(DBQueryPositionStore(db_session), source)
 
     raw_css_path = PACKAGE_DIRECTORY / "render/templates/html/style.css"
     css_text = raw_css_path.read_text()
