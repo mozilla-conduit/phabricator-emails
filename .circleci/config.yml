@@ -9,7 +9,7 @@
 # DOCKER_USER
 # DOCKER_PASS
 
-version: 2
+version: 2.1
 jobs:
   full:
     docker:
@@ -50,7 +50,7 @@ jobs:
       - setup_remote_docker
 
       - run:
-          run: Login to Dockerhub
+          name: Login to Dockerhub
           command: |
             if [ "${DOCKER_USER}" == "" ] || [ "${DOCKER_PASS}" == "" ]; then
               echo "Skipping login to Dockerhub, credentials not available."
@@ -72,7 +72,8 @@ jobs:
       - store_artifacts:
           path: /tmp/artifacts
 
-      - deploy:
+      - run:
+          name: Push image to Dockerhub
           command: |
             if [[ "x$DOCKERHUB_REPO" != x ]]; then
               docker tag "mozilla/phabricator-emails" "${DOCKERHUB_REPO}"
@@ -84,7 +85,6 @@ jobs:
             fi
 
 workflows:
-  version: 2
   main:
     jobs:
       - full:
