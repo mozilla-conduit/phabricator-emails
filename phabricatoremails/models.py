@@ -10,9 +10,8 @@ Base = declarative_base()
 class QueryPosition(Base):
     """The current position in the Phabricator feed.
 
-    Uses the feed story ID (the sequential "feed_storydata.id") to track the current
-    position in the Phabricator feed. There should be one and only one row in the
-    table at any time.
+    Uses the "chronologicalKey" of feed events to track the current position in the
+    Phabricator feed. There should be one and only one row in the table at any time.
     """
 
     __tablename__ = "query_position"

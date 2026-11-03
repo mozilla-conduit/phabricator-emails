@@ -86,12 +86,12 @@ class PhabricatorSource:
         return body
 
     def fetch_feed_end(self):
-        body = self._request("feed.for_email.status_id")
+        body = self._request("feed.for_email.status")
         return int(body["result"])
 
     def fetch_next(self, after):
         body = self._request(
-            "feed.for_email.query_id",
+            "feed.for_email.query",
             storyLimit=self.story_limit,
             after=after if after else None,
         )
