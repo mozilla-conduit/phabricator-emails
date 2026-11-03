@@ -61,14 +61,22 @@ position must be translated once when deploying this change:
    Conduit methods. Until it is live, every poll fails.
 2. Stop the `phabricator-emails service`.
 3. Read the current position from the emails database: `SELECT up_to_key FROM query_position;`
-4. Find the matching feed ID in the Phabricator (MySQL) database. `<=` handles the case where the exact
-   story no longer exists:
+4. Find the equivalent feed ID in the Phabricator (MySQL) database. Feed IDs and chronological keys
+   don't always sort in the same order, so this picks a boundary just below the lowest-ID story that
+   hasn't been emailed yet, rather than the ID matching `up_to_key`:
    ```sql
-   SELECT id FROM phabricator_feed.feed_storydata
-   WHERE chronologicalKey <= <up_to_key>
-   ORDER BY chronologicalKey DESC
-   LIMIT 1;
+   SELECT COALESCE(
+     -- boundary just below the first pending story
+     (SELECT MIN(id) - 1 FROM phabricator_feed.feed_storydata
+      WHERE chronologicalKey > <up_to_key>),
+     -- nothing pending: start after the newest story
+     (SELECT MAX(id) FROM phabricator_feed.feed_storydata),
+     -- empty feed
+     0
+   ) AS id;
    ```
+   This may resend a few stories that were already emailed (those above the boundary with
+   `chronologicalKey <= <up_to_key>`). That is deliberate: a duplicate email is better than a missed one.
 5. Store it in the emails database (it has a single row): `UPDATE query_position SET up_to_key = <id>;`
 6. Deploy the new version and start the service.
 
