@@ -37,8 +37,14 @@ from statsd import StatsClient
 _RENDER_EXCEPTIONS = (LookupError, TypeError, ValueError, jinja2.TemplateError)
 
 
-class QueryPositionAheadOfFeedError(Exception):
+class LegacyQueryPositionError(Exception):
     pass
+
+
+# Legacy Phabricator "chronologicalKey" positions are "epoch << 32 | counter",
+# so they're always far above this. Feed story IDs are an auto-increment and
+# won't come close to it.
+_MAX_FEED_STORY_ID = 2**32
 
 
 class ProcessEventState(Enum):
@@ -339,21 +345,20 @@ class Pipeline:
         return int(result["cursor"]["after"])
 
 
-def check_position_not_ahead_of_feed(store: QueryPositionStore, source: Source):
-    """Raise if the stored position is past the end of the Phabricator feed.
+def check_position_is_feed_id(store: QueryPositionStore):
+    """Raise if the stored position is a legacy "chronologicalKey".
 
-    Phabricator only returns stories after the stored position, so a position past
-    the end of the feed would silently send no emails. This happens if a legacy
-    "chronologicalKey" position wasn't translated to a feed story ID.
+    Phabricator only returns stories after the stored position, so an untranslated
+    chronological key (which is far larger than any feed story ID) would silently
+    send no emails. This is checked locally rather than against the end of the
+    Phabricator feed, so that a slow or unavailable Phabricator can't stop startup.
     """
     position = store.get_position().up_to_key
-    feed_end = source.fetch_feed_end()
-    if position > feed_end:
-        raise QueryPositionAheadOfFeedError(
-            f'Stored feed position "{position}" is past the end of the Phabricator '
-            f'feed "{feed_end}". If it is a legacy chronological key, translate it '
-            "to a feed story ID (see the README section on switching from "
-            "chronological keys to feed IDs)."
+    if position >= _MAX_FEED_STORY_ID:
+        raise LegacyQueryPositionError(
+            f'Stored feed position "{position}" looks like a legacy chronological '
+            "key rather than a feed story ID. Translate it to a feed story ID (see "
+            "the README section on switching from chronological keys to feed IDs)."
         )
 
 
@@ -382,7 +387,7 @@ def service(settings: Settings, stats: StatsClient):
     # Only the continuous worker resumes from the stored position
     if isinstance(worker, PhabricatorWorker):
         with db.session() as db_session:
-            check_position_not_ahead_of_feed(DBQueryPositionStore(db_session), source)
+            check_position_is_feed_id(DBQueryPositionStore(db_session))
 
     raw_css_path = PACKAGE_DIRECTORY / "render/templates/html/style.css"
     css_text = raw_css_path.read_text()

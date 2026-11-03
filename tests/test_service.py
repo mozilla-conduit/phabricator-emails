@@ -19,8 +19,8 @@ from phabricatoremails.render.template import JinjaTemplateStore
 from phabricatoremails.models import QueryPosition
 from phabricatoremails.service import (
     Pipeline,
-    QueryPositionAheadOfFeedError,
-    check_position_not_ahead_of_feed,
+    LegacyQueryPositionError,
+    check_position_is_feed_id,
     service,
     process_event,
     _send_emails,
@@ -403,33 +403,50 @@ def test_service_throws_error_if_db_not_initialized():
         service(settings, Mock())
 
 
-def test_position_check_passes_if_caught_up_with_feed():
-    store = MockQueryPositionStore(position=QueryPosition(up_to_key=10))
-    check_position_not_ahead_of_feed(store, MockSource(feed_end=10))
+def test_position_check_passes_for_feed_id():
+    store = MockQueryPositionStore(position=QueryPosition(up_to_key=1234))
+    check_position_is_feed_id(store)
 
 
-def test_position_check_throws_error_if_ahead_of_feed():
-    # e.g. a legacy chronological key that wasn't translated to a feed ID
+def test_position_check_throws_error_for_legacy_chronological_key():
     store = MockQueryPositionStore(
-        position=QueryPosition(up_to_key=6809009593164319710)
+        position=QueryPosition(up_to_key=7703725474999349318)
     )
-    with pytest.raises(QueryPositionAheadOfFeedError):
-        check_position_not_ahead_of_feed(store, MockSource(feed_end=1234))
+    with pytest.raises(LegacyQueryPositionError):
+        check_position_is_feed_id(store)
 
 
 @patch("phabricatoremails.service.DBQueryPositionStore")
-def test_service_throws_error_if_position_ahead_of_feed(mock_store_class):
+def test_service_position_check_does_not_call_phabricator(mock_store_class):
     mock_store_class.return_value = MockQueryPositionStore(
-        position=QueryPosition(up_to_key=6809009593164319710)
+        position=QueryPosition(up_to_key=1234)
+    )
+    source = MockSource()
+    worker = PhabricatorWorker(logging.create_dev_logger(), 0, False)
+    settings = MockSettings(
+        source=source, worker=worker, db=MockDB(is_initialized=True)
+    )
+    with patch.object(source, "fetch_feed_end") as fetch_feed_end, patch.object(
+        worker, "process"
+    ) as process:
+        service(settings, Mock())
+    assert not fetch_feed_end.called
+    assert process.called
+
+
+@patch("phabricatoremails.service.DBQueryPositionStore")
+def test_service_throws_error_for_legacy_chronological_key(mock_store_class):
+    mock_store_class.return_value = MockQueryPositionStore(
+        position=QueryPosition(up_to_key=7703725474999349318)
     )
     worker = PhabricatorWorker(logging.create_dev_logger(), 0, False)
     settings = MockSettings(
-        source=MockSource(feed_end=1234),
+        source=MockSource(),
         worker=worker,
         db=MockDB(is_initialized=True),
     )
     with spy_on(worker.process, call_original=False) as process_spy:
-        with pytest.raises(QueryPositionAheadOfFeedError):
+        with pytest.raises(LegacyQueryPositionError):
             service(settings, Mock())
     assert not process_spy.called
 
