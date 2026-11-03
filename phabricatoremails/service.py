@@ -22,14 +22,29 @@ from phabricatoremails.constants import (
 from phabricatoremails.db import DBNotInitializedError
 from phabricatoremails.exception import render_exception
 from phabricatoremails.mail import FsMail, SendEmailState, OutgoingEmail, Mail
+from phabricatoremails.query_position_store import (
+    DBQueryPositionStore,
+    QueryPositionStore,
+)
 from phabricatoremails.render.render import Render
 from phabricatoremails.render.template import JinjaTemplateStore
 from phabricatoremails.settings import Settings
 from phabricatoremails.source import PhabricatorException, Source
 from phabricatoremails.thread_store import ThreadStore
+from phabricatoremails.worker import PhabricatorWorker
 from statsd import StatsClient
 
 _RENDER_EXCEPTIONS = (LookupError, TypeError, ValueError, jinja2.TemplateError)
+
+
+class LegacyQueryPositionError(Exception):
+    pass
+
+
+# Legacy Phabricator "chronologicalKey" positions are "epoch << 32 | counter",
+# so they're always far above this. Feed story IDs are an auto-increment and
+# won't come close to it.
+_MAX_FEED_STORY_ID = 2**32
 
 
 class ProcessEventState(Enum):
@@ -330,6 +345,23 @@ class Pipeline:
         return int(result["cursor"]["after"])
 
 
+def check_position_is_feed_id(store: QueryPositionStore):
+    """Raise if the stored position is a legacy "chronologicalKey".
+
+    Phabricator only returns stories after the stored position, so an untranslated
+    chronological key (which is far larger than any feed story ID) would silently
+    send no emails. This is checked locally rather than against the end of the
+    Phabricator feed, so that a slow or unavailable Phabricator can't stop startup.
+    """
+    position = store.get_position().up_to_key
+    if position >= _MAX_FEED_STORY_ID:
+        raise LegacyQueryPositionError(
+            f'Stored feed position "{position}" looks like a legacy chronological '
+            "key rather than a feed story ID. Translate it to a feed story ID (see "
+            "the README section on switching from chronological keys to feed IDs)."
+        )
+
+
 def service(settings: Settings, stats: StatsClient):
     """Runs the service: fetches Phabricator events and sends emails.
 
@@ -351,6 +383,11 @@ def service(settings: Settings, stats: StatsClient):
             "Database has not been initialized yet, run "
             "`phabricator-emails prepare` first."
         )
+
+    # Only the continuous worker resumes from the stored position
+    if isinstance(worker, PhabricatorWorker):
+        with db.session() as db_session:
+            check_position_is_feed_id(DBQueryPositionStore(db_session))
 
     raw_css_path = PACKAGE_DIRECTORY / "render/templates/html/style.css"
     css_text = raw_css_path.read_text()
